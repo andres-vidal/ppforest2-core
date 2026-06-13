@@ -1,0 +1,257 @@
+/**
+ * @mainpage ppforest2 — C++ API Reference
+ *
+ * ppforest2 is a fast, memory-efficient implementation of
+ * <a href="https://www.tandfonline.com/doi/full/10.1080/10618600.2020.1870480">Projection Pursuit Random Forests</a>,
+ * built on
+ * <a href="https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-7/issue-none/PPtree-Projection-pursuit-classification-tree/10.1214/13-EJS810.full">Projection Pursuit (oblique) Decision Trees</a>.
+ * By learning linear projections at each split, the model captures
+ * complex structure that axis-aligned trees often miss, without
+ * sacrificing interpretability or scalability.
+ *
+ * The C++ core is the single source of truth for the implementation.
+ * Language bindings (R, Python planned) wrap the core via thin
+ * interface layers.
+ *
+ * @section overview Overview
+ *
+ * The library is organised around a small set of core abstractions:
+ *
+ * | Abstraction       | Header                 | Purpose |
+ * |-------------------|------------------------|---------|
+ * | Tree              | models/Tree.hpp                        | A single projection pursuit decision tree |
+ * | Forest            | models/Forest.hpp                      | An ensemble of bootstrap trees with OOB estimation |
+ * | TrainingSpec      | models/TrainingSpec.hpp                | Composes seven strategies into a training configuration |
+ * | ProjectionPursuit | strategies/pp/ProjectionPursuit.hpp    | Projection pursuit index optimisation (e.g. PDA) |
+ * | VariableSelection | strategies/vars/VariableSelection.hpp  | Variable subset selection |
+ * | Cutpoint     | strategies/cutpoint/Cutpoint.hpp  | Split cutpoint computation |
+ * | StopRule          | strategies/stop/StopRule.hpp           | Node stopping condition |
+ * | Binarization      | strategies/binarize/Binarization.hpp   | Multiclass → binary regrouping |
+ * | Grouping     | strategies/grouping/Grouping.hpp | Group partition management |
+ * | LeafStrategy      | strategies/leaf/LeafStrategy.hpp       | Leaf node creation |
+ * | GroupPartition    | stats/GroupPartition.hpp               | Grouped observations with arbitrary row indices |
+ * | VariableImportance| models/Evaluation.hpp                     | Three variable importance measures (permuted, projections, weighted) |
+ *
+ * @section quick_start Quick start
+ *
+ * @subsection train_tree Training a single tree
+ *
+ * @code
+ *   #include "ppforest2.hpp"
+ *
+ *   // Load data — CSV last column is the response, labels encoded as integers.
+ *   auto data = io::csv::read_sorted("iris.csv");
+ *
+ *   using namespace ppforest2;
+ *
+ *   // Compose strategies into a training spec:
+ *   TrainingSpec spec(
+ *     0, 0, 0, 3,                   // size (0 = single tree), seed, threads, max_retries
+ *     pp::pda(0.0),                 // LDA (no penalty)
+ *     vars::all(),                  // use all variables
+ *     cutpoint::mean_of_means());   // midpoint split rule
+ *
+ *   // Train via the unified entry point:
+ *   auto model = Model::train(spec, data.x, data.y);
+ *
+ *   // Or train directly:
+ *   Tree tree = Tree::train(spec, data.x, data.y);
+ *
+ *   types::Outcome label = tree.predict(data.x.row(0));
+ *   types::OutcomeVector preds = tree.predict(data.x);
+ * @endcode
+ *
+ * @subsection train_forest Training a random forest
+ *
+ * @code
+ *   #include "ppforest2.hpp"
+ *
+ *   using namespace ppforest2;
+ *
+ *   // PDA with uniform random variable selection:
+ *   TrainingSpec spec(
+ *     500, 0, 0, 3,                 // size, seed, threads, max_retries
+ *     pp::pda(0.0),                 // LDA
+ *     vars::uniform(3),             // sample 3 variables per split
+ *     cutpoint::mean_of_means());   // midpoint split rule
+ *
+ *   // Use the typed factory when you want classification-specific API
+ *   // (proportions, oob_error) without downcasting from the bimodal base.
+ *   auto forest = ClassificationForest::train(spec, x, y);
+ *
+ *   types::OutcomeVector preds = forest->predict(x_test);
+ *
+ *   // Out-of-bag error — uses only trees where each obs was not in the
+ *   // bootstrap sample. Returns std::optional<double>: std::nullopt when
+ *   // no observation has any OOB tree (e.g. all-in-bag degenerate forest).
+ *   std::optional<double> oob = oob_error(*forest, x, y);
+ *
+ *   // Vote proportions — (n x G) matrix, rows sum to 1. Classification only.
+ *   types::FeatureMatrix probs = predict_proportions(*forest, x_test);
+ *
+ *   // Variable importance — free functions (see models/Evaluation.hpp).
+ *   auto vi_perm = vi_permuted(*forest, x, y, 0);
+ *   auto vi_proj = vi_projections(*forest, x.cols());
+ *   auto vi_wt   = vi_weighted_projections(*forest, x, y);
+ *
+ *   // Convenience: compute all three in one call.
+ *   auto vi      = variable_importance(*forest, x, y, 0);
+ * @endcode
+ *
+ * @subsection ser Serialisation
+ *
+ * @code
+ *   #include "serialization/Json.hpp"
+ *   #include "io/IO.hpp"
+ *
+ *   // Save
+ *   auto j = serialization::to_json(forest);
+ *   io::json::write_file(j, "model.json");
+ *
+ *   // Load
+ *   auto j2 = io::json::read_file("model.json");
+ *   Forest restored = serialization::forest_from_json(j2);
+ * @endcode
+ *
+ * @section strategy_pattern Strategy pattern
+ *
+ * Tree training is parameterised by seven pluggable strategies.  Concrete
+ * implementations are composed at runtime via TrainingSpec, so new
+ * optimisation criteria, variable selection methods, or splitting rules
+ * can be added without changing the tree-building logic.
+ *
+ * - **pp::ProjectionPursuit** — projection pursuit index optimisation. \n
+ *   Built-in: pp::PDA (Generalised LDA, with optional PDA penalty
+ *   via @c lambda).  @c lambda = 0 gives standard LDA;
+ *   @c lambda in (0, 1] penalises the within-group covariance matrix.
+ *
+ * - **vars::VariableSelection** — variable subset selection. \n
+ *   Built-in: vars::All (use all variables, for single trees),
+ *   vars::Uniform (sample @c count variables uniformly at random, for forests).
+ *
+ * - **cutpoint::Cutpoint** — split cutpoint computation. \n
+ *   Built-in: cutpoint::MeanOfMeans (midpoint of projected group means).
+ *
+ * - **stop::StopRule** — node stopping condition. \n
+ *   Built-in: stop::PureNode (stop when the node contains a single group).
+ *
+ * - **binarize::Binarization** — multiclass → binary regrouping. \n
+ *   Built-in: binarize::LargestGap (largest gap between projected group means).
+ *
+ * - **grouping::Grouping** — group partition management. \n
+ *   Built-in: grouping::ByLabel (route all observations of a group to the same child).
+ *
+ * - **leaf::LeafStrategy** — leaf node creation. \n
+ *   Built-in: leaf::MajorityVote (assign the majority class).
+ *
+ * TrainingSpec is a single concrete class that composes these strategies
+ * together with forest-level parameters (size, seed, threads, max retries):
+ *
+ * @code
+ *   using namespace ppforest2;
+ *
+ *   // Single tree with PDA:
+ *   TrainingSpec spec(
+ *     0, 0, 0, 3,                   // size, seed, threads, max_retries
+ *     pp::pda(0.5),                 // PDA with lambda = 0.5
+ *     vars::all(),                  // use all variables
+ *     cutpoint::mean_of_means());   // midpoint of group means
+ *
+ *   // Random forest:
+ *   TrainingSpec spec(
+ *     100, 0, 0, 3,                 // size, seed, threads, max_retries
+ *     pp::pda(0.5),                 // PDA with lambda = 0.5
+ *     vars::uniform(4),             // sample 4 variables per split
+ *     cutpoint::mean_of_means());   // midpoint of group means
+ * @endcode
+ *
+ * Strategies are held via `shared_ptr` and are immutable after construction,
+ * so TrainingSpec can be freely copied and shared across trees without
+ * deep cloning.  Each strategy implements `to_json()` for serialisation.
+ *
+ * For a step-by-step guide to implementing new strategies, see
+ * @ref extending_strategies.
+ *
+ * @section visitor_pattern Visitor pattern
+ *
+ * Two visitor interfaces avoid `dynamic_cast` and keep traversal logic
+ * decoupled from the model types:
+ *
+ * - **TreeNode::Visitor** — dispatches over internal nodes (TreeBranch)
+ *   and leaf nodes (TreeLeaf).  Used by serialisation, visualisation,
+ *   and variable importance.
+ *
+ * - **Model::Visitor** — dispatches over Tree and Forest.  Used by the
+ *   serialisation layer.
+ *
+ * For a step-by-step guide to implementing new visitors, see
+ * @ref extending_visitors.
+ *
+ * @section vi Variable importance
+ *
+ * Three measures quantify each variable's contribution to predictions:
+ *
+ * - **VI1 (permuted)** — For each tree, measures the degradation in OOB
+ *   fit when each variable is randomly permuted among the OOB
+ *   observations.  Classification uses accuracy drop; regression uses
+ *   NMSE increase (MSE increase normalised by `Var(y_oob)`).  Averaged
+ *   over all trees.  See Forest::vi_permuted().
+ *
+ * - **VI2 (projections)** — Accumulates |a_j| / G_s at every split
+ *   node, where a_j is the projection coefficient and G_s is the
+ *   number of groups.  Optionally scaled by per-variable standard
+ *   deviations.  Mode-agnostic.  See Forest::vi_projections() and
+ *   Tree::vi_projections().
+ *
+ * - **VI3 (weighted projections)** — Each tree's contribution is
+ *   weighted by a per-tree OOB quality score (classification:
+ *   `1 - error_rate`; regression: `max(0, 1 - NMSE)`), and each split
+ *   contributes I_s x |a_j|.  See Forest::vi_weighted_projections().
+ *
+ * @section precision Numeric precision
+ *
+ * The core uses single-precision (`float`) arithmetic for all feature
+ * data.  This is sufficient for classification and reduces memory usage.
+ * If a strategy needs higher precision internally (e.g. for regression
+ * loss computation), it can cast to `double` within its own scope.
+ * See types::Feature.
+ *
+ * @section namespaces Namespace guide
+ *
+ * | Namespace                   | Purpose |
+ * |-----------------------------|---------|
+ * | ppforest2                   | Core model types: Tree, Forest, TrainingSpec, VariableImportance |
+ * | ppforest2::types            | Numeric type aliases (Feature, Outcome, FeatureMatrix, ...) |
+ * | ppforest2::stats            | Statistical infrastructure: RNG, GroupPartition, Uniform, ConfusionMatrix |
+ * | ppforest2::pp     | Projection pursuit strategies |
+ * | ppforest2::vars   | Variable selection strategies |
+ * | ppforest2::cutpoint | Split cutpoint strategies |
+ * | ppforest2::stop   | Stopping rule strategies |
+ * | ppforest2::binarize | Multiclass binarization strategies |
+ * | ppforest2::grouping | Group partition strategies |
+ * | ppforest2::leaf | Leaf node creation strategies |
+ * | ppforest2::serialization    | JSON serialization and deserialization |
+ * | ppforest2::viz              | Visualisation visitors for tree structure and decision boundaries |
+ * | ppforest2::io               | File I/O (CSV, JSON) and presentation utilities |
+ * | ppforest2::io::style        | ANSI-aware colored terminal output |
+ * | ppforest2::io::layout       | Column-driven table formatting |
+ * | ppforest2::math             | Numeric comparison utilities |
+ * | ppforest2::cli              | Command-line interface parsing and subcommands |
+ * | ppforest2::sys              | System utilities (memory measurement) |
+ *
+ * @section reproducibility Reproducibility
+ *
+ * Results are identical across platforms (Ubuntu/GCC, macOS/Clang,
+ * Windows/MinGW) for the same seed.  This is enforced by:
+ *
+ * - Using pcg32 exclusively (never std::mt19937).
+ * - Using Lemire's rejection method for unbiased random integers
+ *   (never std::uniform_int_distribution).
+ * - Using Fisher-Yates shuffle via stats::Uniform::distinct()
+ *   (never std::shuffle).
+ * - Using std::stable_sort where element order affects downstream results.
+ * - Verifying against golden reference files on every platform in CI.
+ *
+ * @see <a href="https://github.com/andres-vidal/ppforest2">GitHub repository</a>
+ * @see <a href="../r/">R package documentation</a>
+ */

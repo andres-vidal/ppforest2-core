@@ -1,0 +1,233 @@
+/**
+ * @page extending_visitors Extending: Custom Visitors
+ *
+ * ppforest2 uses the Visitor pattern (double dispatch) to traverse
+ * trees and models without `dynamic_cast`.  You can add new traversal
+ * logic — statistics, export formats, analysis — by implementing a
+ * visitor, without modifying the model types.
+ *
+ * Two visitor interfaces are available:
+ *
+ * | Interface            | Dispatches over                   | Use when |
+ * |----------------------|-----------------------------------|----------|
+ * | TreeNode::Visitor      | TreeBranch (split), TreeLeaf (leaf) | You need to walk the tree structure |
+ * | Model::Visitor         | Tree, Forest                      | You need to handle trees and forests differently |
+ *
+ * @section vis_dispatch How double dispatch works
+ *
+ * Each visitable class has an `accept()` method that calls the
+ * appropriate `visit()` overload on the visitor:
+ *
+ * @code
+ *   // 1. Caller invokes accept() on a node (via base pointer):
+ *   node->accept(visitor);
+ *
+ *   // 2. The concrete node type calls visit(*this):
+ *   void TreeBranch::accept(TreeNode::Visitor& v) const { v.visit(*this); }
+ *   void TreeLeaf::accept(TreeNode::Visitor& v) const  { v.visit(*this); }
+ *
+ *   // 3. The visitor's concrete visit() method runs:
+ *   void MyVisitor::visit(const TreeBranch& cond) { ... }
+ *   void MyVisitor::visit(const TreeLeaf& resp)  { ... }
+ * @endcode
+ *
+ * This resolves both the node type and the visitor type at runtime
+ * without any casts.
+ *
+ * @section vis_treenode Implementing a TreeNode::Visitor
+ *
+ * @subsection vis_treenode_interface Interface to implement
+ *
+ * @code
+ *   class TreeNode::Visitor {
+ *    public:
+ *     virtual ~Visitor()                                = default;
+ *     virtual void visit(const TreeBranch& condition)   = 0;
+ *     virtual void visit(const TreeLeaf& response)      = 0;
+ *   };
+ * @endcode
+ *
+ * **TreeBranch** (internal split node) provides:
+ * - `projector` — the projection vector (p) used at this split
+ * - `cutpoint` — the split cutpoint in projected space
+ * - `lower` / `upper` — child nodes (TreeNode::Ptr)
+ * - `groups` — set of group labels reachable from this node
+ * - `pp_index_value` — the PP index value achieved at this split
+ * - `training_spec` — the TrainingSpec used to build this subtree
+ *
+ * **TreeLeaf** (leaf node) provides:
+ * - `value` — the predicted group label
+ *
+ * @subsection vis_treenode_traversal Traversal pattern
+ *
+ * To walk the full tree, recursively call `accept()` on child nodes
+ * inside your `visit(TreeBranch&)` method:
+ *
+ * @code
+ *   void visit(const TreeBranch& cond) override {
+ *     // ... process this split node ...
+ *     cond.lower->accept(*this);   // recurse left
+ *     cond.upper->accept(*this);   // recurse right
+ *   }
+ *
+ *   void visit(const TreeLeaf& resp) override {
+ *     // ... process this leaf node (base case) ...
+ *   }
+ * @endcode
+ *
+ * @subsection vis_treenode_example Example: computing tree depth
+ *
+ * @code
+ *   #include "models/TreeBranch.hpp"
+ *   #include "models/TreeLeaf.hpp"
+ *
+ *   namespace ppforest2 {
+ *
+ *   class DepthVisitor : public TreeNode::Visitor {
+ *    public:
+ *     int max_depth = 0;
+ *     int current_depth = 0;
+ *
+ *     void visit(const TreeBranch& cond) override {
+ *       ++current_depth;
+ *       if (current_depth > max_depth)
+ *         max_depth = current_depth;
+ *
+ *       cond.lower->accept(*this);
+ *       cond.upper->accept(*this);
+ *
+ *       --current_depth;   // backtrack
+ *     }
+ *
+ *     void visit(const TreeLeaf&) override {
+ *       ++current_depth;
+ *       if (current_depth > max_depth)
+ *         max_depth = current_depth;
+ *       --current_depth;
+ *     }
+ *   };
+ *
+ *   }  // namespace ppforest2
+ * @endcode
+ *
+ * Usage:
+ * @code
+ *   DepthVisitor visitor;
+ *   tree.root->accept(visitor);
+ *   int depth = visitor.max_depth;
+ * @endcode
+ *
+ * @subsection vis_treenode_example2 Example: counting leaves
+ *
+ * @code
+ *   class LeafCountVisitor : public TreeNode::Visitor {
+ *    public:
+ *     int count = 0;
+ *
+ *     void visit(const TreeBranch& cond) override {
+ *       cond.lower->accept(*this);
+ *       cond.upper->accept(*this);
+ *     }
+ *
+ *     void visit(const TreeLeaf&) override {
+ *       ++count;
+ *     }
+ *   };
+ * @endcode
+ *
+ * Usage:
+ * @code
+ *   LeafCountVisitor visitor;
+ *   tree.root->accept(visitor);
+ *   int leaves = visitor.count;
+ * @endcode
+ *
+ * @section vis_model Implementing a Model::Visitor
+ *
+ * Model::Visitor dispatches over Tree and Forest, useful when you need
+ * to handle them differently (e.g. serialisation, summary statistics).
+ *
+ * @subsection vis_model_interface Interface to implement
+ *
+ * @code
+ *   class Model::Visitor {
+ *    public:
+ *     virtual ~Visitor()                       = default;
+ *     virtual void visit(const Tree& tree)     = 0;
+ *     virtual void visit(const Forest& forest) = 0;
+ *   };
+ * @endcode
+ *
+ * @subsection vis_model_example Example: collecting all leaf labels
+ *
+ * @code
+ *   class AllLabelsVisitor : public Model::Visitor {
+ *    public:
+ *     std::set<types::Outcome> labels;
+ *
+ *     void visit(const Tree& tree) override {
+ *       // Use a TreeNode::Visitor to walk the tree:
+ *       class LabelCollector : public TreeNode::Visitor {
+ *        public:
+ *         std::set<types::Outcome>& labels;
+ *         LabelCollector(std::set<types::Outcome>& l) : labels(l) {}
+ *
+ *         void visit(const TreeBranch& c) override {
+ *           c.lower->accept(*this);
+ *           c.upper->accept(*this);
+ *         }
+ *         void visit(const TreeLeaf& r) override {
+ *           labels.insert(r.value);
+ *         }
+ *       };
+ *
+ *       LabelCollector collector(labels);
+ *       tree.root->accept(collector);
+ *     }
+ *
+ *     void visit(const Forest& forest) override {
+ *       for (const auto& bt : forest.trees)
+ *         visit(static_cast<const Tree&>(*bt));
+ *     }
+ *   };
+ * @endcode
+ *
+ * Usage:
+ * @code
+ *   AllLabelsVisitor visitor;
+ *   model.accept(visitor);
+ *   // visitor.labels contains all group labels in the model
+ * @endcode
+ *
+ * @section vis_existing Existing visitors as reference
+ *
+ * | Visitor            | File                          | Purpose |
+ * |--------------------|-------------------------------|---------|
+ * | VIVisitor          | models/VIVisitor.hpp          | Accumulates projection-based variable importance at each split |
+ * | JsonNodeVisitor    | serialization/Json.hpp        | Serialises tree nodes to JSON |
+ * | JsonModelVisitor   | serialization/Json.hpp        | Serialises Tree/Forest to JSON |
+ * | NodeDataVisitor    | models/Visualization.hpp      | Routes observations through the tree, collects per-node histograms |
+ * | BoundaryVisitor    | models/Visualization.hpp      | Projects decision boundaries into 2D for plotting |
+ * | RegionVisitor      | models/Visualization.hpp      | Computes convex decision region polygons via Sutherland-Hodgman clipping |
+ *
+ * @section vis_conventions Conventions
+ *
+ * - **Single-use** — instantiate a fresh visitor for each traversal.
+ *   Do not reuse a visitor across multiple trees without resetting
+ *   its state.
+ *
+ * - **Mutable accumulators** — store results in public mutable members
+ *   (e.g. `int count`, `json result`, `std::vector<NodeData> nodes`).
+ *   Read them after `accept()` returns.
+ *
+ * - **Not thread-safe** — visitors carry mutable state and should not
+ *   be shared across threads.  Use one visitor per thread if needed.
+ *
+ * - **Recursive traversal** — call `cond.lower->accept(*this)` and
+ *   `cond.upper->accept(*this)` inside `visit(TreeBranch&)` to
+ *   walk the full tree.  Omit these calls if you only need to inspect
+ *   the root.
+ *
+ * @see TreeNode::Visitor, Model::Visitor,
+ *      VIVisitor, TreeBranch, TreeLeaf
+ */
