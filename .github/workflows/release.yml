@@ -28,36 +28,8 @@ jobs:
           key: ${{ runner.os }}-cmake-deps-${{ hashFiles('core/Dependencies.cmake') }}
       - run: make test
 
-  r-check:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-          - os: macos-latest
-          - os: windows-latest
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
-      - uses: r-lib/actions/setup-tinytex@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
-        env:
-          TINYTEX_INSTALLER: ${{ runner.os == 'Windows' && 'TinyTeX' || '' }}
-      - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
-        with:
-          working-directory: bindings/R
-          extra-packages: any::devtools
-      - name: Cache CMake deps
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: .build/_deps
-          key: ${{ runner.os }}-r-cmake-deps-${{ hashFiles('core/Dependencies.cmake') }}
-      - run: make r-check-cran
-
   release:
-    needs: [test, r-check]
+    needs: [test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -92,20 +64,6 @@ jobs:
             echo "ERROR: VERSION file ($file_version) does not match tag ($tag_version)"
             exit 1
           fi
-      - name: Verify R DESCRIPTION version matches VERSION
-        run: |
-          # `make r-prepare` rewrites bindings/R/DESCRIPTION's Version field
-          # from the VERSION file, so the two should agree at every commit.
-          # If someone bumped VERSION without running r-prepare / r-build,
-          # DESCRIPTION is stale — which would ship a tarball whose internal
-          # version disagrees with the GitHub release tag. Catch it here.
-          desc_version=$(awk '/^Version:/ {print $2; exit}' bindings/R/DESCRIPTION)
-          tag_version="${{ steps.version.outputs.version }}"
-          if [ "$desc_version" != "$tag_version" ]; then
-            echo "ERROR: bindings/R/DESCRIPTION Version ($desc_version) does not match tag ($tag_version)."
-            echo "Run \`make r-prepare\` and commit the updated DESCRIPTION before tagging."
-            exit 1
-          fi
       - name: Extract changelog for this version
         id: changelog
         run: |
@@ -134,19 +92,6 @@ jobs:
           fi
           echo "Release notes:"
           cat release_notes.md
-      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
-      - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
-        with:
-          working-directory: bindings/R
-      - name: Cache CMake deps
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: .build/_deps
-          key: ${{ runner.os }}-r-cmake-deps-${{ hashFiles('core/Dependencies.cmake') }}
-      - name: Build R package tarball
-        run: |
-          make r-build
-          mv ppforest2_${{ steps.version.outputs.version }}.tar.gz R-ppforest2_${{ steps.version.outputs.version }}.tar.gz
       - name: Run benchmarks
         run: |
           make build
@@ -167,4 +112,3 @@ jobs:
         with:
           body_path: release_notes.md
           generate_release_notes: false
-          files: R-ppforest2_${{ steps.version.outputs.version }}.tar.gz
