@@ -1,10 +1,10 @@
 # ppforest2 <img src="public/logo.png" align="right" height="139" alt="ppforest2 logo" />
 
 [![CRAN status](https://www.r-pkg.org/badges/version/ppforest2)](https://CRAN.R-project.org/package=ppforest2)
-[![C++ Tests](https://github.com/andres-vidal/ppforest2/actions/workflows/run-test.yml/badge.svg)](https://github.com/andres-vidal/ppforest2/actions/workflows/run-test.yml)
-[![R Tests](https://github.com/andres-vidal/ppforest2/actions/workflows/run-r-test.yml/badge.svg)](https://github.com/andres-vidal/ppforest2/actions/workflows/run-r-test.yml)
-[![R Package Check](https://github.com/andres-vidal/ppforest2/actions/workflows/run-r-check.yml/badge.svg)](https://github.com/andres-vidal/ppforest2/actions/workflows/run-r-check.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/andres-vidal/aafefce6b546eeb2f678ca607a950941/raw/ppforest2-coverage.json)](https://github.com/andres-vidal/ppforest2/actions/workflows/run-coverage.yml)
+[![C++ Tests](https://github.com/andres-vidal/ppforest2-core/actions/workflows/run-test.yml/badge.svg)](https://github.com/andres-vidal/ppforest2-core/actions/workflows/run-test.yml)
+[![R Tests](https://github.com/andres-vidal/ppforest2-r/actions/workflows/r-test.yml/badge.svg)](https://github.com/andres-vidal/ppforest2-r/actions/workflows/r-test.yml)
+[![R Package Check](https://github.com/andres-vidal/ppforest2-r/actions/workflows/r-check.yml/badge.svg)](https://github.com/andres-vidal/ppforest2-r/actions/workflows/r-check.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/andres-vidal/aafefce6b546eeb2f678ca607a950941/raw/ppforest2-coverage.json)](https://github.com/andres-vidal/ppforest2-core/actions/workflows/run-coverage.yml)
 
 **ppforest2** is a fast, memory-efficient implementation of
 [Projection Pursuit Random Forests](https://www.tandfonline.com/doi/full/10.1080/10618600.2020.1870480),
