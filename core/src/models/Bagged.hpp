@@ -105,7 +105,7 @@ namespace ppforest2 {
       if (row_idx.empty()) {
         return types::OutcomeVector(0);
       }
-      return model->predict(static_cast<types::FeatureMatrix>(x(row_idx, Eigen::all)));
+      return model->predict(static_cast<types::FeatureMatrix>(x(row_idx, Eigen::indexing::all)));
     }
 
     /** @brief Whether the wrapped model reported a degenerate training run. */

@@ -60,8 +60,8 @@ namespace ppforest2 {
     // own median (contrast with ClassificationForest, which precomputes one
     // forest-level `y_part`).
     std::vector<int> sample_indices = uniform_sample(static_cast<int>(x.rows()), rng);
-    FeatureMatrix sampled_x         = x(sample_indices, Eigen::all);
-    OutcomeVector sampled_y         = y(sample_indices, Eigen::all).eval();
+    FeatureMatrix sampled_x         = x(sample_indices, Eigen::indexing::all);
+    OutcomeVector sampled_y         = y(sample_indices, Eigen::indexing::all).eval();
 
     GroupPartition sampled_gp = this->training_spec->init_groups(sampled_y);
 

@@ -133,7 +133,7 @@ namespace ppforest2::stats {
         }
       }
 
-      return x(indices, Eigen::all);
+      return x(indices, Eigen::indexing::all);
     }
 
     /**
@@ -175,7 +175,7 @@ namespace ppforest2::stats {
         }
       }
 
-      return x(indices, Eigen::all);
+      return x(indices, Eigen::indexing::all);
     }
 
     /** @brief Overall mean of all grouped rows (p). */
