@@ -35,8 +35,8 @@ namespace ppforest2::stats {
 
     std::stable_sort(indices.begin(), indices.end(), [&y](int i, int j) { return y(i) < y(j); });
 
-    x = x(indices, Eigen::all).eval();
-    y = y(indices, Eigen::all).eval();
+    x = x(indices, Eigen::indexing::all).eval();
+    y = y(indices, Eigen::indexing::all).eval();
   }
 
   /**

@@ -22,7 +22,9 @@ namespace ppforest2::cutpoint {
     auto const& projector       = ctx.projector.value();
     Eigen::VectorXi const idx_1 = y_part.group_indices(g1);
     Eigen::VectorXi const idx_2 = y_part.group_indices(g2);
-    ctx.cutpoint = ((ctx.x(idx_1, Eigen::all) * projector).mean() + (ctx.x(idx_2, Eigen::all) * projector).mean()) / 2;
+    ctx.cutpoint                = ((ctx.x(idx_1, Eigen::indexing::all) * projector).mean() +
+                    (ctx.x(idx_2, Eigen::indexing::all) * projector).mean()) /
+                   2;
   }
 
   Cutpoint::Ptr mean_of_means() {

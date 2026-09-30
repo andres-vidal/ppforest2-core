@@ -146,7 +146,7 @@ namespace ppforest2 {
       int valid_trees          = 0;
 
       for_each_bag_with_oob(forest.trees, n_total, [&](BaggedTree const& tree, std::vector<int> const& oob_idx, int k) {
-        OutcomeVector const y_oob = y(oob_idx, Eigen::all);
+        OutcomeVector const y_oob = y(oob_idx, Eigen::indexing::all);
         int const n_oob           = static_cast<int>(oob_idx.size());
 
         auto ctx_opt = baseline(tree, x, y_oob, oob_idx);
@@ -158,7 +158,7 @@ namespace ppforest2 {
         stats::RNG rng(static_cast<unsigned>(seed) ^ static_cast<unsigned>(k));
         stats::Uniform uniform(0, n_oob - 1);
 
-        FeatureMatrix perm_x = x(oob_idx, Eigen::all);
+        FeatureMatrix perm_x = x(oob_idx, Eigen::indexing::all);
         OutcomeVector perm_pred(n_oob);
 
         for (int j = 0; j < n_vars; ++j) {
@@ -211,7 +211,7 @@ namespace ppforest2 {
           forest.trees,
           n_total,
           [&](BaggedTree const& tree, std::vector<int> const& oob_idx, int /*k*/) {
-            OutcomeVector const y_oob = y(oob_idx, Eigen::all);
+            OutcomeVector const y_oob = y(oob_idx, Eigen::indexing::all);
 
             auto weight_opt = weight_fn(tree, x, y_oob, oob_idx);
             if (!weight_opt) {
@@ -428,7 +428,7 @@ namespace ppforest2 {
       return std::nullopt;
     }
 
-    GroupIdVector const y_oob = y(oob.rows, Eigen::all).cast<GroupId>().eval();
+    GroupIdVector const y_oob = y(oob.rows, Eigen::indexing::all).cast<GroupId>().eval();
     return ClassificationMetrics(oob.predictions.cast<GroupId>(), y_oob);
   }
 
@@ -444,7 +444,7 @@ namespace ppforest2 {
       return std::nullopt;
     }
 
-    OutcomeVector const y_oob = y(oob.rows, Eigen::all).eval();
+    OutcomeVector const y_oob = y(oob.rows, Eigen::indexing::all).eval();
     return RegressionMetrics(oob.predictions, y_oob);
   }
 

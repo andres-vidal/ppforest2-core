@@ -24,6 +24,7 @@
 ## Build
 
 - `make tidy` now fails when clang-tidy reports findings or unused includes; previously it always succeeded.
+- Core: uses `Eigen::indexing::all` instead of `Eigen::all`, which does not compile as an index with Eigen 5.0.0. `Eigen::indexing::all` is available since Eigen 3.4.0, the minimum the core already requires.
 - CI: the pull-request benchmark comment renders correctly. The classification and regression sections were collapsed into a single glued heading with empty tables, because the report was suppressed by `-q` and the shell assembly stripped the separators between sections.
 
 ## Documentation

@@ -307,8 +307,8 @@ namespace ppforest2::cli {
 
     auto data_split = split(full_data, *params.evaluate.train_ratio, rng);
 
-    FeatureMatrix tr_x = full_data.x(data_split.tr, Eigen::all);
-    FeatureMatrix te_x = full_data.x(data_split.te, Eigen::all);
+    FeatureMatrix tr_x = full_data.x(data_split.tr, Eigen::indexing::all);
+    FeatureMatrix te_x = full_data.x(data_split.te, Eigen::indexing::all);
     OutcomeVector tr_y = full_data.y(data_split.tr);
     OutcomeVector te_y = full_data.y(data_split.te);
 

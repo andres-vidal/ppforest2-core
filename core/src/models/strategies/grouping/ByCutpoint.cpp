@@ -44,7 +44,7 @@ namespace ppforest2::grouping {
       auto const pivot      = std::stable_partition(perm.begin(), perm.end(), [&](int i) { return p(i) < cutpoint; });
 
       // 3. Apply the permutation to x and continuous_y in place.
-      x.middleRows(start, n)         = x.middleRows(start, n)(perm, Eigen::all).eval();
+      x.middleRows(start, n)         = x.middleRows(start, n)(perm, Eigen::indexing::all).eval();
       continuous_y.segment(start, n) = continuous_y.segment(start, n)(perm).eval();
 
       return start + static_cast<int>(std::distance(perm.begin(), pivot));
