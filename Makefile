@@ -130,16 +130,17 @@ analyze:
 # Strict-warning compile of the core sources the R package vendors, mirroring
 # CRAN's stricter compilation. Uses real GCC (macOS `g++` is clang and won't
 # catch these) — override on macOS with `make cpp-strict STRICT_CXX=g++-15`. Eigen
-# comes from `.build/_deps` (run `make fetch-deps` first) or the system.
+# comes from STRICT_EIGEN, which defaults to `.build/_deps` (run `make fetch-deps`
+# first) or the system's; override it to compile against another Eigen version.
 STRICT_CXX ?= g++
+STRICT_EIGEN ?= $(firstword $(wildcard ${BUILD_DIR}/_deps/eigen-src) /usr/include/eigen3)
 STRICT_SOURCES = $(shell find core/src -name '*.cpp' ! -name '*.test.cpp' ! -name 'test.cpp' ! -path '*/cli/*' ! -path '*/io/*' ! -path '*/golden/*')
 cpp-strict:
-	@eigen=$$(ls -d ${BUILD_DIR}/_deps/eigen-src 2>/dev/null || echo /usr/include/eigen3); \
-	rc=0; \
+	@rc=0; \
 	for f in ${STRICT_SOURCES}; do \
 		${STRICT_CXX} -std=c++17 -O2 -fopenmp -Wall -Wextra -pedantic -Werror \
 			-DNDEBUG -DEIGEN_NO_DEBUG -DEIGEN_DONT_PARALLELIZE -DEIGEN_NO_AUTOMATIC_RESIZING \
-			-isystem $$eigen -isystem ${NLHOMANN_JSON_HEADERS_PATH} -isystem ${PCG_HEADERS_PATH} -Icore/src -Icore/include \
+			-isystem ${STRICT_EIGEN} -isystem ${NLHOMANN_JSON_HEADERS_PATH} -isystem ${PCG_HEADERS_PATH} -Icore/src -Icore/include \
 			-c $$f -o /dev/null || rc=1; \
 	done; \
 	[ $$rc = 0 ] && echo "OK: core compiles clean under -Wall -Wextra -pedantic -Werror" || exit 1

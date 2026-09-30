@@ -8,6 +8,12 @@ name: Run C++ Strict Warnings
 # ppforest2-r vendors a release. Third-party headers (Eigen, nlohmann/json, pcg)
 # are included via -isystem so their warnings do not count.
 #
+# The R package compiles these sources against whichever Eigen RcppEigen ships,
+# not the Eigen pinned for the CMake build: 3.4.0 today, 5.0 once RcppEigen's
+# update lands. Each GCC version therefore compiles them against Eigen 3.4.0 and
+# against the latest 5.0.x release, so code that builds with one but not the
+# other fails here.
+#
 # The compile itself is `make cpp-strict`, so the flags and the source list have
 # one definition rather than a copy here that can drift out of step with it.
 
@@ -18,18 +24,19 @@ on:
 
 jobs:
   strict:
-    name: GCC ${{ matrix.gcc }} -Wall -Wextra -pedantic -Werror
+    name: GCC ${{ matrix.gcc }}, Eigen ${{ matrix.eigen }} -Wall -Wextra -pedantic -Werror
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         gcc: ['13', '14']
+        eigen: ['3.4.0', '5.0.x']
     steps:
       - uses: actions/checkout@v7
-      - name: Install GCC ${{ matrix.gcc }} and Eigen
+      - name: Install GCC ${{ matrix.gcc }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends g++-${{ matrix.gcc }} libeigen3-dev
+          sudo apt-get install -y --no-install-recommends g++-${{ matrix.gcc }}
       - name: Cache CMake deps
         uses: actions/cache@v6
         with:
@@ -37,5 +44,17 @@ jobs:
           key: ${{ runner.os }}-cmake-deps-${{ hashFiles('core/Dependencies.cmake') }}
       - name: Fetch header-only dependencies
         run: make fetch-deps
+      - name: Fetch Eigen ${{ matrix.eigen }}
+        run: |
+          want='${{ matrix.eigen }}'
+          prefix=$(printf '%s' "${want%.x}" | sed 's/\./\\./g')
+          tag=$(git ls-remote --tags --refs https://gitlab.com/libeigen/eigen.git \
+            | sed 's|.*refs/tags/||' | grep -xE "${prefix}(\.[0-9]+)?" | sort -V | tail -1)
+          if [ -z "$tag" ]; then
+            echo "::error::No Eigen release tag matches $want"
+            exit 1
+          fi
+          echo "Eigen $tag"
+          git clone --quiet --depth 1 --branch "$tag" https://gitlab.com/libeigen/eigen.git .eigen
       - name: Compile core sources (warnings are errors)
-        run: make cpp-strict STRICT_CXX=g++-${{ matrix.gcc }}
+        run: make cpp-strict STRICT_CXX=g++-${{ matrix.gcc }} STRICT_EIGEN=.eigen
