@@ -20,7 +20,7 @@ Developed by [Andrés Vidal](https://andresvidal.dev) as a Bachelor's thesis pro
 
 **Key capabilities:** oblique splits via projection pursuit, multi-threaded forest training (OpenMP), cross-platform reproducibility with golden tests, multiple variable importance measures (projection-based, weighted, permutation), LDA/PDA optimization, OOB error estimation, and [parsnip](https://parsnip.tidymodels.org/) / tidymodels integration.
 
-**Documentation:** [andres-vidal.github.io/ppforest2](https://andres-vidal.github.io/ppforest2/) — [C++ API Reference](https://andres-vidal.github.io/ppforest2/main/cpp/) (Doxygen) · [R Package Reference](https://andres-vidal.github.io/ppforest2/main/r/) (pkgdown)
+**Documentation:** [andres-vidal.github.io/ppforest2-core](https://andres-vidal.github.io/ppforest2-core/) — [C++ API Reference](https://andres-vidal.github.io/ppforest2-core/main/cpp/) (Doxygen) · [R Package Reference](https://andres-vidal.github.io/ppforest2-r/) (pkgdown)
 
 ## Contents
 
@@ -86,7 +86,7 @@ Or the development version from GitHub:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("andres-vidal/ppforest2", subdir = "bindings/R", build = FALSE)
+devtools::install_github("andres-vidal/ppforest2-r")
 ```
 
 ```r
@@ -367,9 +367,9 @@ The project is organized into a shared C++ core and language-specific bindings:
 
 - **C++ core** (`core/`) — All models, training algorithms, statistics, serialization, and CLI live here. This is the single source of truth for the implementation. External dependencies (Eigen, nlohmann/json, pcg, GoogleTest, Google Benchmark, CLI11, fmt, csv-parser) are declared in `core/Dependencies.cmake` and fetched automatically via CMake `FetchContent`.
 
-- **R package** (`bindings/R/`) — Thin Rcpp layer that exposes the C++ core to R. Type conversions between R and C++ types are defined in `inst/include/ppforest2.h`. Roxygen documentation and parsnip integration are R-only.
+- **R package** ([ppforest2-r](https://github.com/andres-vidal/ppforest2-r)) — Thin Rcpp layer that exposes the C++ core to R, developed in its own repository. Type conversions between R and C++ types are defined in its `inst/include/ppforest2.h`. Roxygen documentation and parsnip integration are R-only. See [R Package](#r-package).
 
-- **Visualization** (`core/src/models/Visualization.hpp/cpp` + `bindings/R/R/plot-*.R`) — Split between C++ and R. C++ handles geometry: tree traversal visitors collect per-node data, clip decision boundary lines via parametric line clipping, and compute convex decision region polygons via Sutherland–Hodgman polygon clipping. R handles rendering via ggplot2, translating the C++ output into layers and assembling composite layouts (mosaic, pairwise facets, tree diagrams). The tree structure visualization — with embedded per-node histograms and projector labels — is inspired by [dtreeviz](https://github.com/parrt/dtreeviz).
+- **Visualization** (`core/src/models/Visualization.hpp/cpp` + `R/plot-*.R` in ppforest2-r) — Split between C++ and R. C++ handles geometry: tree traversal visitors collect per-node data, clip decision boundary lines via parametric line clipping, and compute convex decision region polygons via Sutherland–Hodgman polygon clipping. R handles rendering via ggplot2, translating the C++ output into layers and assembling composite layouts (mosaic, pairwise facets, tree diagrams). The tree structure visualization — with embedded per-node histograms and projector labels — is inspired by [dtreeviz](https://github.com/parrt/dtreeviz).
 
 - **Numeric precision** — The C++ core uses single-precision (`float`) arithmetic for all feature data. This is sufficient for classification and reduces memory usage (benchmarks show double precision costs 10–90% more time and up to 45% more memory with no accuracy benefit for classification). If a future strategy needs higher precision internally (e.g., regression loss computation), it can cast to `double` within its own scope without affecting the rest of the pipeline.
 
@@ -390,12 +390,10 @@ The C++ core uses two design patterns to keep the algorithm extensible without h
 |              | Linux            | macOS           | Windows                              |
 |--------------|------------------|-----------------|--------------------------------------|
 | **C++ core** | `cmake` >= 3.24, `make`, `gcc` | `cmake` >= 3.24, `make`, `clang` | `cmake` >= 3.24, `make`, MinGW `gcc` |
-| **R package**| `R` >= 3.5       | `R` >= 3.5      | `R` >= 3.5, `Rtools`                |
 | **OpenMP** (optional) | Usually included with `gcc` | `brew install libomp` | Usually included with MinGW |
 | **Coverage** (optional) | `lcov` >= 2  | `brew install lcov` | —                                    |
-| **R docs**   | TeX distribution with `pdflatex` | TeX distribution with `pdflatex` | TeX distribution with `pdflatex` |
 
-For the R package, the C++ compiler must match the one R was built with (`gcc` on Linux/Windows, `clang` on macOS). OpenMP is optional but recommended for multi-threaded forest training; without it, forests train on a single thread.
+OpenMP is optional but recommended for multi-threaded forest training; without it, forests train on a single thread.
 
 ## Building and Testing
 
@@ -407,23 +405,10 @@ make test               # Build and run C++ tests (GoogleTest)
 make build-debug        # Debug build with AddressSanitizer
 make test-debug         # Run debug tests
 make coverage           # Build with coverage, run tests, generate report and HTML
-make clean              # Remove all build artifacts (.build/, .debug/, .coverage/, .r-build/)
+make clean              # Remove all build artifacts (.build/, .debug/, .coverage/)
 ```
 
 The release build produces the `ppforest2` CLI binary and the `ppforest2-test` test runner in `.build/`. The debug build enables AddressSanitizer (on Linux) and runtime assertions.
-
-### R package
-
-```bash
-make r-install-deps     # Install R package dependencies via pak
-make r-build            # Prepare source and run R CMD build (produces tarball)
-make r-test             # Fast: install + run R tests only (devtools)
-make r-check            # Build and run R CMD check on the tarball
-make r-check-cran       # Same as r-check with --as-cran for CRAN submission
-make r-install          # Build and install the package locally
-make r-document         # Regenerate Roxygen man pages
-make r-clean            # Remove R compilation byproducts
-```
 
 ### Development tools
 
@@ -448,9 +433,8 @@ Golden files in `golden/` are pre-computed reference outputs verified on every p
 ### Documentation
 
 ```bash
-make docs               # Build all documentation (landing page + C++ API + R pkgdown)
+make docs               # Build all documentation (landing page + C++ API)
 make docs-cpp           # Build C++ API docs only (Doxygen)
-make docs-r             # Build R package site only (pkgdown)
 ```
 
 ## Benchmarking
@@ -538,66 +522,13 @@ Setting `"iterations"` forces fixed mode for that scenario; otherwise, smart con
 
 ## R Package
 
-### Building from Source
+The R package is developed in [ppforest2-r](https://github.com/andres-vidal/ppforest2-r). It compiles the C++ core directly through `Makevars`, with no CMake and no network access, from a copy of this repository's `core/` and `golden/` committed under its `src/core/` and `inst/golden/`. The copy is refreshed from tagged releases of this repository, and ppforest2-r's `CORE_VERSION` file records which release it contains.
 
-Install R dependencies, then build:
-
-```bash
-make r-install-deps
-```
-
-```bash
-make r-build            # Prepare source and run R CMD build
-make r-test             # Fast: install + run R tests only
-make r-check            # Run R CMD check on the built tarball
-make r-install          # Run R CMD INSTALL on the built tarball
-make r-document         # Regenerate Roxygen man pages
-make r-clean            # Remove compilation byproducts
-```
-
-> **Important:** Always use `make r-build` before checking or installing. This target copies the C++ core source into the R package's `src/core/` so it can be compiled on install.
-
-### Build Process
-
-The R package wraps the C++ core via Rcpp. Because the core lives outside the R package directory, the build process assembles a self-contained source tarball. The C++ core is compiled **directly through `Makevars`** using R's own compiler — no CMake, no network access, and no pre-built static libraries. This keeps the package CRAN-installable: everything it needs ships in the tarball.
-
-The only external C++ dependencies at R-build time are Eigen (provided by `RcppEigen` via `LinkingTo`) and the header-only nlohmann/json and pcg libraries, which are vendored under `bindings/R/inst/include/`. The `fmt` and `csv-parser` dependencies are only used by the CLI/io layer, which the R package does not compile.
-
-#### Tarball pipeline (`make r-check`)
-
-1. **`r-prepare`** — Stages the core sources the R package compiles into `src/core/` (dropping the `cli/`, `io/`, `golden/` and test translation units, which need `fmt`/`csv-parser`/GoogleTest), copies the changelog to `NEWS.md`, and copies golden files into `inst/golden/`. The vendored json/pcg headers are already committed under `inst/include/`, so nothing is downloaded.
-
-2. **`r-build`** — Regenerates `RcppExports.cpp`/`RcppExports.R` via `Rcpp::compileAttributes()`, then runs `R CMD build` to produce a source tarball.
-
-3. **`configure` / `configure.win`** — During `R CMD INSTALL` (or `R CMD check`), the configure script:
-   - Stages the core sources if needed — from the bundled `src/core/` in a **tarball**, or by copying `../../core/` in the **monorepo** (`devtools::load_all()` / `install_github`).
-   - Generates the `OBJECTS` list (every needed core `.cpp`) and writes `src/Makevars` from `Makevars.in`.
-   - Detects OpenMP support (needed only for the macOS special case; elsewhere R's `$(SHLIB_OPENMP_CXXFLAGS)` suffices) and falls back to a single-threaded build if unavailable.
-
-   Compiling every strategy object straight into the shared object means the self-registering strategies cannot be dead-stripped, so no whole-archive link trickery is required.
-
-#### Development workflow (`devtools::load_all()`)
-
-`devtools::load_all()` runs `configure`, which stages `../../core/` into `src/core/` and compiles it through `Makevars` — the same path used for a tarball install.
-
-```r
-devtools::load_all("bindings/R")   # edit C++ -> reload -> test
-devtools::test("bindings/R")        # run testthat suite
-```
-
-### How `install_github` Works
-
-`install_github` requires `build = FALSE` so that `R CMD INSTALL` runs directly on the source directory within the cloned monorepo (without `build = FALSE`, `R CMD build` creates an intermediate tarball that loses the monorepo context):
-
-```r
-devtools::install_github("andres-vidal/ppforest2", subdir = "bindings/R", build = FALSE)
-```
-
-The configure script detects `../../core/`, stages it into `src/core/`, and compiles it through `Makevars`.
+The copy leaves out `cli/`, `io/`, `golden/` and the `*.test.cpp` files, which need `fmt`, `csv-parser` and GoogleTest. Everything else under `core/src` is compiled into the R package, so it must build with R's toolchain. `make cpp-strict` compiles exactly that subset with `-Wall -Wextra -pedantic -Werror`, and CI runs it against Eigen 3.4.0 and the latest Eigen 5.0.x, so the R package builds with an RcppEigen based on either.
 
 ## Documentation
 
-The project has a unified documentation site combining a static landing page, a C++ API reference (Doxygen), and R package documentation (pkgdown). The site is deployed to GitHub Pages with versioned directories for each branch and tag.
+The project has a documentation site combining a static landing page and a C++ API reference (Doxygen). The landing page links to the R package documentation, which ppforest2-r publishes separately. The site is deployed to GitHub Pages with versioned directories for each branch and tag.
 
 ### Deployment
 
@@ -664,22 +595,24 @@ requesting pure LDA (`lambda = 0`). Root cause is documented at the eigensolver 
 
 The project follows [Semantic Versioning](https://semver.org/) with a single source of truth: the `VERSION` file at the repository root.
 
-- **MAJOR** — breaking API changes (C++ public API, R/Python interface changes that break user code)
+- **MAJOR** — breaking API changes (C++ public API or CLI changes that break user code)
 - **MINOR** — new features, new model types, new parameters
 - **PATCH** — bug fixes, performance improvements, documentation
 
-The `VERSION` file contains `MAJOR.MINOR.PATCH` (e.g., `0.1.0`). All components share the same version: CMake reads it for the C++ core and CLI, and `make r-prepare` updates the R package DESCRIPTION. Git tags use the format `v0.1.0`.
+The `VERSION` file contains `MAJOR.MINOR.PATCH` (e.g., `0.1.0`). CMake reads it for the C++ core and CLI. The R package versions independently in ppforest2-r. Git tags use the format `v0.1.0`.
 
 ### Changelog
 
-`CHANGELOG.md` at the repository root tracks all changes. It uses the format expected by R's `utils::news()` (`# ppforest2 X.Y.Z` headings) and is copied as `NEWS.md` into the R package during `make r-prepare`.
+`CHANGELOG.md` at the repository root tracks all changes. It uses the format expected by R's `utils::news()` (`# ppforest2 X.Y.Z` headings).
 
 ### How to release
 
 1. Update the `VERSION` file with the new version number
 2. Add a section to `CHANGELOG.md` for the new version
-3. Run `make r-prepare` (or `make r-build`) — DESCRIPTION version is updated from the `VERSION` file
-4. Commit, tag (`v0.1.0`), push
+3. Merge the changes into `main`
+4. Tag and push the tag with `make release`, which tags `v` followed by the `VERSION`
+
+The tag runs `.github/workflows/release.yml`, which runs the tests on Ubuntu, macOS and Windows, checks that the tag is on `main`, that it matches `VERSION` and that `CHANGELOG.md` has exactly one section for it, and publishes a GitHub release with that section and the benchmark results.
 
 ### Reverting a release
 
