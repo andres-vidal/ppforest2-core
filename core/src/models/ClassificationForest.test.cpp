@@ -15,6 +15,7 @@
 #include "stats/Stats.hpp"
 #include "test/Projectors.hpp"
 #include "utils/Macros.hpp"
+#include "utils/UserError.hpp"
 
 using namespace ppforest2;
 using namespace ppforest2::stats;
@@ -844,4 +845,12 @@ TEST(ForestEdgeCase, ExtremeImbalance) {
   OutcomeVector const predictions = forest->predict(x);
   ASSERT_EQ(predictions.size(), y.size());
   EXPECT_TRUE((predictions.array() >= 0).all() && (predictions.array() <= 1).all());
+}
+
+TEST(ClassificationForest, PredictRejectsWrongFeatureCount) {
+  ClassificationForest const forest = build_three_group_forest();
+  FeatureMatrix const x             = FeatureMatrix::Zero(3, 4);
+
+  EXPECT_THROW(forest.predict(x), UserError);
+  EXPECT_THROW(forest.predict(x, Proportions{}), UserError);
 }

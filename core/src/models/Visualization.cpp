@@ -7,11 +7,13 @@
  */
 
 #include "models/Visualization.hpp"
+#include "utils/UserError.hpp"
 
 #include <cmath>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <string>
 
 namespace ppforest2::viz {
   /**
@@ -42,6 +44,12 @@ namespace ppforest2::viz {
   }
 
   void NodeDataVisitor::visit(TreeBranch const& node) {
+    user_error(
+        x.cols() == node.projector.size(),
+        "The data has " + std::to_string(x.cols()) + " features, but the model was trained on " +
+            std::to_string(node.projector.size()) + "."
+    );
+
     // Collect projected values for all observations reaching this node.
     NodeData nd;
     nd.is_leaf   = false;

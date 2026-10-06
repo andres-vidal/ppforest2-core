@@ -4,6 +4,7 @@
 #include "models/TreeBranch.hpp"
 #include "models/TreeLeaf.hpp"
 #include "test/Projectors.hpp"
+#include "utils/UserError.hpp"
 
 using namespace ppforest2;
 using namespace ppforest2::pp;
@@ -72,4 +73,25 @@ TEST(IsLeaf, FalseForTreeBranch) {
 TEST(IsLeaf, FalseForTreeBranchPtr) {
   TreeNode::Ptr const branch = TreeBranch::make(as_projector({1.0, 2.0}), 3.0, TreeLeaf::make(1), TreeLeaf::make(2));
   EXPECT_FALSE(is_leaf(branch));
+}
+
+TEST(TreeBranch, PredictRejectsWrongFeatureCount) {
+  TreeBranch const branch(as_projector({1.0, 2.0}), 3.0, TreeLeaf::make(1), TreeLeaf::make(2));
+
+  FeatureVector too_many(3);
+  too_many << 1.0F, 2.0F, 3.0F;
+  FeatureVector too_few(1);
+  too_few << 1.0F;
+
+  EXPECT_THROW(branch.predict(too_many), UserError);
+  EXPECT_THROW(branch.predict(too_few), UserError);
+}
+
+TEST(TreeBranch, PredictAcceptsMatchingFeatureCount) {
+  TreeBranch const branch(as_projector({1.0, 2.0}), 3.0, TreeLeaf::make(1), TreeLeaf::make(2));
+
+  FeatureVector x(2);
+  x << 1.0F, 2.0F;
+
+  EXPECT_EQ(branch.predict(x), 2);
 }

@@ -15,6 +15,7 @@
 #include "stats/Stats.hpp"
 #include "test/Projectors.hpp"
 #include "utils/Macros.hpp"
+#include "utils/UserError.hpp"
 
 using namespace ppforest2;
 using namespace ppforest2::pp;
@@ -999,4 +1000,17 @@ TEST(ClassificationTreeStop, MaxDepthBoundsTreeDepth) {
       Tree::train(TrainingSpec::builder(types::Mode::Classification).stop(stop::max_depth(1)).build(), x, y, rng);
 
   EXPECT_LE(tree_depth(*tree), 1) << "max_depth(1) must bound tree depth at 1";
+}
+
+TEST(ClassificationTree, PredictRejectsWrongFeatureCount) {
+  ClassificationTree const tree(
+      TreeBranch::make(as_projector({1.0F, 0.0F}), 0.5F, TreeLeaf::make(0), TreeLeaf::make(1), {0, 1}),
+      TrainingSpec::builder(types::Mode::Classification).make(),
+      ClassificationTree::Groups{0, 1}
+  );
+
+  FeatureMatrix const x = FeatureMatrix::Zero(4, 3);
+
+  EXPECT_THROW(tree.predict(x), UserError);
+  EXPECT_THROW(tree.predict(x, Proportions{}), UserError);
 }
