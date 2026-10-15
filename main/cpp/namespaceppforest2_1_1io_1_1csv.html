@@ -114,6 +114,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ab21dffa92707551b52e2c7fa7fce0517" id="r_ab21dffa92707551b52e2c7fa7fce0517"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab21dffa92707551b52e2c7fa7fce0517">check_feature_count</a> (<a class="el" href="structppforest2_1_1stats_1_1DataPacket.html">stats::DataPacket</a> const &amp;data, int n_features)</td></tr>
+<tr class="memdesc:ab21dffa92707551b52e2c7fa7fce0517"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that a data file has as many feature columns as a model.  <br /></td></tr>
+<tr class="separator:ab21dffa92707551b52e2c7fa7fce0517"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae218cd92b9213fafd1ab3936a857223c" id="r_ae218cd92b9213fafd1ab3936a857223c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structppforest2_1_1stats_1_1DataPacket.html">stats::DataPacket</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae218cd92b9213fafd1ab3936a857223c">read</a> (std::string const &amp;filename)</td></tr>
 <tr class="memdesc:ae218cd92b9213fafd1ab3936a857223c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a CSV file into a DataPacket.  <br /></td></tr>
 <tr class="separator:ae218cd92b9213fafd1ab3936a857223c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -137,6 +140,35 @@ Functions</h2></td></tr>
 <tr class="separator:a3c0009a801161f7c53fcc8c92a4fc1d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ab21dffa92707551b52e2c7fa7fce0517" name="ab21dffa92707551b52e2c7fa7fce0517"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab21dffa92707551b52e2c7fa7fce0517">&#9670;&#160;</a></span>check_feature_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ppforest2::io::csv::check_feature_count </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structppforest2_1_1stats_1_1DataPacket.html">stats::DataPacket</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n_features</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check that a data file has as many feature columns as a model. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classppforest2_1_1UserError.html" title="Exception for user-facing input validation errors.">UserError</a></td><td>naming both counts when they differ. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ae218cd92b9213fafd1ab3936a857223c" name="ae218cd92b9213fafd1ab3936a857223c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae218cd92b9213fafd1ab3936a857223c">&#9670;&#160;</a></span>read() <span class="overload">[1/2]</span></h2>
 

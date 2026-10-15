@@ -16,7 +16,7 @@ var searchData=
   ['for_20adding_20a_20new_20strategy_13',['Checklist for adding a new strategy',['../extending_strategies.html#strat_checklist',1,'']]],
   ['for_5feach_5fbag_5fwith_5foob_14',['for_each_bag_with_oob',['../namespaceppforest2.html#a58611c1bb0686c772ae8e634d62ce29b',1,'ppforest2']]],
   ['forbid_5fkey_15',['forbid_key',['../classppforest2_1_1JsonReader.html#aaf330de7dba4b409d67663ab65a151e8',1,'ppforest2::JsonReader']]],
-  ['forest_16',['Forest',['../classppforest2_1_1Forest.html',1,'ppforest2::Forest'],['../classppforest2_1_1Forest.html#af4d43a830ec82d3f9e44cccb53d65baf',1,'ppforest2::Forest::Forest()=default'],['../classppforest2_1_1Forest.html#abb7f06d0b4cee3a968fe89bc51766ad0',1,'ppforest2::Forest::Forest(TrainingSpec::Ptr spec)']]],
+  ['forest_16',['Forest',['../classppforest2_1_1Forest.html',1,'ppforest2::Forest'],['../classppforest2_1_1Forest.html#abb7f06d0b4cee3a968fe89bc51766ad0',1,'ppforest2::Forest::Forest()']]],
   ['forest_17',['Training a random forest',['../index.html#train_forest',1,'']]],
   ['forest_2ehpp_18',['Forest.hpp',['../Forest_8hpp.html',1,'']]],
   ['format_19',['format',['../structppforest2_1_1cli_1_1BenchmarkParams.html#aab83bf598da28d07ec276532bebfe69f',1,'ppforest2::cli::BenchmarkParams::format'],['../structppforest2_1_1cli_1_1SimulateParams.html#af1695a357c09532387cd738275c592a0',1,'ppforest2::cli::SimulateParams::format']]],

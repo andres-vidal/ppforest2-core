@@ -129,24 +129,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa6f10c078595f3f05b1ae2a5da09efa9" id="r_aa6f10c078595f3f05b1ae2a5da09efa9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6f10c078595f3f05b1ae2a5da09efa9">accept</a> (<a class="el" href="classppforest2_1_1TreeNode_1_1Visitor.html">TreeNode::Visitor</a> &amp;visitor) const override</td></tr>
 <tr class="memdesc:aa6f10c078595f3f05b1ae2a5da09efa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accept a tree node visitor (double dispatch).  <br /></td></tr>
 <tr class="separator:aa6f10c078595f3f05b1ae2a5da09efa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63d7d7430a2738ec896e93d1a3f2fd84" id="r_a63d7d7430a2738ec896e93d1a3f2fd84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classppforest2_1_1TreeNode.html#aa03af85bbfe1c0f8d8ce50f18c96623c">TreeNode::Ptr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a63d7d7430a2738ec896e93d1a3f2fd84">clone</a> () const override</td></tr>
-<tr class="memdesc:a63d7d7430a2738ec896e93d1a3f2fd84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deep copy of this node and its subtree.  <br /></td></tr>
-<tr class="separator:a63d7d7430a2738ec896e93d1a3f2fd84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fa479b403f64c40613ddd5a872b9d84" id="r_a6fa479b403f64c40613ddd5a872b9d84"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6fa479b403f64c40613ddd5a872b9d84">equals</a> (<a class="el" href="classppforest2_1_1TreeNode.html">TreeNode</a> const &amp;other) const override</td></tr>
 <tr class="memdesc:a6fa479b403f64c40613ddd5a872b9d84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structural equality comparison (value-based).  <br /></td></tr>
 <tr class="separator:a6fa479b403f64c40613ddd5a872b9d84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9b7c133f8156ffa53cc6b35d429c87f" id="r_af9b7c133f8156ffa53cc6b35d429c87f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9b7c133f8156ffa53cc6b35d429c87f">group_count</a> () const override</td></tr>
-<tr class="memdesc:af9b7c133f8156ffa53cc6b35d429c87f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of distinct groups reachable from this node.  <br /></td></tr>
-<tr class="separator:af9b7c133f8156ffa53cc6b35d429c87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a095188e2f186291db01df975e29087ad" id="r_a095188e2f186291db01df975e29087ad"><td class="memItemLeft" align="right" valign="top">std::set&lt; <a class="el" href="namespaceppforest2_1_1types.html#a6d253918badca20f9bc5fcc7bb081c31">types::GroupId</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a095188e2f186291db01df975e29087ad">node_groups</a> () const override</td></tr>
-<tr class="memdesc:a095188e2f186291db01df975e29087ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sorted set of group labels reachable from this node.  <br /></td></tr>
-<tr class="separator:a095188e2f186291db01df975e29087ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05ebd05033f2c1076baa3198d7568b6f" id="r_a05ebd05033f2c1076baa3198d7568b6f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceppforest2_1_1types.html#a65b9b5ffdb51754c6f84a62904d1bd7b">types::Outcome</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05ebd05033f2c1076baa3198d7568b6f">predict</a> (<a class="el" href="namespaceppforest2_1_1types.html#a409985f07e7a60fd352934db8849d25c">types::FeatureVector</a> const &amp;x) const override</td></tr>
 <tr class="memdesc:a05ebd05033f2c1076baa3198d7568b6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Route an observation through this split.  <br /></td></tr>
 <tr class="separator:a05ebd05033f2c1076baa3198d7568b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a113de1113264fbf9f4435166716b270d" id="r_a113de1113264fbf9f4435166716b270d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceppforest2_1_1types.html#a65b9b5ffdb51754c6f84a62904d1bd7b">types::Outcome</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a113de1113264fbf9f4435166716b270d">response</a> () const override</td></tr>
-<tr class="memdesc:a113de1113264fbf9f4435166716b270d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the response of the lower child.  <br /></td></tr>
-<tr class="separator:a113de1113264fbf9f4435166716b270d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classppforest2_1_1TreeNode"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classppforest2_1_1TreeNode')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classppforest2_1_1TreeNode.html">ppforest2::TreeNode</a></td></tr>
 <tr class="memitem:adda9ba5c464c0520a77d6a8496c2f239 inherit pub_methods_classppforest2_1_1TreeNode" id="r_adda9ba5c464c0520a77d6a8496c2f239"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classppforest2_1_1TreeNode.html#adda9ba5c464c0520a77d6a8496c2f239">~TreeNode</a> ()=default</td></tr>
 <tr class="separator:adda9ba5c464c0520a77d6a8496c2f239 inherit pub_methods_classppforest2_1_1TreeNode"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -276,35 +264,6 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a63d7d7430a2738ec896e93d1a3f2fd84" name="a63d7d7430a2738ec896e93d1a3f2fd84"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63d7d7430a2738ec896e93d1a3f2fd84">&#9670;&#160;</a></span>clone()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classppforest2_1_1TreeNode.html#aa03af85bbfe1c0f8d8ce50f18c96623c">TreeNode::Ptr</a> ppforest2::TreeBranch::clone </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Deep copy of this node and its subtree. </p>
-
-<p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#afe195ce45f18dc9e2fc543ff4f7bf166">ppforest2::TreeNode</a>.</p>
-
-</div>
-</div>
 <a id="a6fa479b403f64c40613ddd5a872b9d84" name="a6fa479b403f64c40613ddd5a872b9d84"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6fa479b403f64c40613ddd5a872b9d84">&#9670;&#160;</a></span>equals()</h2>
 
@@ -331,35 +290,6 @@ Public Attributes</h2></td></tr>
 <p>Structural equality comparison (value-based). </p>
 
 <p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#a5ec62c510e282beae85c9e9a59e11efc">ppforest2::TreeNode</a>.</p>
-
-</div>
-</div>
-<a id="af9b7c133f8156ffa53cc6b35d429c87f" name="af9b7c133f8156ffa53cc6b35d429c87f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9b7c133f8156ffa53cc6b35d429c87f">&#9670;&#160;</a></span>group_count()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int ppforest2::TreeBranch::group_count </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Number of distinct groups reachable from this node. </p>
-
-<p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#acf538798f71c698194827b16a4bd100a">ppforest2::TreeNode</a>.</p>
 
 </div>
 </div>
@@ -414,35 +344,6 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a095188e2f186291db01df975e29087ad" name="a095188e2f186291db01df975e29087ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a095188e2f186291db01df975e29087ad">&#9670;&#160;</a></span>node_groups()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::set&lt; <a class="el" href="namespaceppforest2_1_1types.html#a6d253918badca20f9bc5fcc7bb081c31">types::GroupId</a> &gt; ppforest2::TreeBranch::node_groups </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Sorted set of group labels reachable from this node. </p>
-
-<p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#a0ee7d5f41c8320ba91f4b496753166b9">ppforest2::TreeNode</a>.</p>
-
-</div>
-</div>
 <a id="a05ebd05033f2c1076baa3198d7568b6f" name="a05ebd05033f2c1076baa3198d7568b6f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a05ebd05033f2c1076baa3198d7568b6f">&#9670;&#160;</a></span>predict()</h2>
 
@@ -477,35 +378,6 @@ Public Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Predicted group label from the reached leaf. </dd></dl>
 
 <p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#a4f248d3a62caa7f6d80a1ba9387c4fbe">ppforest2::TreeNode</a>.</p>
-
-</div>
-</div>
-<a id="a113de1113264fbf9f4435166716b270d" name="a113de1113264fbf9f4435166716b270d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a113de1113264fbf9f4435166716b270d">&#9670;&#160;</a></span>response()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespaceppforest2_1_1types.html#a65b9b5ffdb51754c6f84a62904d1bd7b">types::Outcome</a> ppforest2::TreeBranch::response </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Returns the response of the lower child. </p>
-
-<p>Implements <a class="el" href="classppforest2_1_1TreeNode.html#a89bba06b61229b8a0fa212477bebb5ac">ppforest2::TreeNode</a>.</p>
 
 </div>
 </div>

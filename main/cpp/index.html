@@ -154,14 +154,14 @@ Training a single tree</h2>
 <div class="line">  <a class="code hl_function" href="namespaceppforest2_1_1cutpoint.html#a87c2b7c4af0ba296ee6ad99c0fb20b6e">cutpoint::mean_of_means</a>());   <span class="comment">// midpoint split rule</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Train via the unified entry point:</span></div>
-<div class="line"><span class="keyword">auto</span> model = <a class="code hl_function" href="classppforest2_1_1Model.html#a6b68cfc7993c6624cc821466c8e62143">Model::train</a>(spec, data.x, data.y);</div>
+<div class="line"><span class="keyword">auto</span> model = <a class="code hl_function" href="classppforest2_1_1Model.html#addc4989ba5d14e47fac8a2455fec8b4b">Model::train</a>(spec, data.x, data.y);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Or train directly:</span></div>
 <div class="line"><a class="code hl_class" href="classppforest2_1_1Tree.html">Tree</a> tree = <a class="code hl_function" href="classppforest2_1_1Tree.html#a44314480444b29c2bc560d6517c8c81e">Tree::train</a>(spec, data.x, data.y);</div>
 <div class="line"> </div>
 <div class="line"><a class="code hl_typedef" href="namespaceppforest2_1_1types.html#a65b9b5ffdb51754c6f84a62904d1bd7b">types::Outcome</a> label = tree.<a class="code hl_function" href="classppforest2_1_1Tree.html#ae2c79921980a45c8bddbcb5dcb8d15eb">predict</a>(data.x.row(0));</div>
 <div class="line"><a class="code hl_typedef" href="namespaceppforest2_1_1types.html#a2432f13302eed47b33e7b5a73e57b020">types::OutcomeVector</a> preds = tree.<a class="code hl_function" href="classppforest2_1_1Tree.html#ae2c79921980a45c8bddbcb5dcb8d15eb">predict</a>(data.x);</div>
-<div class="ttc" id="aclassppforest2_1_1Model_html_a6b68cfc7993c6624cc821466c8e62143"><div class="ttname"><a href="classppforest2_1_1Model.html#a6b68cfc7993c6624cc821466c8e62143">ppforest2::Model::train</a></div><div class="ttdeci">static Ptr train(TrainingSpec const &amp;spec, types::FeatureMatrix &amp;x, types::OutcomeVector &amp;y)</div><div class="ttdoc">Train a model from a training specification.</div></div>
+<div class="ttc" id="aclassppforest2_1_1Model_html_addc4989ba5d14e47fac8a2455fec8b4b"><div class="ttname"><a href="classppforest2_1_1Model.html#addc4989ba5d14e47fac8a2455fec8b4b">ppforest2::Model::train</a></div><div class="ttdeci">static Ptr train(TrainingSpec const &amp;spec, types::FeatureMatrix const &amp;x, types::OutcomeVector const &amp;y)</div><div class="ttdoc">Train a model from a training specification.</div></div>
 <div class="ttc" id="aclassppforest2_1_1TrainingSpec_html"><div class="ttname"><a href="classppforest2_1_1TrainingSpec.html">ppforest2::TrainingSpec</a></div><div class="ttdoc">Training configuration for projection pursuit trees and forests.</div><div class="ttdef"><b>Definition</b> TrainingSpec.hpp:44</div></div>
 <div class="ttc" id="aclassppforest2_1_1Tree_html"><div class="ttname"><a href="classppforest2_1_1Tree.html">ppforest2::Tree</a></div><div class="ttdoc">Abstract base class for projection pursuit decision trees.</div><div class="ttdef"><b>Definition</b> Tree.hpp:29</div></div>
 <div class="ttc" id="aclassppforest2_1_1Tree_html_a44314480444b29c2bc560d6517c8c81e"><div class="ttname"><a href="classppforest2_1_1Tree.html#a44314480444b29c2bc560d6517c8c81e">ppforest2::Tree::train</a></div><div class="ttdeci">static Ptr train(TrainingSpec const &amp;spec, types::FeatureMatrix &amp;x, types::OutcomeVector &amp;y)</div><div class="ttdoc">Train a tree from a response vector.</div></div>
@@ -229,7 +229,7 @@ Serialisation</h2>
 <div class="line"><a class="code hl_class" href="classppforest2_1_1Forest.html">Forest</a> restored = serialization::forest_from_json(j2);</div>
 <div class="ttc" id="aIO_8hpp_html"><div class="ttname"><a href="IO_8hpp.html">IO.hpp</a></div><div class="ttdoc">File I/O utilities, JSON and CSV reading/writing.</div></div>
 <div class="ttc" id="aJson_8hpp_html"><div class="ttname"><a href="Json_8hpp.html">Json.hpp</a></div></div>
-<div class="ttc" id="aclassppforest2_1_1Forest_html"><div class="ttname"><a href="classppforest2_1_1Forest.html">ppforest2::Forest</a></div><div class="ttdoc">Abstract base class for projection pursuit random forests.</div><div class="ttdef"><b>Definition</b> Forest.hpp:31</div></div>
+<div class="ttc" id="aclassppforest2_1_1Forest_html"><div class="ttname"><a href="classppforest2_1_1Forest.html">ppforest2::Forest</a></div><div class="ttdoc">Abstract base class for projection pursuit random forests.</div><div class="ttdef"><b>Definition</b> Forest.hpp:32</div></div>
 <div class="ttc" id="anamespaceppforest2_1_1serialization_html_ab027fe7ed8f34af449430fa660c0f191"><div class="ttname"><a href="namespaceppforest2_1_1serialization.html#ab027fe7ed8f34af449430fa660c0f191">ppforest2::serialization::to_json</a></div><div class="ttdeci">json to_json(types::OutcomeVector const &amp;y, types::Names const &amp;names)</div><div class="ttdoc">Serialize a prediction vector as JSON.</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="strategy_pattern"></a>
 Strategy pattern</h1>

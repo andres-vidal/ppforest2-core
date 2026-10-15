@@ -148,54 +148,35 @@ Functions</h2></td></tr>
 <tr class="memdesc:adf8b8bd6bac208efb2dcb04c51ccef47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate the structural shape of a loaded model <a class="el" href="structppforest2_1_1serialization_1_1Export.html" title="A model bundled with its export metadata and optional metrics.">Export</a> JSON.  <br /></td></tr>
 <tr class="separator:adf8b8bd6bac208efb2dcb04c51ccef47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Serialization</div></td></tr>
-<tr class="memitem:af24192eaa3c80420571a995b8b6148c2" id="r_af24192eaa3c80420571a995b8b6148c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af24192eaa3c80420571a995b8b6148c2">to_json</a> (<a class="el" href="classppforest2_1_1Model.html">Model</a> const &amp;model)</td></tr>
-<tr class="separator:af24192eaa3c80420571a995b8b6148c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05661f6f29fd6850a0d7f64c4b25e470" id="r_a05661f6f29fd6850a0d7f64c4b25e470"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05661f6f29fd6850a0d7f64c4b25e470">to_json</a> (<a class="el" href="classppforest2_1_1TreeNode.html">TreeNode</a> const &amp;node)</td></tr>
-<tr class="separator:a05661f6f29fd6850a0d7f64c4b25e470"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3bd60fa9fb5bd95b40cb74eeb6a68df" id="r_af3bd60fa9fb5bd95b40cb74eeb6a68df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3bd60fa9fb5bd95b40cb74eeb6a68df">to_json</a> (<a class="el" href="classppforest2_1_1Tree.html">Tree</a> const &amp;tree)</td></tr>
-<tr class="separator:af3bd60fa9fb5bd95b40cb74eeb6a68df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad50b5ef7422f00b75482f0c8cc0c5e47" id="r_ad50b5ef7422f00b75482f0c8cc0c5e47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad50b5ef7422f00b75482f0c8cc0c5e47">to_json</a> (<a class="el" href="namespaceppforest2.html#a9cf905b70cf6d7a781209394cac89000">BaggedTree</a> const &amp;tree)</td></tr>
-<tr class="separator:ad50b5ef7422f00b75482f0c8cc0c5e47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41ffcc97e8bfcbe007ad40fab6f881af" id="r_a41ffcc97e8bfcbe007ad40fab6f881af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41ffcc97e8bfcbe007ad40fab6f881af">to_json</a> (<a class="el" href="classppforest2_1_1Forest.html">Forest</a> const &amp;forest)</td></tr>
-<tr class="separator:a41ffcc97e8bfcbe007ad40fab6f881af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a000f8bc1055b4b8284c4a766a3aec16b" id="r_a000f8bc1055b4b8284c4a766a3aec16b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a000f8bc1055b4b8284c4a766a3aec16b">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ConfusionMatrix.html">stats::ConfusionMatrix</a> const &amp;cm)</td></tr>
-<tr class="separator:a000f8bc1055b4b8284c4a766a3aec16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb17e2228298f904002322719c17cf5c" id="r_abb17e2228298f904002322719c17cf5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abb17e2228298f904002322719c17cf5c">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ClassificationMetrics.html">stats::ClassificationMetrics</a> const &amp;cm)</td></tr>
-<tr class="separator:abb17e2228298f904002322719c17cf5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupText"><p>With non-empty <code class="param">group_names</code>, leaves, node groups and confusion-matrix labels are written as label strings instead of integer codes. </p>
+</div></td></tr>
+<tr class="memitem:a9409ccdc96a877cc5e5905326da0e5a3" id="r_a9409ccdc96a877cc5e5905326da0e5a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9409ccdc96a877cc5e5905326da0e5a3">to_json</a> (<a class="el" href="classppforest2_1_1Model.html">Model</a> const &amp;model, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a9409ccdc96a877cc5e5905326da0e5a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5209171ad8665fa08e4734cb0e37250a" id="r_a5209171ad8665fa08e4734cb0e37250a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5209171ad8665fa08e4734cb0e37250a">to_json</a> (<a class="el" href="classppforest2_1_1TreeNode.html">TreeNode</a> const &amp;node, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a5209171ad8665fa08e4734cb0e37250a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d3a4b3777332f1c526369d3375a4830" id="r_a0d3a4b3777332f1c526369d3375a4830"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d3a4b3777332f1c526369d3375a4830">to_json</a> (<a class="el" href="classppforest2_1_1Tree.html">Tree</a> const &amp;tree, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a0d3a4b3777332f1c526369d3375a4830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9d1668c218573bb87b728283952ff0c" id="r_ae9d1668c218573bb87b728283952ff0c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9d1668c218573bb87b728283952ff0c">to_json</a> (<a class="el" href="namespaceppforest2.html#a9cf905b70cf6d7a781209394cac89000">BaggedTree</a> const &amp;tree, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:ae9d1668c218573bb87b728283952ff0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92a47e2fa65671817a0a9f9f4d537377" id="r_a92a47e2fa65671817a0a9f9f4d537377"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a92a47e2fa65671817a0a9f9f4d537377">to_json</a> (<a class="el" href="classppforest2_1_1Forest.html">Forest</a> const &amp;forest, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a92a47e2fa65671817a0a9f9f4d537377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5182f641a713978eec024d2a96dba0bc" id="r_a5182f641a713978eec024d2a96dba0bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5182f641a713978eec024d2a96dba0bc">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ConfusionMatrix.html">stats::ConfusionMatrix</a> const &amp;cm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a5182f641a713978eec024d2a96dba0bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01cba52c86eb7eac278667da8255e95b" id="r_a01cba52c86eb7eac278667da8255e95b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01cba52c86eb7eac278667da8255e95b">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ClassificationMetrics.html">stats::ClassificationMetrics</a> const &amp;cm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a01cba52c86eb7eac278667da8255e95b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e824543c227a9471fb9804a62d4be52" id="r_a2e824543c227a9471fb9804a62d4be52"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e824543c227a9471fb9804a62d4be52">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1RegressionMetrics.html">stats::RegressionMetrics</a> const &amp;rm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a2e824543c227a9471fb9804a62d4be52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9291c058106af098c8be5f31f7835fc4" id="r_a9291c058106af098c8be5f31f7835fc4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9291c058106af098c8be5f31f7835fc4">to_json</a> (<a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> const &amp;metrics, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:a9291c058106af098c8be5f31f7835fc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a107afa7dd5edd4dffbb2d201dbda07b3" id="r_a107afa7dd5edd4dffbb2d201dbda07b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a107afa7dd5edd4dffbb2d201dbda07b3">to_json</a> (<a class="el" href="structppforest2_1_1VariableImportance.html">VariableImportance</a> const &amp;vi)</td></tr>
 <tr class="separator:a107afa7dd5edd4dffbb2d201dbda07b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fe50ebb416cf658a798137ec738b9c3" id="r_a8fe50ebb416cf658a798137ec738b9c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8fe50ebb416cf658a798137ec738b9c3">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1RegressionMetrics.html">stats::RegressionMetrics</a> const &amp;rm)</td></tr>
-<tr class="separator:a8fe50ebb416cf658a798137ec738b9c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed68683cc910b1d7f69b8178f053227e" id="r_aed68683cc910b1d7f69b8178f053227e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed68683cc910b1d7f69b8178f053227e">to_json</a> (<a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> const &amp;metrics)</td></tr>
-<tr class="separator:aed68683cc910b1d7f69b8178f053227e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f5c70391e6831b723860f7fb878dba0" id="r_a6f5c70391e6831b723860f7fb878dba0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f5c70391e6831b723860f7fb878dba0">to_json</a> (<a class="el" href="namespaceppforest2_1_1types.html#a20733a55a09432e8f9f924eb11fb5b0d">types::FeatureMatrix</a> const &amp;matrix)</td></tr>
 <tr class="separator:a6f5c70391e6831b723860f7fb878dba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Labeled serialization (uses group names instead of integer codes)</div></td></tr>
-<tr class="memitem:a42aa3363b4e574f7dfdcaa3ececa1fc6" id="r_a42aa3363b4e574f7dfdcaa3ececa1fc6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42aa3363b4e574f7dfdcaa3ececa1fc6">to_json</a> (<a class="el" href="classppforest2_1_1Model.html">Model</a> const &amp;model, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:a42aa3363b4e574f7dfdcaa3ececa1fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b6f8351bab1da2f29bacc38cbd06bbb" id="r_a6b6f8351bab1da2f29bacc38cbd06bbb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b6f8351bab1da2f29bacc38cbd06bbb">to_json</a> (<a class="el" href="classppforest2_1_1TreeNode.html">TreeNode</a> const &amp;node, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:a6b6f8351bab1da2f29bacc38cbd06bbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54e68235a824db26770a8964b8abf85f" id="r_a54e68235a824db26770a8964b8abf85f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54e68235a824db26770a8964b8abf85f">to_json</a> (<a class="el" href="classppforest2_1_1Tree.html">Tree</a> const &amp;tree, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:a54e68235a824db26770a8964b8abf85f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba43c430d2f9f296ffd6669a423282cd" id="r_aba43c430d2f9f296ffd6669a423282cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba43c430d2f9f296ffd6669a423282cd">to_json</a> (<a class="el" href="namespaceppforest2.html#a9cf905b70cf6d7a781209394cac89000">BaggedTree</a> const &amp;tree, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:aba43c430d2f9f296ffd6669a423282cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26a9329d291c1f73cd79faa449e4025b" id="r_a26a9329d291c1f73cd79faa449e4025b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26a9329d291c1f73cd79faa449e4025b">to_json</a> (<a class="el" href="classppforest2_1_1Forest.html">Forest</a> const &amp;forest, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:a26a9329d291c1f73cd79faa449e4025b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aada508b80344c76f48a29d230514f78f" id="r_aada508b80344c76f48a29d230514f78f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aada508b80344c76f48a29d230514f78f">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ConfusionMatrix.html">stats::ConfusionMatrix</a> const &amp;cm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:aada508b80344c76f48a29d230514f78f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e09c58be4501c59ca5f9b07f8b4141d" id="r_a5e09c58be4501c59ca5f9b07f8b4141d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e09c58be4501c59ca5f9b07f8b4141d">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1ClassificationMetrics.html">stats::ClassificationMetrics</a> const &amp;cm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:a5e09c58be4501c59ca5f9b07f8b4141d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab63073be1fe8e331632b75e55f1be8c1" id="r_ab63073be1fe8e331632b75e55f1be8c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab63073be1fe8e331632b75e55f1be8c1">to_json</a> (<a class="el" href="structppforest2_1_1stats_1_1RegressionMetrics.html">stats::RegressionMetrics</a> const &amp;rm, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:ab63073be1fe8e331632b75e55f1be8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade32de3fdff2ac683c1832ce1aa44028" id="r_ade32de3fdff2ac683c1832ce1aa44028"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade32de3fdff2ac683c1832ce1aa44028">to_json</a> (<a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> const &amp;metrics, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:ade32de3fdff2ac683c1832ce1aa44028"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Optional serialization — &lt;tt&gt;nullopt&lt;/tt&gt; round-trips as JSON &lt;tt&gt;null&lt;/tt&gt;.</div></td></tr>
 <tr class="memitem:ae722498e99c388d06a5b36547aec4794" id="r_ae722498e99c388d06a5b36547aec4794"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae722498e99c388d06a5b36547aec4794">to_json</a> (std::optional&lt; <a class="el" href="structppforest2_1_1VariableImportance.html">VariableImportance</a> &gt; const &amp;vi)</td></tr>
 <tr class="separator:ae722498e99c388d06a5b36547aec4794"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22bb489428565fea6600fcc974b2774c" id="r_a22bb489428565fea6600fcc974b2774c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22bb489428565fea6600fcc974b2774c">to_json</a> (std::optional&lt; <a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> &gt; const &amp;metrics)</td></tr>
-<tr class="separator:a22bb489428565fea6600fcc974b2774c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa58de99cba9d6ec97b69e11cb2076fc" id="r_aaa58de99cba9d6ec97b69e11cb2076fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa58de99cba9d6ec97b69e11cb2076fc">to_json</a> (std::optional&lt; <a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> &gt; const &amp;metrics, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names)</td></tr>
-<tr class="separator:aaa58de99cba9d6ec97b69e11cb2076fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb50d3298849da2bfb79f2956948a406" id="r_adb50d3298849da2bfb79f2956948a406"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adb50d3298849da2bfb79f2956948a406">to_json</a> (std::optional&lt; <a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> &gt; const &amp;metrics, <a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;group_names={})</td></tr>
+<tr class="separator:adb50d3298849da2bfb79f2956948a406"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Deserialization</div></td></tr>
 <tr class="memitem:a21d88670ecb8e48528bbbe76612c2636" id="r_a21d88670ecb8e48528bbbe76612c2636"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a21d88670ecb8e48528bbbe76612c2636"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a21d88670ecb8e48528bbbe76612c2636">from_json</a> (<a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> const &amp;j)</td></tr>
@@ -654,25 +635,8 @@ template&lt;typename V&gt; </div>
 
 </div>
 </div>
-<a id="ad50b5ef7422f00b75482f0c8cc0c5e47" name="ad50b5ef7422f00b75482f0c8cc0c5e47"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad50b5ef7422f00b75482f0c8cc0c5e47">&#9670;&#160;</a></span>to_json() <span class="overload">[1/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespaceppforest2.html#a9cf905b70cf6d7a781209394cac89000">BaggedTree</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>tree</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aba43c430d2f9f296ffd6669a423282cd" name="aba43c430d2f9f296ffd6669a423282cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba43c430d2f9f296ffd6669a423282cd">&#9670;&#160;</a></span>to_json() <span class="overload">[2/24]</span></h2>
+<a id="ae9d1668c218573bb87b728283952ff0c" name="ae9d1668c218573bb87b728283952ff0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9d1668c218573bb87b728283952ff0c">&#9670;&#160;</a></span>to_json() <span class="overload">[1/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -685,32 +649,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a41ffcc97e8bfcbe007ad40fab6f881af" name="a41ffcc97e8bfcbe007ad40fab6f881af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41ffcc97e8bfcbe007ad40fab6f881af">&#9670;&#160;</a></span>to_json() <span class="overload">[3/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classppforest2_1_1Forest.html">Forest</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>forest</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a26a9329d291c1f73cd79faa449e4025b" name="a26a9329d291c1f73cd79faa449e4025b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26a9329d291c1f73cd79faa449e4025b">&#9670;&#160;</a></span>to_json() <span class="overload">[4/24]</span></h2>
+<a id="a92a47e2fa65671817a0a9f9f4d537377" name="a92a47e2fa65671817a0a9f9f4d537377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92a47e2fa65671817a0a9f9f4d537377">&#9670;&#160;</a></span>to_json() <span class="overload">[2/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -723,32 +670,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="aed68683cc910b1d7f69b8178f053227e" name="aed68683cc910b1d7f69b8178f053227e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed68683cc910b1d7f69b8178f053227e">&#9670;&#160;</a></span>to_json() <span class="overload">[5/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>metrics</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ade32de3fdff2ac683c1832ce1aa44028" name="ade32de3fdff2ac683c1832ce1aa44028"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ade32de3fdff2ac683c1832ce1aa44028">&#9670;&#160;</a></span>to_json() <span class="overload">[6/24]</span></h2>
+<a id="a9291c058106af098c8be5f31f7835fc4" name="a9291c058106af098c8be5f31f7835fc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9291c058106af098c8be5f31f7835fc4">&#9670;&#160;</a></span>to_json() <span class="overload">[3/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -761,32 +691,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="af24192eaa3c80420571a995b8b6148c2" name="af24192eaa3c80420571a995b8b6148c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af24192eaa3c80420571a995b8b6148c2">&#9670;&#160;</a></span>to_json() <span class="overload">[7/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classppforest2_1_1Model.html">Model</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>model</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a42aa3363b4e574f7dfdcaa3ececa1fc6" name="a42aa3363b4e574f7dfdcaa3ececa1fc6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42aa3363b4e574f7dfdcaa3ececa1fc6">&#9670;&#160;</a></span>to_json() <span class="overload">[8/24]</span></h2>
+<a id="a9409ccdc96a877cc5e5905326da0e5a3" name="a9409ccdc96a877cc5e5905326da0e5a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9409ccdc96a877cc5e5905326da0e5a3">&#9670;&#160;</a></span>to_json() <span class="overload">[4/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -799,32 +712,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="abb17e2228298f904002322719c17cf5c" name="abb17e2228298f904002322719c17cf5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abb17e2228298f904002322719c17cf5c">&#9670;&#160;</a></span>to_json() <span class="overload">[9/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structppforest2_1_1stats_1_1ClassificationMetrics.html">stats::ClassificationMetrics</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>cm</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5e09c58be4501c59ca5f9b07f8b4141d" name="a5e09c58be4501c59ca5f9b07f8b4141d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5e09c58be4501c59ca5f9b07f8b4141d">&#9670;&#160;</a></span>to_json() <span class="overload">[10/24]</span></h2>
+<a id="a01cba52c86eb7eac278667da8255e95b" name="a01cba52c86eb7eac278667da8255e95b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01cba52c86eb7eac278667da8255e95b">&#9670;&#160;</a></span>to_json() <span class="overload">[5/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -837,32 +733,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a000f8bc1055b4b8284c4a766a3aec16b" name="a000f8bc1055b4b8284c4a766a3aec16b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a000f8bc1055b4b8284c4a766a3aec16b">&#9670;&#160;</a></span>to_json() <span class="overload">[11/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structppforest2_1_1stats_1_1ConfusionMatrix.html">stats::ConfusionMatrix</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>cm</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aada508b80344c76f48a29d230514f78f" name="aada508b80344c76f48a29d230514f78f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aada508b80344c76f48a29d230514f78f">&#9670;&#160;</a></span>to_json() <span class="overload">[12/24]</span></h2>
+<a id="a5182f641a713978eec024d2a96dba0bc" name="a5182f641a713978eec024d2a96dba0bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5182f641a713978eec024d2a96dba0bc">&#9670;&#160;</a></span>to_json() <span class="overload">[6/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -875,32 +754,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a8fe50ebb416cf658a798137ec738b9c3" name="a8fe50ebb416cf658a798137ec738b9c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8fe50ebb416cf658a798137ec738b9c3">&#9670;&#160;</a></span>to_json() <span class="overload">[13/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structppforest2_1_1stats_1_1RegressionMetrics.html">stats::RegressionMetrics</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>rm</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ab63073be1fe8e331632b75e55f1be8c1" name="ab63073be1fe8e331632b75e55f1be8c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab63073be1fe8e331632b75e55f1be8c1">&#9670;&#160;</a></span>to_json() <span class="overload">[14/24]</span></h2>
+<a id="a2e824543c227a9471fb9804a62d4be52" name="a2e824543c227a9471fb9804a62d4be52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e824543c227a9471fb9804a62d4be52">&#9670;&#160;</a></span>to_json() <span class="overload">[7/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -913,32 +775,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a22bb489428565fea6600fcc974b2774c" name="a22bb489428565fea6600fcc974b2774c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22bb489428565fea6600fcc974b2774c">&#9670;&#160;</a></span>to_json() <span class="overload">[15/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype">std::optional&lt; <a class="el" href="#a4d41a399f2edea883d51995b9cba01b3">Metrics</a> &gt; const &amp;</td>          <td class="paramname"><span class="paramname"><em>metrics</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aaa58de99cba9d6ec97b69e11cb2076fc" name="aaa58de99cba9d6ec97b69e11cb2076fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa58de99cba9d6ec97b69e11cb2076fc">&#9670;&#160;</a></span>to_json() <span class="overload">[16/24]</span></h2>
+<a id="adb50d3298849da2bfb79f2956948a406" name="adb50d3298849da2bfb79f2956948a406"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb50d3298849da2bfb79f2956948a406">&#9670;&#160;</a></span>to_json() <span class="overload">[8/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -951,7 +796,7 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -959,7 +804,7 @@ template&lt;typename V&gt; </div>
 </div>
 </div>
 <a id="ae722498e99c388d06a5b36547aec4794" name="ae722498e99c388d06a5b36547aec4794"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae722498e99c388d06a5b36547aec4794">&#9670;&#160;</a></span>to_json() <span class="overload">[17/24]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae722498e99c388d06a5b36547aec4794">&#9670;&#160;</a></span>to_json() <span class="overload">[9/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -975,25 +820,8 @@ template&lt;typename V&gt; </div>
 
 </div>
 </div>
-<a id="af3bd60fa9fb5bd95b40cb74eeb6a68df" name="af3bd60fa9fb5bd95b40cb74eeb6a68df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3bd60fa9fb5bd95b40cb74eeb6a68df">&#9670;&#160;</a></span>to_json() <span class="overload">[18/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classppforest2_1_1Tree.html">Tree</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>tree</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a54e68235a824db26770a8964b8abf85f" name="a54e68235a824db26770a8964b8abf85f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54e68235a824db26770a8964b8abf85f">&#9670;&#160;</a></span>to_json() <span class="overload">[19/24]</span></h2>
+<a id="a0d3a4b3777332f1c526369d3375a4830" name="a0d3a4b3777332f1c526369d3375a4830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d3a4b3777332f1c526369d3375a4830">&#9670;&#160;</a></span>to_json() <span class="overload">[10/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1006,32 +834,15 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a05661f6f29fd6850a0d7f64c4b25e470" name="a05661f6f29fd6850a0d7f64c4b25e470"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05661f6f29fd6850a0d7f64c4b25e470">&#9670;&#160;</a></span>to_json() <span class="overload">[20/24]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#afced42a0b2c517da2664a9a849d90899">json</a> ppforest2::serialization::to_json </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classppforest2_1_1TreeNode.html">TreeNode</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a6b6f8351bab1da2f29bacc38cbd06bbb" name="a6b6f8351bab1da2f29bacc38cbd06bbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b6f8351bab1da2f29bacc38cbd06bbb">&#9670;&#160;</a></span>to_json() <span class="overload">[21/24]</span></h2>
+<a id="a5209171ad8665fa08e4734cb0e37250a" name="a5209171ad8665fa08e4734cb0e37250a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5209171ad8665fa08e4734cb0e37250a">&#9670;&#160;</a></span>to_json() <span class="overload">[11/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1044,7 +855,7 @@ template&lt;typename V&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a09eca2e12bf9f725e0e2cada774853fb">Names</a> const &amp;</td>          <td class="paramname"><span class="paramname"><em>group_names</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1052,7 +863,7 @@ template&lt;typename V&gt; </div>
 </div>
 </div>
 <a id="a6f5c70391e6831b723860f7fb878dba0" name="a6f5c70391e6831b723860f7fb878dba0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f5c70391e6831b723860f7fb878dba0">&#9670;&#160;</a></span>to_json() <span class="overload">[22/24]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f5c70391e6831b723860f7fb878dba0">&#9670;&#160;</a></span>to_json() <span class="overload">[12/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1069,7 +880,7 @@ template&lt;typename V&gt; </div>
 </div>
 </div>
 <a id="ab027fe7ed8f34af449430fa660c0f191" name="ab027fe7ed8f34af449430fa660c0f191"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab027fe7ed8f34af449430fa660c0f191">&#9670;&#160;</a></span>to_json() <span class="overload">[23/24]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab027fe7ed8f34af449430fa660c0f191">&#9670;&#160;</a></span>to_json() <span class="overload">[13/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1093,7 +904,7 @@ template&lt;typename V&gt; </div>
 </div>
 </div>
 <a id="a107afa7dd5edd4dffbb2d201dbda07b3" name="a107afa7dd5edd4dffbb2d201dbda07b3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a107afa7dd5edd4dffbb2d201dbda07b3">&#9670;&#160;</a></span>to_json() <span class="overload">[24/24]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a107afa7dd5edd4dffbb2d201dbda07b3">&#9670;&#160;</a></span>to_json() <span class="overload">[14/14]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

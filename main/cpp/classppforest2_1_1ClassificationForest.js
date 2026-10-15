@@ -17,6 +17,5 @@ var classppforest2_1_1ClassificationForest =
     [ "predict", "classppforest2_1_1ClassificationForest.html#a69384e42c1b00f1b0eb6308e9e7ffb38", null ],
     [ "predict", "classppforest2_1_1ClassificationForest.html#ae39e5a655259bb8094237db065dc7498", null ],
     [ "train", "classppforest2_1_1ClassificationForest.html#a9d3a6bf671921982bc9eb76439cd4ec4", null ],
-    [ "train_tree", "classppforest2_1_1ClassificationForest.html#adda42eafa19a0a1d86c5a7664a7a348c", null ],
     [ "groups", "classppforest2_1_1ClassificationForest.html#a312a26407bbe1efda0e87d283a6f2dbf", null ]
 ];

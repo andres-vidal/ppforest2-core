@@ -27,7 +27,7 @@ var searchData=
   ['boundaryvisitor_24',['BoundaryVisitor',['../classppforest2_1_1viz_1_1BoundaryVisitor.html',1,'ppforest2::viz']]],
   ['build_25',['build',['../classppforest2_1_1TrainingSpec_1_1Builder.html#a92a59e56cb4fca5d8eb1b0b612635f5d',1,'ppforest2::TrainingSpec::Builder']]],
   ['build_5froot_26',['build_root',['../classppforest2_1_1Tree.html#a9a790e2e7fa303f78d03b501a1752719',1,'ppforest2::Tree']]],
-  ['build_5ftrees_27',['build_trees',['../classppforest2_1_1Forest.html#a73e34a0a91de35b5e81ac824c65c2f71',1,'ppforest2::Forest']]],
+  ['build_5ftrees_27',['build_trees',['../classppforest2_1_1Forest.html#a28b7716bbf159246b6ce8fd828a74dfb',1,'ppforest2::Forest']]],
   ['builder_28',['Builder',['../classppforest2_1_1TrainingSpec_1_1Builder.html',1,'ppforest2::TrainingSpec::Builder'],['../classppforest2_1_1TrainingSpec_1_1Builder.html#a79893677e9e9c5d11f5781968917342f',1,'ppforest2::TrainingSpec::Builder::Builder()']]],
   ['builder_29',['builder',['../classppforest2_1_1TrainingSpec.html#a0d15223b3753409f955e66bc0ed92cc9',1,'ppforest2::TrainingSpec']]],
   ['by_5fcutpoint_30',['by_cutpoint',['../namespaceppforest2_1_1grouping.html#ac4c5c70963d9524f4b0a84be77f3c73d',1,'ppforest2::grouping']]],

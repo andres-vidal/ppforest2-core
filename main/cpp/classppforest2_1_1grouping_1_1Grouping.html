@@ -271,7 +271,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Create the initial GroupPartition from the training response. </p>
 <p>Caller must pre-sort rows so equal values (classification) or ascending response (regression) form contiguous blocks.</p>
-<p>Public NVI entry point: delegates to the subclass-provided <code>compute_init</code>, then asserts the partition's post-conditions — blocks rooted at row 0 and covering all of <code>y</code>. Downstream callers (e.g. stratified resampling in <code><a class="el" href="classppforest2_1_1ClassificationForest.html#adda42eafa19a0a1d86c5a7664a7a348c" title="Train one bagged tree on a bootstrap resample of x / y.">ClassificationForest::train_tree</a></code>) rely on those properties to safely reuse the parent partition over a resampled response. </p>
+<p>Public NVI entry point: delegates to the subclass-provided <code>compute_init</code>, then asserts the partition's post-conditions — blocks rooted at row 0 and covering all of <code>y</code>. Downstream callers (e.g. stratified resampling in <code><a class="el" href="classppforest2_1_1ClassificationForest.html#a9d3a6bf671921982bc9eb76439cd4ec4">ClassificationForest::train</a></code>) rely on those properties to safely reuse the parent partition over a resampled response. </p>
 
 </div>
 </div>
