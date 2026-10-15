@@ -16,15 +16,7 @@ namespace ppforest2 {
   namespace {
     /** @brief Uniform sample with replacement: n indices drawn from [0, n-1]. */
     std::vector<int> uniform_sample(int n, RNG& rng) {
-      std::vector<int> indices;
-      indices.reserve(n);
-
-      Uniform const unif(0, n - 1);
-
-      for (int j = 0; j < n; ++j) {
-        indices.push_back(unif(rng));
-      }
-
+      std::vector<int> indices = Uniform(0, n - 1)(n, rng);
       std::sort(indices.begin(), indices.end());
       return indices;
     }
