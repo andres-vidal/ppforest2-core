@@ -4,6 +4,10 @@
 
 - Core: predicting with a feature matrix or vector whose number of columns differs from the training data throws a `UserError` instead of computing projections out of bounds. This covers trees and forests in both modes, class proportions, out-of-bag prediction and the node data used for visualization. The CLI already checked the column count when reading CSV files.
 
+## Internal changes
+
+- Core: refactored the models, statistics, serialization and CLI code to remove duplicated serializers, mode-dispatch visitors, unused methods and avoidable copies. Model outputs, the JSON format and the API used by ppforest2-r are unchanged.
+
 # ppforest2 0.1.3
 
 ## New features
