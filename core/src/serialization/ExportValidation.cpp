@@ -47,7 +47,7 @@ namespace ppforest2::serialization {
     // Validate the `meta` block, cross-checking against the config mode.
     //
     // The schema is mode-homogeneous: `meta.groups` is always present, with
-    // shape dictated by `meta.mode`. For regression the value is `null`
+    // shape dictated by `config.mode`. For regression it is an empty array
     // (no group concept); for classification it must be a non-empty array
     // of strings. See `Export<Model::Ptr>::to_json` for the writer side.
     void validate_meta(JsonReader const& meta, std::string const& config_mode) {
