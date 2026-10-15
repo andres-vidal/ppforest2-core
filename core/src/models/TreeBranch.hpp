@@ -4,6 +4,8 @@
 #include "models/Projector.hpp"
 #include "utils/Types.hpp"
 
+#include <set>
+
 namespace ppforest2 {
   /**
    * @brief Internal split node in a projection pursuit tree.
@@ -41,9 +43,6 @@ namespace ppforest2 {
 
     void accept(TreeNode::Visitor& visitor) const override;
 
-    /** @brief Returns the response of the lower child. */
-    types::Outcome response() const override;
-
     /**
      * @brief Route an observation through this split.
      *
@@ -55,12 +54,7 @@ namespace ppforest2 {
      */
     types::Outcome predict(types::FeatureVector const& x) const override;
 
-    int group_count() const override { return static_cast<int>(groups.size()); }
-
-    std::set<types::GroupId> node_groups() const override { return groups; }
-
     bool equals(TreeNode const& other) const override;
-    TreeNode::Ptr clone() const override;
 
     /** @brief Factory method that returns a unique_ptr to a new TreeBranch. */
     static Ptr make(

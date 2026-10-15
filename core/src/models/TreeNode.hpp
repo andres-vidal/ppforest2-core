@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <set>
 
 #include "utils/Types.hpp"
 
@@ -52,24 +51,8 @@ namespace ppforest2 {
      */
     virtual types::Outcome predict(types::FeatureVector const& x) const = 0;
 
-    /** @brief The group label at this node (leaf value or majority group). */
-    virtual types::Outcome response() const = 0;
-
-    /**
-     * @brief Number of distinct groups reachable from this node.
-     */
-    virtual int group_count() const = 0;
-
-    /**
-     * @brief Sorted set of group labels reachable from this node.
-     */
-    virtual std::set<types::GroupId> node_groups() const = 0;
-
     /** @brief Structural equality comparison (value-based). */
     virtual bool equals(TreeNode const& other) const = 0;
-
-    /** @brief Deep copy of this node and its subtree. */
-    virtual Ptr clone() const = 0;
 
     bool operator==(TreeNode const& other) const;
     bool operator!=(TreeNode const& other) const;

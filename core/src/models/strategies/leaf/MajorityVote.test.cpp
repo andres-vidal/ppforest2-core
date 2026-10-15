@@ -3,6 +3,7 @@
 
 #include "models/strategies/leaf/MajorityVote.hpp"
 #include "models/strategies/leaf/LeafStrategy.hpp"
+#include "models/TreeLeaf.hpp"
 #include "test/NodeContextFixture.hpp"
 #include "utils/Types.hpp"
 #include "utils/Macros.hpp"
@@ -13,6 +14,12 @@ using namespace ppforest2::stats;
 using namespace ppforest2::test;
 using namespace ppforest2::types;
 using json = nlohmann::json;
+
+namespace {
+  Outcome leaf_value(TreeNode::Ptr const& node) {
+    return static_cast<TreeLeaf const&>(*node).value;
+  }
+}
 
 TEST(MajorityVoteLeaf, FromJsonValid) {
   json const j  = {{"name", "majority_vote"}};
@@ -55,7 +62,7 @@ TEST(MajorityVoteLeaf, SingleGroupReturnsIt) {
 
   ASSERT_NE(leaf, nullptr);
   EXPECT_TRUE(is_leaf(leaf));
-  EXPECT_EQ(leaf->response(), 2);
+  EXPECT_EQ(leaf_value(leaf), 2);
   EXPECT_FALSE(leaf->degenerate);
 }
 
@@ -65,7 +72,7 @@ TEST(MajorityVoteLeaf, MajorityGroupWins) {
   MajorityVote const mv;
   auto leaf = mv.create_leaf(f.ctx, f.rng);
 
-  EXPECT_EQ(leaf->response(), 0);
+  EXPECT_EQ(leaf_value(leaf), 0);
   EXPECT_FALSE(leaf->degenerate);
 }
 
@@ -77,7 +84,7 @@ TEST(MajorityVoteLeaf, TiedGroupsPicksSmallestLabel) {
 
   // On tie, iterating std::set<int> yields smallest first, which gets
   // majority_size first and subsequent ties don't replace it.
-  EXPECT_EQ(leaf->response(), 0);
+  EXPECT_EQ(leaf_value(leaf), 0);
 }
 
 TEST(MajorityVoteLeaf, ThreeGroupsMajorityWins) {
@@ -86,7 +93,7 @@ TEST(MajorityVoteLeaf, ThreeGroupsMajorityWins) {
   MajorityVote const mv;
   auto leaf = mv.create_leaf(f.ctx, f.rng);
 
-  EXPECT_EQ(leaf->response(), 1);
+  EXPECT_EQ(leaf_value(leaf), 1);
 }
 
 TEST(MajorityVoteLeaf, DisplayName) {

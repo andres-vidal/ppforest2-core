@@ -19,7 +19,6 @@ namespace ppforest2 {
     explicit TreeLeaf(types::Outcome value);
 
     void accept(TreeNode::Visitor& visitor) const override;
-    types::Outcome response() const override;
 
     /**
      * @brief Return the stored class label (ignores input).
@@ -29,12 +28,7 @@ namespace ppforest2 {
      */
     types::Outcome predict(types::FeatureVector const& x) const override;
 
-    int group_count() const override { return 1; }
-
-    std::set<types::GroupId> node_groups() const override { return {static_cast<types::GroupId>(value)}; }
-
     bool equals(TreeNode const& other) const override;
-    TreeNode::Ptr clone() const override;
 
     /** @brief Factory method that returns a unique_ptr to a new TreeLeaf. */
     static Ptr make(types::Outcome value);

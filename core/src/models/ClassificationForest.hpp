@@ -37,8 +37,8 @@ namespace ppforest2 {
      * Canonical column layout for `predict(FeatureMatrix, Proportions)`.
      * Populated at construction (training: from `y_part.groups`; JSON: from
      * `meta.groups` indices; R: from `forest$groups` names). Independent of
-     * any individual tree's `node_groups()` — a degenerate-retry tree with
-     * a narrower group set can't shrink the prediction matrix.
+     * the groups reachable in any individual tree — a degenerate-retry tree
+     * with a narrower group set can't shrink the prediction matrix.
      */
     Groups groups;
 

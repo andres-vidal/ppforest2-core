@@ -3,6 +3,7 @@
 
 #include "models/strategies/leaf/MeanResponse.hpp"
 #include "models/strategies/leaf/LeafStrategy.hpp"
+#include "models/TreeLeaf.hpp"
 #include "test/NodeContextFixture.hpp"
 #include "utils/Types.hpp"
 #include "utils/Macros.hpp"
@@ -13,6 +14,12 @@ using namespace ppforest2::stats;
 using namespace ppforest2::test;
 using namespace ppforest2::types;
 using json = nlohmann::json;
+
+namespace {
+  Outcome leaf_value(TreeNode::Ptr const& node) {
+    return static_cast<TreeLeaf const&>(*node).value;
+  }
+}
 
 TEST(MeanResponseLeaf, FromJsonValid) {
   json const j  = {{"name", "mean_response"}};
@@ -55,7 +62,7 @@ TEST(MeanResponseLeaf, MeanOfAllObservations) {
 
   ASSERT_NE(leaf, nullptr);
   EXPECT_TRUE(is_leaf(leaf));
-  EXPECT_FLOAT_EQ(static_cast<float>(leaf->response()), 4.0F);
+  EXPECT_FLOAT_EQ(static_cast<float>(leaf_value(leaf)), 4.0F);
 }
 
 TEST(MeanResponseLeaf, MeanOfSingleGroup) {
@@ -64,7 +71,7 @@ TEST(MeanResponseLeaf, MeanOfSingleGroup) {
   MeanResponse const mr;
   auto leaf = mr.create_leaf(f.ctx, f.rng);
 
-  EXPECT_FLOAT_EQ(static_cast<float>(leaf->response()), 4.0F);
+  EXPECT_FLOAT_EQ(static_cast<float>(leaf_value(leaf)), 4.0F);
 }
 
 TEST(MeanResponseLeaf, MeanOfSubset) {
@@ -82,5 +89,5 @@ TEST(MeanResponseLeaf, MeanOfSubset) {
   auto leaf = mr.create_leaf(f.ctx, f.rng);
 
   // Only group 0 observations (indices 0,1) → mean of 10.0 and 20.0 = 15.0
-  EXPECT_FLOAT_EQ(static_cast<float>(leaf->response()), 15.0F);
+  EXPECT_FLOAT_EQ(static_cast<float>(leaf_value(leaf)), 15.0F);
 }
