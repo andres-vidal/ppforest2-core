@@ -339,30 +339,25 @@ namespace ppforest2::serialization {
   }
 
   template<> void Export<Model::Ptr>::compute_metrics(types::FeatureMatrix const& x, types::OutcomeVector const& y) {
-    struct MetricsVisitor : Model::Visitor {
+    training_metrics = stats::metrics_from_outcomes(model->predict(x), y, model->training_spec->mode);
+
+    // Out-of-bag metrics take the concrete forest type, and variable
+    // importance differs between trees and forests.
+    struct Visitor : Model::Visitor {
       FeatureMatrix const& x;
       OutcomeVector const& y;
       int seed;
       Export<Model::Ptr>& self;
 
-      MetricsVisitor(FeatureMatrix const& x, OutcomeVector const& y, int seed, Export<Model::Ptr>& self)
+      Visitor(FeatureMatrix const& x, OutcomeVector const& y, int seed, Export<Model::Ptr>& self)
           : x(x)
           , y(y)
           , seed(seed)
           , self(self) {}
 
-      void visit(ClassificationTree const& tree) override {
-        self.training_metrics    = ClassificationMetrics(tree.predict(x).cast<GroupId>(), y.cast<GroupId>());
-        self.variable_importance = ppforest2::variable_importance(tree, x);
-      }
-
-      void visit(RegressionTree const& tree) override {
-        self.training_metrics    = RegressionMetrics(tree.predict(x), y);
-        self.variable_importance = ppforest2::variable_importance(tree, x);
-      }
+      void visit(Tree const& tree) override { self.variable_importance = ppforest2::variable_importance(tree, x); }
 
       void visit(ClassificationForest const& forest) override {
-        self.training_metrics = ClassificationMetrics(forest.predict(x).cast<GroupId>(), y.cast<GroupId>());
         if (auto m = ppforest2::oob_metrics(forest, x, y)) {
           self.oob_metrics = *m;
         }
@@ -370,7 +365,6 @@ namespace ppforest2::serialization {
       }
 
       void visit(RegressionForest const& forest) override {
-        self.training_metrics = RegressionMetrics(forest.predict(x), y);
         if (auto m = ppforest2::oob_metrics(forest, x, y)) {
           self.oob_metrics = *m;
         }
@@ -378,7 +372,7 @@ namespace ppforest2::serialization {
       }
     };
 
-    MetricsVisitor visitor(x, y, model->training_spec->seed, *this);
+    Visitor visitor(x, y, model->training_spec->seed, *this);
     model->accept(visitor);
   }
 }
