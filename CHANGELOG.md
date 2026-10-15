@@ -1,3 +1,9 @@
+# ppforest2 0.1.4
+
+## Bug fixes
+
+- Core: predicting with a feature matrix or vector whose number of columns differs from the training data throws a `UserError` instead of computing projections out of bounds. This covers trees and forests in both modes, class proportions, out-of-bag prediction and the node data used for visualization. The CLI already checked the column count when reading CSV files.
+
 # ppforest2 0.1.3
 
 ## New features

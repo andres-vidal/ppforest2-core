@@ -17,6 +17,7 @@
 #include "test/Projectors.hpp"
 #include "test/TestSpec.hpp"
 #include "utils/Macros.hpp"
+#include "utils/UserError.hpp"
 
 #include <cmath>
 
@@ -468,6 +469,13 @@ TEST(OOBPredict, HandBuiltTreeWithKnownOOB) {
   EXPECT_EQ(preds(3), 1) << "Row 3 OOB, x[0]=9.8 > 5";
   EXPECT_TRUE(std::isnan(preds(4))) << "Row 4 in bag";
   EXPECT_TRUE(std::isnan(preds(5))) << "Row 5 in bag";
+}
+
+TEST(OOBPredict, RejectsWrongFeatureCount) {
+  ClassificationForest const forest = single_split_forest({0, 1});
+  FeatureMatrix const x             = FeatureMatrix::Zero(4, 3);
+
+  EXPECT_THROW(oob_predict(forest, x), UserError);
 }
 
 TEST(OOBPredict, AllInBagReturnsSentinel) {

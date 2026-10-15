@@ -1,5 +1,6 @@
 #include "models/TreeBranch.hpp"
 #include "utils/Math.hpp"
+#include "utils/UserError.hpp"
 
 #include <stdexcept>
 #include <utility>
@@ -34,6 +35,15 @@ namespace ppforest2 {
   }
 
   Outcome TreeBranch::predict(FeatureVector const& x) const {
+    // The dot product does not check sizes when Eigen's assertions are off, so
+    // an observation with the wrong number of features would read out of
+    // bounds. This runs once per node for every row predicted, so the message
+    // is a constant rather than one built with the counts.
+    user_error(
+        x.size() == projector.size(),
+        "The observation has a different number of features from the data the model was trained on."
+    );
+
     Feature const projected = x.dot(projector);
 
     if (projected < cutpoint) {

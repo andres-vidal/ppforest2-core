@@ -8,6 +8,7 @@
 #include "models/TrainingSpec.hpp"
 #include "test/Projectors.hpp"
 #include "stats/Stats.hpp"
+#include "utils/UserError.hpp"
 
 using namespace ppforest2;
 using namespace ppforest2::stats;
@@ -324,4 +325,14 @@ TEST_F(VisualizationTest, PairwiseBoundaryAndRegions) {
       EXPECT_EQ(rv.regions.size(), 3U) << "Wrong region count for pair (" << i << ", " << j << ")";
     }
   }
+}
+
+TEST(VisualizationFeatureCount, NodeDataVisitorRejectsWrongFeatureCount) {
+  ClassificationTree const tree = test_tree();
+  FeatureMatrix const x         = FeatureMatrix::Zero(3, 2);
+  OutcomeVector const y         = OutcomeVector::Zero(3);
+
+  NodeDataVisitor visitor(x, y);
+
+  EXPECT_THROW(tree.root->accept(visitor), UserError);
 }

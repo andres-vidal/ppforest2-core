@@ -9,10 +9,19 @@
 #include "stats/Stats.hpp"
 #include "stats/Simulation.hpp"
 #include "utils/Macros.hpp"
+#include "utils/UserError.hpp"
+#include "models/Bagged.hpp"
+#include "models/RegressionForest.hpp"
+#include "models/RegressionTree.hpp"
+#include "models/TreeBranch.hpp"
+#include "models/TreeLeaf.hpp"
+#include "test/Projectors.hpp"
+#include "test/TestSpec.hpp"
 
 using namespace ppforest2;
 using namespace ppforest2::types;
 using namespace ppforest2::stats;
+using namespace ppforest2::test;
 // ---------------------------------------------------------------------------
 // RegressionForest tests
 // ---------------------------------------------------------------------------
@@ -307,4 +316,19 @@ TEST(RegressionForestEdgeCase, MinimalDataset) {
   for (Eigen::Index i = 0; i < predictions.size(); ++i) {
     EXPECT_TRUE(std::isfinite(predictions(i)));
   }
+}
+
+TEST(RegressionForest, PredictRejectsWrongFeatureCount) {
+  RegressionForest forest(test::regression_spec());
+  forest.add_tree(BaggedTree::make(
+      std::make_unique<RegressionTree>(
+          TreeBranch::make(as_projector({1.0F, 0.0F}), 0.5F, TreeLeaf::make(1.0F), TreeLeaf::make(2.0F)),
+          test::regression_spec()
+      ),
+      std::vector<int>{}
+  ));
+
+  FeatureMatrix const x = FeatureMatrix::Zero(3, 3);
+
+  EXPECT_THROW(forest.predict(x), UserError);
 }
