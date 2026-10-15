@@ -22,8 +22,6 @@ namespace ppforest2 {
     }
   }
 
-  RegressionForest::RegressionForest() = default;
-
   RegressionForest::RegressionForest(TrainingSpec::Ptr spec)
       : Forest(std::move(spec)) {
     invariant(this->training_spec != nullptr, "RegressionForest requires a non-null TrainingSpec");
@@ -33,14 +31,10 @@ namespace ppforest2 {
   RegressionForest::Ptr
   RegressionForest::train(TrainingSpec const& spec, FeatureMatrix const& x, OutcomeVector const& y) {
     invariant(is_regression(spec), "RegressionForest::train requires mode = Regression");
-
-    auto forest = std::make_unique<RegressionForest>(TrainingSpec::make(spec));
-    forest->build_trees(x, y);
-    return forest;
-  }
-
-  BaggedTree::Ptr RegressionForest::train_tree(FeatureMatrix const& x, OutcomeVector const& y, RNG& rng) const {
     invariant(y.size() == x.rows(), "Response size must match x.rows() for regression");
+
+    auto spec_ptr = TrainingSpec::make(spec);
+    auto forest   = std::make_unique<RegressionForest>(spec_ptr);
 
     // Bootstrap indices come back ascending from `uniform_sample`, and the
     // training pipeline guarantees `x` rows are y-sorted (CSV reader sorts;
@@ -51,15 +45,19 @@ namespace ppforest2 {
     // The `y_part` is rebuilt per bootstrap because each replicate has its
     // own median (contrast with ClassificationForest, which precomputes one
     // forest-level `y_part`).
-    std::vector<int> sample_indices = uniform_sample(static_cast<int>(x.rows()), rng);
-    FeatureMatrix sampled_x         = x(sample_indices, Eigen::indexing::all);
-    OutcomeVector sampled_y         = y(sample_indices, Eigen::indexing::all).eval();
+    forest->build_trees([&](RNG& rng) {
+      std::vector<int> sample_indices = uniform_sample(static_cast<int>(x.rows()), rng);
+      FeatureMatrix sampled_x         = x(sample_indices, Eigen::indexing::all);
+      OutcomeVector sampled_y         = y(sample_indices, Eigen::indexing::all).eval();
 
-    GroupPartition sampled_gp = this->training_spec->init_groups(sampled_y);
+      GroupPartition sampled_gp = spec_ptr->init_groups(sampled_y);
 
-    RegressionTree::Ptr tree = RegressionTree::train(*this->training_spec, sampled_x, sampled_y, sampled_gp, rng);
+      RegressionTree::Ptr tree = RegressionTree::train(*spec_ptr, sampled_x, sampled_y, sampled_gp, rng);
 
-    return BaggedTree::make(std::move(tree), std::move(sample_indices));
+      return BaggedTree::make(std::move(tree), std::move(sample_indices));
+    });
+
+    return forest;
   }
 
   Outcome RegressionForest::predict(FeatureVector const& x) const {

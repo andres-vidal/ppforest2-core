@@ -17,7 +17,7 @@ using namespace ppforest2::types;
 
 namespace ppforest2 {
 
-  void Forest::build_trees(FeatureMatrix const& x, OutcomeVector const& y) {
+  void Forest::build_trees(TrainTree const& train_tree) {
     invariant(this->training_spec != nullptr, "Forest::build_trees: must have training spec");
     invariant(training_spec->size > 0, "The forest size must be greater than 0.");
 
@@ -45,7 +45,7 @@ namespace ppforest2 {
           std::uint64_t const stream = i + attempt * size;
           RNG rng(seed, stream);
 
-          bags[i] = train_tree(x, y, rng);
+          bags[i] = train_tree(rng);
 
           if (!bags[i]->degenerate()) {
             break;

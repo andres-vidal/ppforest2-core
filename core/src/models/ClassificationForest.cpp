@@ -47,23 +47,17 @@ namespace ppforest2 {
 
     auto forest = std::make_unique<ClassificationForest>(spec_ptr, y_part.groups);
 
-    forest->y_part = &y_part;
-    forest->build_trees(x, y);
-    forest->y_part = nullptr;
+    forest->build_trees([&](RNG& rng) {
+      std::vector<int> sample_indices = stratified_sample(y_part, rng);
+      FeatureMatrix sampled_x         = x(sample_indices, Eigen::indexing::all);
+      OutcomeVector sampled_y         = y(sample_indices);
+
+      auto tree = ClassificationTree::train(*spec_ptr, sampled_x, sampled_y, y_part, rng);
+
+      return BaggedTree::make(std::move(tree), std::move(sample_indices));
+    });
 
     return forest;
-  }
-
-  BaggedTree::Ptr ClassificationForest::train_tree(FeatureMatrix const& x, OutcomeVector const& y, RNG& rng) const {
-    invariant(y_part != nullptr, "ClassificationForest::train_tree: y_part must be set by train()");
-
-    std::vector<int> sample_indices = stratified_sample(*y_part, rng);
-    FeatureMatrix sampled_x         = x(sample_indices, Eigen::indexing::all);
-    OutcomeVector sampled_y         = y(sample_indices);
-
-    auto tree = ClassificationTree::train(*this->training_spec, sampled_x, sampled_y, *y_part, rng);
-
-    return BaggedTree::make(std::move(tree), std::move(sample_indices));
   }
 
   Outcome ClassificationForest::predict(FeatureVector const& x) const {

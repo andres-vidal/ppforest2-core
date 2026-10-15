@@ -79,24 +79,5 @@ namespace ppforest2 {
     FeatureMatrix predict(FeatureMatrix const& x, Proportions, GroupIndices const& indices) const;
 
     void accept(Model::Visitor& visitor) const override;
-
-  protected:
-    BaggedTree::Ptr train_tree(FeatureMatrix const& x, OutcomeVector const& y, RNG& rng) const override;
-
-  private:
-    /**
-     * @brief Transient pointer to the parent's label partition.
-     *
-     * Set by `train` to a stack-local in its own frame just before
-     * `build_trees` runs, and cleared (via RAII) on return or unwind.
-     * Read by `train_tree` under the OMP loop. Outside that one call
-     * the pointer is `nullptr` — it never participates in the trained
-     * forest's identity (no JSON, no equality, no predict).
-     *
-     * Pointer (not value) because `GroupPartition` has `const` members;
-     * by-value storage would force `optional` plus move-construction
-     * gymnastics, and we don't want to own it anyway.
-     */
-    GroupPartition const* y_part = nullptr;
   };
 }
