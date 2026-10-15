@@ -11,7 +11,6 @@
 #include "utils/UserError.hpp"
 
 #include <CLI/CLI.hpp>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -46,12 +45,7 @@ namespace ppforest2::cli {
       auto model_export = model_data.get<serialization::Export<Model::Ptr>>();
       auto data         = io::csv::read(params.data_path, model_export.spec->mode);
 
-      user_error(
-          static_cast<int>(data.x.cols()) == model_export.n_features,
-          fmt::format(
-              "Data has {} feature column(s) but the model was trained with {}.", data.x.cols(), model_export.n_features
-          )
-      );
+      io::csv::check_feature_count(data, model_export.n_features);
 
       // Metrics must be computed in the model's label space and training row
       // order: remap the file's first-appearance label codes to the model's

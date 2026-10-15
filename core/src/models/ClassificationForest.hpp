@@ -37,8 +37,8 @@ namespace ppforest2 {
      * Canonical column layout for `predict(FeatureMatrix, Proportions)`.
      * Populated at construction (training: from `y_part.groups`; JSON: from
      * `meta.groups` indices; R: from `forest$groups` names). Independent of
-     * any individual tree's `node_groups()` — a degenerate-retry tree with
-     * a narrower group set can't shrink the prediction matrix.
+     * the groups reachable in any individual tree — a degenerate-retry tree
+     * with a narrower group set can't shrink the prediction matrix.
      */
     Groups groups;
 
@@ -79,24 +79,5 @@ namespace ppforest2 {
     FeatureMatrix predict(FeatureMatrix const& x, Proportions, GroupIndices const& indices) const;
 
     void accept(Model::Visitor& visitor) const override;
-
-  protected:
-    BaggedTree::Ptr train_tree(FeatureMatrix const& x, OutcomeVector const& y, RNG& rng) const override;
-
-  private:
-    /**
-     * @brief Transient pointer to the parent's label partition.
-     *
-     * Set by `train` to a stack-local in its own frame just before
-     * `build_trees` runs, and cleared (via RAII) on return or unwind.
-     * Read by `train_tree` under the OMP loop. Outside that one call
-     * the pointer is `nullptr` — it never participates in the trained
-     * forest's identity (no JSON, no equality, no predict).
-     *
-     * Pointer (not value) because `GroupPartition` has `const` members;
-     * by-value storage would force `optional` plus move-construction
-     * gymnastics, and we don't want to own it anyway.
-     */
-    GroupPartition const* y_part = nullptr;
   };
 }

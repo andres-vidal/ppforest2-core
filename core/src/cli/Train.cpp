@@ -98,14 +98,7 @@ namespace ppforest2::cli {
         {"max_retries", m.max_retries},
     });
 
-    // Per-call copies: `Model::train` may permute its inputs (regression's
-    // ByCutpoint sorts rows in place). Copying here keeps the caller's
-    // matrices intact so they can be reused across iterations / for
-    // post-train predictions.
-    FeatureMatrix x_local = x;
-    OutcomeVector y_local = y;
-
-    auto [model, ms] = io::measure_time_ms([&] { return Model::train(*spec, x_local, y_local); });
+    auto [model, ms] = io::measure_time_ms([&] { return Model::train(*spec, x, y); });
 
     return {std::move(model), ms};
   }

@@ -126,39 +126,30 @@ namespace ppforest2::serialization {
    */
   json to_json(types::OutcomeVector const& y, types::Names const& names);
 
-  /** @name Serialization */
+  /**
+   * @name Serialization
+   *
+   * With non-empty @p group_names, leaves, node groups and confusion-matrix
+   * labels are written as label strings instead of integer codes.
+   */
   ///@{
-  json to_json(Model const& model);
-  json to_json(TreeNode const& node);
-  json to_json(Tree const& tree);
-  json to_json(BaggedTree const& tree);
-  json to_json(Forest const& forest);
-  json to_json(stats::ConfusionMatrix const& cm);
-  json to_json(stats::ClassificationMetrics const& cm);
+  json to_json(Model const& model, Names const& group_names = {});
+  json to_json(TreeNode const& node, Names const& group_names = {});
+  json to_json(Tree const& tree, Names const& group_names = {});
+  json to_json(BaggedTree const& tree, Names const& group_names = {});
+  json to_json(Forest const& forest, Names const& group_names = {});
+  json to_json(stats::ConfusionMatrix const& cm, Names const& group_names = {});
+  json to_json(stats::ClassificationMetrics const& cm, Names const& group_names = {});
+  json to_json(stats::RegressionMetrics const& rm, Names const& group_names = {});
+  json to_json(Metrics const& metrics, Names const& group_names = {});
   json to_json(VariableImportance const& vi);
-  json to_json(stats::RegressionMetrics const& rm);
-  json to_json(Metrics const& metrics);
   json to_json(types::FeatureMatrix const& matrix);
-  ///@}
-
-  /** @name Labeled serialization (uses group names instead of integer codes) */
-  ///@{
-  json to_json(Model const& model, Names const& group_names);
-  json to_json(TreeNode const& node, Names const& group_names);
-  json to_json(Tree const& tree, Names const& group_names);
-  json to_json(BaggedTree const& tree, Names const& group_names);
-  json to_json(Forest const& forest, Names const& group_names);
-  json to_json(stats::ConfusionMatrix const& cm, Names const& group_names);
-  json to_json(stats::ClassificationMetrics const& cm, Names const& group_names);
-  json to_json(stats::RegressionMetrics const& rm, Names const& group_names);
-  json to_json(Metrics const& metrics, Names const& group_names);
   ///@}
 
   /** @name Optional serialization — `nullopt` round-trips as JSON `null`. */
   ///@{
   json to_json(std::optional<VariableImportance> const& vi);
-  json to_json(std::optional<Metrics> const& metrics);
-  json to_json(std::optional<Metrics> const& metrics, Names const& group_names);
+  json to_json(std::optional<Metrics> const& metrics, Names const& group_names = {});
   ///@}
 
   /** @name Deserialization */

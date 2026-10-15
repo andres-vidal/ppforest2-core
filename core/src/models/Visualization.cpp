@@ -7,6 +7,7 @@
  */
 
 #include "models/Visualization.hpp"
+#include "utils/RangeVector.hpp"
 #include "utils/UserError.hpp"
 
 #include <cmath>
@@ -34,14 +35,8 @@ namespace ppforest2::viz {
   NodeDataVisitor::NodeDataVisitor(types::FeatureMatrix const& x, types::OutcomeVector const& y)
       : x(x)
       , y(y)
-      , depth(0) {
-    // Initially all observations are routed through the root.
-    indices.resize(static_cast<std::size_t>(x.rows()));
-
-    for (int i = 0; i < x.rows(); ++i) {
-      indices[static_cast<std::size_t>(i)] = i;
-    }
-  }
+      , indices(utils::range_vector(x.rows()))
+      , depth(0) {}
 
   void NodeDataVisitor::visit(TreeBranch const& node) {
     user_error(

@@ -350,6 +350,13 @@ namespace ppforest2::io::csv {
     return read_impl(filename, mode);
   }
 
+  void check_feature_count(DataPacket const& data, int n_features) {
+    user_error(
+        static_cast<int>(data.x.cols()) == n_features,
+        fmt::format("Data has {} feature column(s) but the model was trained with {}.", data.x.cols(), n_features)
+    );
+  }
+
   OutcomeVector remap_labels(DataPacket const& data, types::Names const& target_groups) {
     std::unordered_map<std::string, int> target_codes;
     for (int i = 0; i < static_cast<int>(target_groups.size()); ++i) {

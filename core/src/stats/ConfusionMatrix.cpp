@@ -18,14 +18,7 @@ namespace ppforest2::stats {
     std::set<int> pred_set   = unique(y_pred);
     labels_set.insert(pred_set.begin(), pred_set.end());
 
-    std::map<int, int> labels_map;
-    int i = 0;
-
-    for (int label : labels_set) {
-      labels_map[label] = i++;
-    }
-
-    return labels_map;
+    return group_indices(labels_set);
   }
 
   ConfusionMatrix::ConfusionMatrix(GroupIdVector const& y_pred, GroupIdVector const& y)

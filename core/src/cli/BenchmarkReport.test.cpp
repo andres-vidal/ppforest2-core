@@ -82,7 +82,7 @@ TEST_F(BenchmarkReportTest, WriteCsv) {
   auto const result      = make_sample_result();
   std::string const path = (std::filesystem::temp_directory_path() / "ppforest2-test-report.csv").string();
 
-  ppforest2::io::text::write_file(result.to_csv(), path);
+  ppforest2::io::text::write_file(BenchmarkReport(result).to_csv(), path);
 
   std::ifstream file(path);
   ASSERT_TRUE(file.is_open());

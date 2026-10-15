@@ -21,7 +21,6 @@ namespace ppforest2 {
     using Outcome       = types::Outcome;
 
 
-    RegressionForest();
     explicit RegressionForest(TrainingSpec::Ptr spec);
 
     static Ptr train(TrainingSpec const& spec, FeatureMatrix const& x, OutcomeVector const& y);
@@ -29,8 +28,5 @@ namespace ppforest2 {
     types::Outcome predict(FeatureVector const& x) const override;
 
     void accept(Model::Visitor& visitor) const override;
-
-  protected:
-    BaggedTree::Ptr train_tree(FeatureMatrix const& x, OutcomeVector const& y, stats::RNG& rng) const override;
   };
 }

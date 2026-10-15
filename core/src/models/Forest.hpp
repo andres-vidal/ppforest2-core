@@ -5,6 +5,7 @@
 #include "models/Tree.hpp"
 #include "stats/Stats.hpp"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -77,22 +78,16 @@ namespace ppforest2 {
     bool operator!=(Forest const& other) const;
 
   protected:
-    Forest() = default;
     explicit Forest(TrainingSpec::Ptr spec) { training_spec = std::move(spec); };
 
     /**
-     * @brief Train one bagged tree on a bootstrap resample of @p x / @p y.
+     * @brief Trains one bagged tree, drawing its bootstrap sample from the
+     *        RNG it is given.
      *
-     * Mode-specific hook invoked by `build_trees` once per slot in the
-     * forest (with retries on degenerate trees). Subclasses that need
-     * per-training shared state (e.g. `ClassificationForest` caches the
-     * parent's label partition for stratified sampling) hold it as a
-     * private transient pointer set up before `build_trees` runs.
-     *
-     * Called from inside `build_trees`'s OpenMP parallel for, so
-     * implementations must be thread-safe and read-only over `*this`.
+     * Called from inside `build_trees`'s OpenMP parallel for, so it must
+     * be thread-safe and must only read what it captures.
      */
-    virtual BaggedTree::Ptr train_tree(FeatureMatrix const& x, OutcomeVector const& y, RNG& rng) const = 0;
+    using TrainTree = std::function<BaggedTree::Ptr(RNG& rng)>;
 
     /**
      * @brief Build `training_spec->size` bagged trees in parallel and
@@ -100,19 +95,17 @@ namespace ppforest2 {
      *
      * Shared training-loop scaffolding for `ClassificationForest::train`
      * and `RegressionForest::train`. The two only differ in how a single
-     * bagged tree is trained — the outer scaffolding (size guard, OpenMP
-     * setup, per-tree retry loop with stream-id RNG, error capture, the
-     * post-loop assembly with degenerate-flag propagation) is identical.
-     * Mirrors the `Tree::build_root` pattern: shared algorithm lives on
-     * the base; the concrete subclass provides the mode-specific work
-     * via the `train_tree` virtual hook.
+     * bagged tree is trained, which each passes in as @p train_tree; the
+     * outer scaffolding (size guard, OpenMP setup, per-tree retry loop with
+     * stream-id RNG, error capture, the post-loop assembly with
+     * degenerate-flag propagation) is shared.
      *
      * Each tree is trained using a RNG stream formula `i + attempt * size`,
      * which is load-bearing for reproducibility.
      *
-     * @throws Whatever `train_tree` threw. If multiple iterations threw,
+     * @throws Whatever @p train_tree threw. If multiple iterations threw,
      *         the first (lowest-index) exception is rethrown.
      */
-    void build_trees(types::FeatureMatrix const& x, types::OutcomeVector const& y);
+    void build_trees(TrainTree const& train_tree);
   };
 }

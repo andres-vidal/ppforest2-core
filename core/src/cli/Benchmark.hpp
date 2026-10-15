@@ -73,7 +73,6 @@ namespace ppforest2::cli {
     double total_time_ms = 0;
 
     nlohmann::json to_json() const;
-    std::string to_csv() const;
   };
 
   /**

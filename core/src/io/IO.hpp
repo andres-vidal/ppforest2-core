@@ -120,6 +120,13 @@ namespace ppforest2::io::csv {
   types::OutcomeVector remap_labels(stats::DataPacket const& data, types::Names const& target_groups);
 
   /**
+   * @brief Check that a data file has as many feature columns as a model.
+   *
+   * @throws UserError naming both counts when they differ.
+   */
+  void check_feature_count(stats::DataPacket const& data, int n_features);
+
+  /**
    * @brief Read a CSV file and sort rows ascending by the response column.
    *
    * Mode is detected from the y column's *written form*:

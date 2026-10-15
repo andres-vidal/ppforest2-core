@@ -13,10 +13,6 @@ namespace ppforest2 {
     visitor.visit(*this);
   }
 
-  Outcome TreeLeaf::response() const {
-    return value;
-  }
-
   Outcome TreeLeaf::predict(FeatureVector const& /*x*/) const {
     return value;
   }
@@ -35,10 +31,6 @@ namespace ppforest2 {
     EqualsVisitor visitor(value);
     other.accept(visitor);
     return visitor.result;
-  }
-
-  TreeNode::Ptr TreeLeaf::clone() const {
-    return std::make_unique<TreeLeaf>(*this);
   }
 
   TreeLeaf::Ptr TreeLeaf::make(Outcome value) {

@@ -103,14 +103,14 @@ namespace ppforest2 {
      * @brief Train a model from a training specification.
      *
      * Dispatches to Tree::train or Forest::train based on
-     * spec.is_forest().
+     * spec.is_forest(). The inputs are not modified.
      *
      * @param spec  Training specification.
      * @param x     Feature matrix (n × p).
      * @param y     Outcome vector (n).
      * @return      Trained model (Tree or Forest).
      */
-    static Ptr train(TrainingSpec const& spec, types::FeatureMatrix& x, types::OutcomeVector& y);
+    static Ptr train(TrainingSpec const& spec, types::FeatureMatrix const& x, types::OutcomeVector const& y);
 
     /**
      * @brief Validate common training inputs (y non-empty, matching x rows).

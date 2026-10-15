@@ -33,8 +33,8 @@ namespace ppforest2 {
      *
      * Canonical column layout for `predict(FeatureMatrix, Proportions)`.
      * Populated by `train` (from the parent's `y_part.groups`) and by
-     * the JSON deserializer (from `meta.groups`). Independent of
-     * `root->node_groups()` so that a stop/leaf combination producing a
+     * the JSON deserializer (from `meta.groups`). Independent of the
+     * groups reachable from the root, so that a stop/leaf combination producing a
      * single-leaf root doesn't shrink the prediction matrix relative to
      * what the model was trained for.
      */

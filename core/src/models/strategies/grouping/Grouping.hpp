@@ -39,7 +39,7 @@ namespace ppforest2::grouping {
      * Public NVI entry point: delegates to the subclass-provided
      * `compute_init`, then asserts the partition's post-conditions —
      * blocks rooted at row 0 and covering all of `y`. Downstream callers
-     * (e.g. stratified resampling in `ClassificationForest::train_tree`)
+     * (e.g. stratified resampling in `ClassificationForest::train`)
      * rely on those properties to safely reuse the parent partition over
      * a resampled response.
      */

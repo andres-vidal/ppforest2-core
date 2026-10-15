@@ -24,7 +24,7 @@ namespace ppforest2::grouping {
      * Uses `std::stable_partition`, so the relative order within each side
      * is preserved. When the input range is ascending in `continuous_y`
      * (the contract for ByCutpoint), each child's range is still ascending
-     * after this call — no follow-up sort is needed before `median_split`.
+     * after this call — no follow-up sort is needed before `range_partition`.
      */
     int partition_by_cutpoint(
         FeatureMatrix& x,
@@ -51,20 +51,21 @@ namespace ppforest2::grouping {
     }
 
     /**
-   * @brief Create a 2-group partition by median-splitting rows [start, end].
-   *
-   * Assumes rows are already sorted by continuous_y within this range.
-   * Group 0 gets the first half, group 1 gets the second half.
-   *
-   * Requires n >= 2 (caller must check).
-   */
-    GroupPartition median_split(int start, int end) {
-      int const n   = end - start + 1;
-      int const mid = n / 2;
+     * @brief Partition rows [start, end] for the next projection pursuit step.
+     *
+     * With at least 2 rows, splits them at the median into 2 groups: group 0
+     * gets the first half, group 1 the second half. Assumes the rows are
+     * already sorted by continuous_y within the range. With fewer than 2
+     * rows, returns a single group, which the stop rule turns into a leaf.
+     */
+    GroupPartition range_partition(int start, int end) {
+      int const n = end - start + 1;
 
-      invariant(n >= 2, "median_split requires at least 2 observations");
+      if (n < 2) {
+        return GroupPartition(start, end);
+      }
 
-      return GroupPartition(start, end).bisect(start + mid);
+      return GroupPartition(start, end).bisect(start + n / 2);
     }
   }
 
@@ -74,14 +75,7 @@ namespace ppforest2::grouping {
   }
 
   GroupPartition ByCutpoint::compute_init(OutcomeVector const& y) const {
-    int const n = static_cast<int>(y.size());
-
-    if (n < 2) {
-      return GroupPartition(0, n - 1);
-    }
-
-    int const mid = n / 2;
-    return GroupPartition(0, n - 1).bisect(mid);
+    return range_partition(0, static_cast<int>(y.size()) - 1);
   }
 
 
@@ -106,39 +100,21 @@ namespace ppforest2::grouping {
     int const right_n = node_end - mid + 1;
 
     // Edge case: all observations go to one side of the cutpoint. Write
-    // identical partitions for both children; the tree builder's no-progress
-    // guard (Tree::build_root) detects this and converts the node to a leaf.
-    if (left_n == 0) {
-      auto edge_y_part = right_n >= 2 ? median_split(mid, node_end) : GroupPartition(mid, node_end);
-      ctx.lower_y_part.emplace(edge_y_part);
-      ctx.upper_y_part.emplace(edge_y_part);
+    // identical partitions of the whole range for both children; the
+    // no-progress check in Grouping::split detects this and aborts the node.
+    if (left_n == 0 || right_n == 0) {
+      GroupPartition const whole = range_partition(node_start, node_end);
+      ctx.lower_y_part.emplace(whole);
+      ctx.upper_y_part.emplace(whole);
       return;
     }
 
-    if (right_n == 0) {
-      auto edge_y_part = left_n >= 2 ? median_split(node_start, node_end) : GroupPartition(node_start, node_end);
-      ctx.lower_y_part.emplace(edge_y_part);
-      ctx.upper_y_part.emplace(edge_y_part);
-      return;
-    }
-
-    // 2. Median-split each child into 2 groups (if enough observations).
-    // Children with < 2 observations get a single-group partition;
-    // the stop rule will turn them into leaves. `partition_by_cutpoint`
-    // uses `std::stable_partition`, so each child's range is still
-    // ascending in `continuous_y` (the parent range was, by contract).
-    auto make_child_partition = [](int start, int end) -> GroupPartition {
-      int const n = end - start + 1;
-
-      if (n < 2) {
-        return GroupPartition(start, end);
-      }
-
-      return median_split(start, end);
-    };
-
-    ctx.lower_y_part.emplace(make_child_partition(node_start, mid - 1));
-    ctx.upper_y_part.emplace(make_child_partition(mid, node_end));
+    // 2. Partition each child for its own projection pursuit step.
+    // `partition_by_cutpoint` uses `std::stable_partition`, so each child's
+    // range is still ascending in `continuous_y` (the parent range was, by
+    // contract).
+    ctx.lower_y_part.emplace(range_partition(node_start, mid - 1));
+    ctx.upper_y_part.emplace(range_partition(mid, node_end));
   }
 
   Grouping::Ptr by_cutpoint() {

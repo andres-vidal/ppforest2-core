@@ -65,12 +65,7 @@ namespace ppforest2::cli {
     // the response is parsed.
     DataPacket const data = io::csv::read(params.data_path, mode);
 
-    user_error(
-        static_cast<int>(data.x.cols()) == exported.n_features,
-        fmt::format(
-            "Data has {} feature column(s) but the model was trained with {}.", data.x.cols(), exported.n_features
-        )
-    );
+    io::csv::check_feature_count(data, exported.n_features);
 
     auto const& model      = *exported.model;
     auto const predictions = model.predict(data.x);

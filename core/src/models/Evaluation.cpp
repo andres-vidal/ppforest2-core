@@ -2,11 +2,9 @@
 
 #include "models/Bagged.hpp"
 #include "models/ClassificationForest.hpp"
-#include "models/ClassificationTree.hpp"
 #include "models/Forest.hpp"
 #include "models/Model.hpp"
 #include "models/RegressionForest.hpp"
-#include "models/RegressionTree.hpp"
 #include "models/Tree.hpp"
 #include "models/VIVisitor.hpp"
 #include "stats/Metrics.hpp"
@@ -65,15 +63,13 @@ namespace ppforest2 {
 
       std::vector<std::vector<Outcome>> per_row(static_cast<std::size_t>(n_total));
 
-      for (auto const& bag_ptr : forest.trees) {
-        BaggedTree const& bag    = *bag_ptr;
-        std::vector<int> oob_idx = bag.oob_indices(n_total);
-        OutcomeVector preds      = bag.predict_oob(x, oob_idx);
+      for_each_bag_with_oob(forest.trees, n_total, [&](BaggedTree const& bag, std::vector<int> const& oob_idx, int) {
+        OutcomeVector const preds = bag.predict_oob(x, oob_idx);
 
         for (int j = 0; j < static_cast<int>(oob_idx.size()); ++j) {
           per_row[static_cast<std::size_t>(oob_idx[static_cast<std::size_t>(j)])].push_back(preds(j));
         }
-      }
+      });
 
       OOBPredictions out;
       out.rows.reserve(static_cast<std::size_t>(n_total));
@@ -291,67 +287,27 @@ namespace ppforest2 {
   }
 
   FeatureVector vi_permuted(Forest const& forest, FeatureMatrix const& x, OutcomeVector const& y, int seed) {
-    struct Visitor : Model::Visitor {
-      FeatureMatrix const& x;
-      OutcomeVector const& y;
-      int seed;
-      FeatureVector result;
-
-      Visitor(FeatureMatrix const& x, OutcomeVector const& y, int seed)
-          : x(x)
-          , y(y)
-          , seed(seed) {}
-
-      void visit(Forest const&) override {
-        throw UserError("vi_permuted: unknown forest mode (expected classification or regression).");
-      }
-      void visit(ClassificationForest const& forest) override {
-        result = vi_permuted_with(forest, x, y, seed, accuracy_baseline, accuracy_delta);
-      }
-      void visit(RegressionForest const& forest) override {
-        result = vi_permuted_with(forest, x, y, seed, nmse_baseline, nmse_delta);
-      }
-    };
-
-    Visitor visitor(x, y, seed);
-    forest.accept(visitor);
-    return std::move(visitor.result);
+    if (is_regression(forest)) {
+      return vi_permuted_with(forest, x, y, seed, nmse_baseline, nmse_delta);
+    } else {
+      return vi_permuted_with(forest, x, y, seed, accuracy_baseline, accuracy_delta);
+    }
   }
 
   FeatureVector vi_weighted_projections(
       Forest const& forest, FeatureMatrix const& x, OutcomeVector const& y, FeatureVector const* scale
   ) {
-    struct Visitor : Model::Visitor {
-      FeatureMatrix const& x;
-      OutcomeVector const& y;
-      FeatureVector const* scale;
-      FeatureVector result;
-
-      Visitor(FeatureMatrix const& x, OutcomeVector const& y, FeatureVector const* scale)
-          : x(x)
-          , y(y)
-          , scale(scale) {}
-
-      void visit(Forest const&) override {
-        throw UserError("vi_weighted_projections: unknown forest mode (expected classification or regression).");
-      }
-      void visit(ClassificationForest const& forest) override {
-        // The (G - 1) factor in the denominator subtracts the random-classifier
-        // baseline implicitly: a classifier predicting at random has error rate
-        // (G - 1) / G, so its weight `1 - error_rate` is `1/G`, and the (G - 1)
-        // scale lifts informative trees relative to that floor.
-        GroupIdVector const y_int  = y.cast<GroupId>();
-        Feature const group_factor = static_cast<Feature>(stats::unique(y_int).size() - 1);
-        result                     = vi_weighted_projections_with(forest, x, y, scale, accuracy_weight, group_factor);
-      }
-      void visit(RegressionForest const& forest) override {
-        result = vi_weighted_projections_with(forest, x, y, scale, nmse_clipped_weight, Feature(1));
-      }
-    };
-
-    Visitor visitor(x, y, scale);
-    forest.accept(visitor);
-    return std::move(visitor.result);
+    if (is_regression(forest)) {
+      return vi_weighted_projections_with(forest, x, y, scale, nmse_clipped_weight, Feature(1));
+    } else {
+      // The (G - 1) factor in the denominator subtracts the random-classifier
+      // baseline implicitly: a classifier predicting at random has error rate
+      // (G - 1) / G, so its weight `1 - error_rate` is `1/G`, and the (G - 1)
+      // scale lifts informative trees relative to that floor.
+      GroupIdVector const y_int  = y.cast<GroupId>();
+      Feature const group_factor = static_cast<Feature>(stats::unique(y_int).size() - 1);
+      return vi_weighted_projections_with(forest, x, y, scale, accuracy_weight, group_factor);
+    }
   }
 
   VariableImportance variable_importance(Tree const& tree, FeatureMatrix const& x) {
@@ -389,36 +345,14 @@ namespace ppforest2 {
   //     which worked but required a separate filter path on every caller;
   //     unifying on `NaN` lets callers use `std::isnan` regardless of mode.)
   OutcomeVector oob_predict(Forest const& forest, FeatureMatrix const& x) {
-    struct Visitor : Model::Visitor {
-      FeatureMatrix const& x;
-      OutcomeVector result;
+    OOBPredictions const oob = oob_predictions_with(forest, x, is_regression(forest) ? mean : majority_vote);
 
-      explicit Visitor(FeatureMatrix const& x)
-          : x(x) {}
-
-      void visit(Forest const&) override {
-        throw UserError("oob_predict: unknown forest mode (expected classification or regression).");
-      }
-      void visit(ClassificationForest const& forest) override {
-        result = scatter(oob_predictions_with(forest, x, majority_vote), x.rows());
-      }
-      void visit(RegressionForest const& forest) override {
-        result = scatter(oob_predictions_with(forest, x, mean), x.rows());
-      }
-
-      static OutcomeVector scatter(OOBPredictions const& oob, Eigen::Index n) {
-        OutcomeVector out(n);
-        out.fill(std::numeric_limits<Outcome>::quiet_NaN());
-        for (int k = 0; k < static_cast<int>(oob.rows.size()); ++k) {
-          out(oob.rows[static_cast<std::size_t>(k)]) = oob.predictions(k);
-        }
-        return out;
-      }
-    };
-
-    Visitor visitor(x);
-    forest.accept(visitor);
-    return std::move(visitor.result);
+    OutcomeVector out(x.rows());
+    out.fill(std::numeric_limits<Outcome>::quiet_NaN());
+    for (int k = 0; k < static_cast<int>(oob.rows.size()); ++k) {
+      out(oob.rows[static_cast<std::size_t>(k)]) = oob.predictions(k);
+    }
+    return out;
   }
 
   ClassificationMetrics::Maybe
@@ -458,9 +392,6 @@ namespace ppforest2 {
           : x(x)
           , y(y) {}
 
-      void visit(Forest const&) override {
-        throw UserError("oob_error: unknown forest mode (expected classification or regression).");
-      }
       void visit(ClassificationForest const& forest) override {
         if (auto m = oob_metrics(forest, x, y)) {
           result = m->error_rate();
@@ -483,29 +414,7 @@ namespace ppforest2 {
   }
 
   double error(Model const& model, FeatureMatrix const& x, OutcomeVector const& y) {
-    struct Visitor : Model::Visitor {
-      FeatureMatrix const& x;
-      OutcomeVector const& y;
-      double result = 0.0;
-
-      Visitor(FeatureMatrix const& x, OutcomeVector const& y)
-          : x(x)
-          , y(y) {}
-
-      void visit(Tree const&) override {
-        throw UserError("error: unknown model mode (expected classification or regression).");
-      }
-      void visit(Forest const&) override {
-        throw UserError("error: unknown model mode (expected classification or regression).");
-      }
-      void visit(ClassificationTree const& m) override { result = stats::error_rate(m.predict(x), y); }
-      void visit(ClassificationForest const& m) override { result = stats::error_rate(m.predict(x), y); }
-      void visit(RegressionTree const& m) override { result = stats::mse(m.predict(x), y); }
-      void visit(RegressionForest const& m) override { result = stats::mse(m.predict(x), y); }
-    };
-
-    Visitor visitor(x, y);
-    model.accept(visitor);
-    return visitor.result;
+    OutcomeVector const predictions = model.predict(x);
+    return is_regression(model) ? stats::mse(predictions, y) : stats::error_rate(predictions, y);
   }
 }

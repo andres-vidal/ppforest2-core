@@ -2,7 +2,6 @@
 #include "utils/Math.hpp"
 #include "utils/UserError.hpp"
 
-#include <stdexcept>
 #include <utility>
 
 using namespace ppforest2::types;
@@ -28,10 +27,6 @@ namespace ppforest2 {
 
   void TreeBranch::accept(TreeNode::Visitor& visitor) const {
     visitor.visit(*this);
-  }
-
-  Outcome TreeBranch::response() const {
-    throw std::invalid_argument("Cannot get response from a condition node");
   }
 
   Outcome TreeBranch::predict(FeatureVector const& x) const {
@@ -75,10 +70,6 @@ namespace ppforest2 {
     EqualsVisitor visitor(*this);
     other.accept(visitor);
     return visitor.result;
-  }
-
-  TreeNode::Ptr TreeBranch::clone() const {
-    return make(projector, cutpoint, lower->clone(), upper->clone(), groups, pp_index_value);
   }
 
   TreeBranch::Ptr TreeBranch::make(
