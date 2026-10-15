@@ -22,16 +22,16 @@ namespace ppforest2 {
     visit(static_cast<Forest const&>(forest));
   }
 
-  Model::Ptr Model::train(TrainingSpec const& spec, types::FeatureMatrix& x, types::OutcomeVector& y) {
-    Model::Ptr model;
-
+  Model::Ptr Model::train(TrainingSpec const& spec, types::FeatureMatrix const& x, types::OutcomeVector const& y) {
     if (spec.is_forest()) {
-      model = std::shared_ptr<Forest>(Forest::train(spec, x, y).release());
-    } else {
-      model = std::shared_ptr<Tree>(Tree::train(spec, x, y).release());
+      return Forest::train(spec, x, y);
     }
 
-    return model;
+    // Tree training may reorder the rows of its inputs (regression's
+    // ByCutpoint sorts them in place), so it works on copies.
+    types::FeatureMatrix x_copy = x;
+    types::OutcomeVector y_copy = y;
+    return Tree::train(spec, x_copy, y_copy);
   }
 
   void Model::check_train_inputs(types::FeatureMatrix const& x, types::OutcomeVector const& y) {

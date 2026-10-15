@@ -37,11 +37,10 @@ namespace ppforest2 {
       Feature pp_index_value = 0;
       Projector projector;
 
-      Step(GroupPartition const& y, TreeNode::Ptr* node, int const cols, int depth = 0)
+      Step(GroupPartition const& y, TreeNode::Ptr* node, int depth = 0)
           : y(y)
           , node(node)
-          , depth(depth)
-          , projector(Projector::Zero(cols)) {}
+          , depth(depth) {}
     };
 
     void push_children(
@@ -49,15 +48,14 @@ namespace ppforest2 {
         NodeContext const& ctx,
         GroupPartition const& lower_y_part,
         GroupPartition const& upper_y_part,
-        FeatureMatrix const& x,
         std::stack<Step>& stack
     ) {
       step.projector      = ctx.projector.value();
       step.cutpoint       = ctx.cutpoint.value();
       step.pp_index_value = ctx.pp_index_value.value();
 
-      stack.emplace(lower_y_part, &step.lower, x.cols(), step.depth + 1);
-      stack.emplace(upper_y_part, &step.upper, x.cols(), step.depth + 1);
+      stack.emplace(lower_y_part, &step.lower, step.depth + 1);
+      stack.emplace(upper_y_part, &step.upper, step.depth + 1);
 
       step.pop = true;
     }
@@ -70,14 +68,14 @@ namespace ppforest2 {
 
     TreeNode::Ptr root;
 
-    stack.emplace(y_part, &root, x.cols());
+    stack.emplace(y_part, &root);
 
     while (!stack.empty()) {
       Step& step = stack.top();
 
       if (step.pop) {
         *step.node = TreeBranch::make(
-            step.projector,
+            std::move(step.projector),
             step.cutpoint,
             std::move(step.lower),
             std::move(step.upper),
@@ -113,7 +111,7 @@ namespace ppforest2 {
         continue;
       }
 
-      push_children(step, ctx, ctx.lower_y_part.value(), ctx.upper_y_part.value(), x, stack);
+      push_children(step, ctx, ctx.lower_y_part.value(), ctx.upper_y_part.value(), stack);
     }
 
     return root;
