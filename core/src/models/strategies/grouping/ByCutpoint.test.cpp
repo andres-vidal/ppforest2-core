@@ -224,7 +224,7 @@ TEST(ByCutpoint, SplitProducesSingleGroupForSmallChild) {
 
   ASSERT_TRUE(f.ctx.lower_y_part.has_value());
   ASSERT_TRUE(f.ctx.upper_y_part.has_value());
-  // Lower child has just 1 row → single_group (1 group). Upper has 3 rows → median_split (2 groups).
+  // The lower child has 1 row, so it stays one group. The upper child has 3 rows, split at the median into 2 groups.
   EXPECT_EQ(f.ctx.lower_y_part->groups.size(), 1U); // NOLINT(bugprone-unchecked-optional-access)
   EXPECT_EQ(f.ctx.upper_y_part->groups.size(), 2U); // NOLINT(bugprone-unchecked-optional-access)
 }
