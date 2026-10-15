@@ -11,7 +11,6 @@
 #include "cli/Train.hpp"
 #include "io/Color.hpp"
 #include "io/IO.hpp"
-#include "utils/UserError.hpp"
 
 #include <fmt/format.h>
 
@@ -53,12 +52,9 @@ int main(int argc, char* argv[]) {
 
       default: fmt::print(stderr, "Error: No subcommand specified\n"); return 1;
     }
-  } catch (ppforest2::UserError const& e) {
-    fmt::print(stderr, "Error: {}\n", e.what());
-    return 1;
   } catch (std::exception const& e) {
-    // Backstop: anything not already translated into a UserError closer to
-    // its source. Bad input must never escape as a raw exception — that
+    // Covers UserError, and anything not already translated into one closer
+    // to its source. Bad input must never escape as a raw exception — that
     // aborts via std::terminate with no usable message.
     fmt::print(stderr, "Error: {}\n", e.what());
     return 1;

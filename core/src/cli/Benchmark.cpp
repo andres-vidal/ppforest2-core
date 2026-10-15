@@ -187,35 +187,6 @@ namespace ppforest2::cli {
     return j;
   }
 
-  std::string SuiteResult::to_csv() const {
-    std::string csv;
-
-    csv += "scenario,n,p,g,trees,vars,train_ratio,runs,mean_time_ms,std_time_ms,"
-           "mean_train_error,mean_test_error,peak_rss_mb,scenario_time_ms\n";
-
-    for (auto const& r : results) {
-      csv += fmt::format(
-          "{},{},{},{},{},{:.2f},{:.2f},{},{:.2f},{:.2f},{:.4f},{:.4f},{:.1f},{:.0f}\n",
-          r.name,
-          r.n,
-          r.p,
-          r.g,
-          r.size,
-          r.p_vars.value_or(0),
-          r.train_ratio,
-          r.runs,
-          r.mean_time_ms,
-          r.std_time_ms,
-          r.mean_tr_error,
-          r.mean_te_error,
-          r.peak_rss_mb.value_or(-1.0),
-          r.scenario_time_ms
-      );
-    }
-
-    return csv;
-  }
-
   /**
    * @brief Run a command and return its exit code.
    *

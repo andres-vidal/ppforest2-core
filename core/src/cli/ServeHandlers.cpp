@@ -90,18 +90,6 @@ namespace ppforest2::cli::serve {
       }
       return dst;
     }
-
-    json proportions_to_json(types::FeatureMatrix const& probs) {
-      json arr = json::array();
-      for (Eigen::Index i = 0; i < probs.rows(); ++i) {
-        json row = json::array();
-        for (Eigen::Index j = 0; j < probs.cols(); ++j) {
-          row.push_back(probs(i, j));
-        }
-        arr.push_back(std::move(row));
-      }
-      return arr;
-    }
   }
 
   // PredictionStore ---------------------------------------------------------
@@ -648,7 +636,7 @@ namespace ppforest2::cli::serve {
     json body;
     body["predictions"] = serialization::to_json(result.predictions, loaded.group_names);
     if (types::is_classification(loaded.mode)) {
-      body["proportions"] = proportions_to_json(result.proportions);
+      body["proportions"] = result.proportions;
     }
     if (result.metrics) {
       body["metrics"] = serialization::to_json(*result.metrics, loaded.group_names);
