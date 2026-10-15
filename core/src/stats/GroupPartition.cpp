@@ -19,8 +19,6 @@ namespace ppforest2::stats {
 
         if (i != 0) {
           Group prev        = y(i - 1);
-          blocks[curr].prev = prev;
-          blocks[prev].next = curr;
           blocks[prev].end  = i - 1;
           blocks[prev].size = i - blocks[prev].start;
         }
@@ -69,12 +67,6 @@ namespace ppforest2::stats {
 
   GroupPartition::GroupPartition(BlockMap const& blocks, GroupMap const& supergroups_)
       : groups(utils::values(supergroups_))
-      , supergroups(supergroups_)
-      , subgroups(utils::invert(supergroups))
-      , blocks(blocks) {}
-
-  GroupPartition::GroupPartition(BlockMap const& blocks, GroupSet const& groups_, GroupMap const& supergroups_)
-      : groups(groups_)
       , supergroups(supergroups_)
       , subgroups(utils::invert(supergroups))
       , blocks(blocks) {}
@@ -137,18 +129,9 @@ namespace ppforest2::stats {
 
   GroupPartition GroupPartition::subset(GroupSet const& groups) const {
     BlockMap subset_blocks;
-    std::optional<Group> prev;
 
     for (auto const& g : groups) {
-      Block block = {blocks.at(g).start, blocks.at(g).end, blocks.at(g).size};
-
-      if (prev) {
-        block.prev                   = prev;
-        subset_blocks.at(*prev).next = g;
-      }
-
-      subset_blocks[g] = block;
-      prev             = g;
+      subset_blocks[g] = blocks.at(g);
     }
 
     return GroupPartition(subset_blocks, groups);
@@ -179,7 +162,7 @@ namespace ppforest2::stats {
       : GroupPartition([&] {
         invariant(start >= 0 && end >= start, "GroupPartition(start, end): invalid range");
         BlockMap blocks;
-        blocks[0] = Block{start, end, end - start + 1, std::nullopt, std::nullopt};
+        blocks[0] = Block{start, end, end - start + 1};
         return blocks;
       }()) {}
 
@@ -191,8 +174,8 @@ namespace ppforest2::stats {
     invariant(start < mid && mid <= end, "GroupPartition::bisect: mid must be in (start, end]");
 
     BlockMap split_blocks;
-    split_blocks[0] = Block{start, mid - 1, mid - start, 1, std::nullopt};
-    split_blocks[1] = Block{mid, end, end - mid + 1, std::nullopt, 0};
+    split_blocks[0] = Block{start, mid - 1, mid - start};
+    split_blocks[1] = Block{mid, end, end - mid + 1};
 
     return GroupPartition(split_blocks);
   }

@@ -5,7 +5,6 @@
 #include "utils/Invariant.hpp"
 
 #include <map>
-#include <optional>
 #include <set>
 #include <vector>
 #include <Eigen/Dense>
@@ -122,18 +121,11 @@ namespace ppforest2::stats {
        * @return       Block expression over the rows of @p group.
        */
     template<typename Derived> auto group(Eigen::MatrixBase<Derived> const& x, Group const& group) const {
-      std::vector<int> indices;
-
-      auto const& subs = this->subgroups.at(group);
-
-      for (auto const& g : subs) {
-        for (int i = group_start(g); i <= group_end(g); ++i) {
-          invariant(i >= 0 && i < x.rows(), "GroupPartition::group: index out of bounds");
-          indices.push_back(i);
-        }
+      for (auto const& g : this->subgroups.at(group)) {
+        invariant(group_start(g) >= 0 && group_end(g) < x.rows(), "GroupPartition::group: index out of bounds");
       }
 
-      return x(indices, Eigen::indexing::all);
+      return x(indices_of(group), Eigen::indexing::all);
     }
 
     /**
@@ -146,16 +138,7 @@ namespace ppforest2::stats {
        * Eigen's product evaluator (fixed in GCC 15).
        */
     Eigen::VectorXi group_indices(Group const& group) const {
-      std::vector<int> indices;
-
-      auto const& subs = this->subgroups.at(group);
-
-      for (auto const& g : subs) {
-        for (int i = group_start(g); i <= group_end(g); ++i) {
-          indices.push_back(i);
-        }
-      }
-
+      std::vector<int> const indices = indices_of(group);
       return Eigen::VectorXi::Map(indices.data(), static_cast<Eigen::Index>(indices.size()));
     }
 
@@ -167,6 +150,7 @@ namespace ppforest2::stats {
        */
     template<typename Derived> auto data(Eigen::MatrixBase<Derived> const& x) const {
       std::vector<int> indices;
+      indices.reserve(static_cast<std::size_t>(total_size()));
 
       for (auto const& kv : blocks) {
         auto const& g = kv.first;
@@ -235,11 +219,9 @@ namespace ppforest2::stats {
 
   private:
     struct Block {
-      int start                          = 0;
-      int end                            = 0;
-      int size                           = 0;
-      std::optional<types::GroupId> next = std::nullopt;
-      std::optional<types::GroupId> prev = std::nullopt;
+      int start = 0;
+      int end   = 0;
+      int size  = 0;
     };
 
     using BlockMap = std::map<types::GroupId, Block>;
@@ -254,6 +236,23 @@ namespace ppforest2::stats {
 
     GroupPartition(BlockMap const& blocks, GroupMap const& supergroups);
 
-    GroupPartition(BlockMap const& blocks, GroupSet const& groups, GroupMap const& supergroups);
+    /** @brief Row indices of a group (or supergroup), in block order. */
+    std::vector<int> indices_of(Group const& group) const {
+      auto const& subs = this->subgroups.at(group);
+
+      std::size_t total = 0;
+      for (auto const& g : subs) {
+        total += static_cast<std::size_t>(group_end(g) - group_start(g) + 1);
+      }
+
+      std::vector<int> indices;
+      indices.reserve(total);
+      for (auto const& g : subs) {
+        for (int i = group_start(g); i <= group_end(g); ++i) {
+          indices.push_back(i);
+        }
+      }
+      return indices;
+    }
   };
 }
