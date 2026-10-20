@@ -59,13 +59,12 @@ jobs:
               });
             }
 
-      - name: Update coverage badge
-        if: github.ref == 'refs/heads/main'
-        uses: schneegans/dynamic-badges-action@v1.9.0
+      # Fails on pushes to main, and on PRs when the token is available, so a
+      # broken upload is not silently ignored.
+      - uses: codecov/codecov-action@v7
         with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ vars.COVERAGE_GIST_ID }}
-          filename: ppforest2-coverage.json
-          label: LOC Coverage
-          message: ${{ steps.report.outputs.line_pct }}%
-          color: brightgreen
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          files: .coverage/coverage-filtered.info
+          plugins: noop
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
