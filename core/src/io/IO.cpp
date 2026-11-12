@@ -181,39 +181,59 @@ namespace ppforest2::io::csv {
     // stray "NA", an empty cell, a "nan"/"inf") — silently integer-encoding
     // the whole column would destroy its numeric values, so reject it with
     // the first offending cell named.
-    std::vector<bool> is_categorical(RawRows const& raw, int n_features, types::Names const& feature_names) {
-      std::vector<bool> res(static_cast<std::size_t>(n_features), false);
+    bool is_categorical(RawRows const& raw, int col, std::string const& name) {
+      bool any_numeric  = false;
+      int offending_row = -1;
+      std::string offending_cell;
 
-      for (int j = 0; j < n_features; ++j) {
-        bool any_numeric  = false;
-        int offending_row = -1;
-        std::string offending_cell;
-
-        for (int i = 0; i < static_cast<int>(raw.values.size()); ++i) {
-          auto const& cell = at(at(raw.values, i), j);
-          if (is_numeric(cell)) {
-            any_numeric = true;
-          } else if (offending_row < 0) {
-            offending_row  = i;
-            offending_cell = cell;
-          }
+      for (int i = 0; i < static_cast<int>(raw.values.size()); ++i) {
+        auto const& cell = at(at(raw.values, i), col);
+        if (is_numeric(cell)) {
+          any_numeric = true;
+        } else if (offending_row < 0) {
+          offending_row  = i;
+          offending_cell = cell;
         }
-
-        user_error(
-            !(any_numeric && offending_row >= 0),
-            fmt::format(
-                "Column '{}' mixes numeric and non-numeric values (row {} has '{}'). Missing or non-finite cells "
-                "are not supported — clean the data, or make the column fully categorical.",
-                at(feature_names, j),
-                offending_row + 1,
-                offending_cell
-            )
-        );
-
-        at(res, j) = offending_row >= 0;
       }
 
-      return res;
+      user_error(
+          !(any_numeric && offending_row >= 0),
+          fmt::format(
+              "Column '{}' mixes numeric and non-numeric values (row {} has '{}'). Missing or non-finite cells "
+              "are not supported — clean the data, or make the column fully categorical.",
+              name,
+              offending_row + 1,
+              offending_cell
+          )
+      );
+
+      return offending_row >= 0;
+    }
+
+    // Converts CSV column `columns[j]` into column j of a feature matrix:
+    // numeric columns are parsed, categorical ones integer-encoded in
+    // first-appearance order. `names` holds the header names, indexed by CSV
+    // column, for error messages.
+    FeatureMatrix encode_features(RawRows const& raw, std::vector<int> const& columns, types::Names const& names) {
+      int const n = static_cast<int>(raw.values.size());
+      FeatureMatrix x(n, static_cast<int>(columns.size()));
+
+      for (int j = 0; j < static_cast<int>(columns.size()); ++j) {
+        int const col = at(columns, j);
+
+        if (is_categorical(raw, col, at(names, col))) {
+          CategoricalEncoder encoder;
+          for (int i = 0; i < n; ++i) {
+            x(i, j) = encoder.encode(at(at(raw.values, i), col));
+          }
+        } else {
+          for (int i = 0; i < n; ++i) {
+            x(i, j) = std::stof(at(at(raw.values, i), col));
+          }
+        }
+      }
+
+      return x;
     }
 
     // Auto-detect regression: any y value with fractional / scientific
@@ -249,23 +269,17 @@ namespace ppforest2::io::csv {
       int const n          = static_cast<int>(raw.values.size());
 
       auto const _is_classification = mode ? types::is_classification(*mode) : is_classification(raw);
-      auto const _is_categorical    = is_categorical(raw, n_features, feature_names);
 
-      std::vector<CategoricalEncoder> encoders(static_cast<std::size_t>(n_features));
-      FeatureMatrix x(n, n_features);
+      std::vector<int> feature_columns(static_cast<std::size_t>(n_features));
+      std::iota(feature_columns.begin(), feature_columns.end(), 0);
+      FeatureMatrix x = encode_features(raw, feature_columns, feature_names);
+
       OutcomeVector y(n);
       types::Names group_names;
       std::unordered_map<std::string, int> label_mapping;
 
       for (int i = 0; i < n; ++i) {
-        auto const& row = at(raw.values, i);
-
-        for (int j = 0; j < n_features; ++j) {
-          auto const& val = at(row, j);
-          x(i, j)         = at(_is_categorical, j) ? at(encoders, j).encode(val) : std::stof(val);
-        }
-
-        auto const& y_str = at(row, y_col);
+        auto const& y_str = at(at(raw.values, i), y_col);
 
         if (_is_classification) {
           y(i) = encode_classification_y(y_str, group_names, label_mapping);
@@ -301,39 +315,14 @@ namespace ppforest2::io::csv {
       return encode_rows(raw, std::move(feature_names), mode);
     }
 
-    // Encodes every column of a CSV to predict on, as training data is
-    // encoded: numeric columns are parsed, categorical ones integer-encoded
-    // in first-appearance order. `names` holds the header names, for error
-    // messages; the caller picks the model's features out of the result.
-    FeatureMatrix encode_features(RawRows const& raw, types::Names const& names) {
-      int const n_cols = raw.n_cols;
-      int const n      = static_cast<int>(raw.values.size());
-
-      auto const _is_categorical = is_categorical(raw, n_cols, names);
-
-      std::vector<CategoricalEncoder> encoders(static_cast<std::size_t>(n_cols));
-      FeatureMatrix x(n, n_cols);
-
-      for (int i = 0; i < n; ++i) {
-        auto const& row = at(raw.values, i);
-
-        for (int j = 0; j < n_cols; ++j) {
-          auto const& val = at(row, j);
-          x(i, j)         = at(_is_categorical, j) ? at(encoders, j).encode(val) : std::stof(val);
-        }
-      }
-
-      return x;
-    }
-
     // -----------------------------------------------------------------------
     // Prediction data
     //
-    // A file to predict on is matched against the model by its header, which
-    // decides which columns are the model's features and which one, if any,
-    // is the response. Every column is encoded, as in training data, and the
-    // features are then taken in the model's order; the response also keeps
-    // its text until the caller parses it against the model's labels.
+    // A file to predict on is matched against the model before anything is
+    // converted: the header decides which columns are the model's features
+    // and which one, if any, is the response. Only the features are encoded;
+    // the response keeps its text until the caller parses it against the
+    // model's labels, and any other column is never converted.
     // -----------------------------------------------------------------------
 
     // Which CSV columns hold the model's features, in the model's column
@@ -408,15 +397,6 @@ namespace ppforest2::io::csv {
       return match;
     }
 
-    // Column j of the result is column `columns[j]` of @p x.
-    FeatureMatrix select_columns(FeatureMatrix const& x, std::vector<int> const& columns) {
-      FeatureMatrix selected(x.rows(), static_cast<int>(columns.size()));
-      for (int j = 0; j < static_cast<int>(columns.size()); ++j) {
-        selected.col(j) = x.col(at(columns, j));
-      }
-      return selected;
-    }
-
     PredictionData read_prediction_csv(::csv::CSVReader& reader, types::Names const& feature_names, int n_features) {
       auto const col_names = reader.get_col_names();
       user_error(!col_names.empty(), "CSV header must have at least 1 column");
@@ -431,7 +411,7 @@ namespace ppforest2::io::csv {
       user_error(!raw.values.empty(), "CSV has no data rows");
 
       PredictionData data;
-      data.x = select_columns(encode_features(raw, header), match.features);
+      data.x = encode_features(raw, match.features, header);
 
       if (match.response) {
         ResponseColumn response{at(header, *match.response), {}};

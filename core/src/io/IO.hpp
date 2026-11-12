@@ -207,10 +207,9 @@ namespace ppforest2::io::csv {
    *   are matched by position: the file has the @p n_features feature
    *   columns, and no response, or one more column, the response.
    *
-   * Rows keep their file order. Every column is converted with the same
-   * rules as `read`, so one mixing numbers and text is an error even when it
-   * is not a feature. Categorical features are integer-encoded per file, so
-   * their values must encode the same way as in the training data.
+   * Rows keep their file order. Only the feature columns are converted,
+   * with the same rules as `read`; categorical ones are integer-encoded per
+   * file, so their values must encode the same way as in the training data.
    *
    * `predict` reads files with this function and `serve` reads request
    * bodies with `read_prediction_data_from_string`, so both match columns
