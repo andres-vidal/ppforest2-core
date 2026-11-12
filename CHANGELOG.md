@@ -1,3 +1,10 @@
+# ppforest2 0.1.5
+
+## Bug fixes
+
+- CLI: `predict` accepts data without a response column. It read the last column as the response whatever the data held, so a CSV with only the model's features failed with `Data has 4 feature column(s) but the model was trained with 5`, even with `--no-metrics`. It now matches columns to the model's features with the same code `serve` uses for a request: by name, in any order, with the last column that is not a feature read as the response and reported with metrics; data without one is predicted without metrics, and a missing feature is an error that names it. A model saved without feature names takes the columns by position, with the response optionally after the features. `--no-metrics` no longer parses the response column, and without metrics or `--output`, `predict` reports how many observations it predicted instead of printing nothing.
+- CLI: `serve` reads a response column after the features of a model saved without feature names, and adds metrics for it, instead of rejecting the request with a 400. A regression response is parsed with the rules used for training data, so a value such as `12abc` leaves out the metrics instead of counting as 12.
+
 # ppforest2 0.1.4
 
 ## Bug fixes

@@ -95,6 +95,44 @@ TEST_F(ServeHandlersClassificationTest, PredictUnnamedModelPositionalColumnsWork
   EXPECT_EQ(r.status, 200);
   auto body = json::parse(r.body);
   EXPECT_EQ(body.at("predictions").size(), 1U);
+  EXPECT_FALSE(body.contains("metrics"));
+}
+
+/* For an unnamed model, one column more than the training feature count is
+ * the response, as `predict` reads it: the response gains metrics. */
+TEST_F(ServeHandlersClassificationTest, PredictUnnamedModelLastExtraColumnIsResponse) {
+  auto mj                     = json::parse(model_->read());
+  mj["meta"]["feature_names"] = json::array();
+  TempFile const stripped;
+  {
+    std::ofstream out(stripped.path());
+    out << mj.dump();
+  }
+  auto const loaded = load_from_file(stripped.path());
+
+  Response const r = handle_predict(loaded, store, "a,b,c,d,e\n5.1,3.5,1.4,0.2,setosa\n6.7,3.0,5.2,2.3,virginica\n");
+  ASSERT_EQ(r.status, 200);
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  ASSERT_TRUE(body.contains("metrics"));
+  EXPECT_TRUE(body.at("metrics").contains("error_rate"));
+}
+
+/* Unlike `predict`, which fails, a request whose response column doesn't
+ * parse as the model's response (an ID column, say) still gets predictions,
+ * just no metrics. */
+TEST_F(ServeHandlersClassificationTest, PredictUnparseableResponseOmitsMetrics) {
+  auto const loaded = load_from_file(model_->path());
+
+  std::string const csv = "id,Sepal.Length,Sepal.Width,Petal.Length,Petal.Width\n"
+                          "1,5.1,3.5,1.4,0.2\n"
+                          "2,6.7,3.0,5.2,2.3\n";
+
+  Response const r = handle_predict(loaded, store, csv);
+  ASSERT_EQ(r.status, 200);
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  EXPECT_FALSE(body.contains("metrics"));
 }
 
 TEST_F(ServeHandlersClassificationTest, SummarizeOmitsModelField) {
