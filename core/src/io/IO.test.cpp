@@ -338,28 +338,193 @@ TEST(FileHelpers, CheckFileExistsOnNonexistent) {
   EXPECT_THROW(io::check_file_exists("/nonexistent/path.csv"), ppforest2::UserError);
 }
 
-/* read_features_from_string parses a feature-only CSV body. */
-TEST(ReadFeaturesFromString, ParsesNumericCsv) {
-  auto set = io::csv::read_features_from_string("a,b,c\n1.0,2.0,3.0\n4.0,5.0,6.0\n");
+// ---------------------------------------------------------------------------
+// read_prediction_data — columns matched to a model's features
+// ---------------------------------------------------------------------------
 
-  ASSERT_EQ(set.feature_names.size(), 3U);
-  EXPECT_EQ(set.feature_names[0], "a");
-  EXPECT_EQ(set.feature_names[2], "c");
+namespace {
+  types::Names const FEATURES = {"a", "b", "c"};
 
-  ASSERT_EQ(set.x.rows(), 2);
-  ASSERT_EQ(set.x.cols(), 3);
-  EXPECT_FLOAT_EQ(set.x(0, 0), 1.0F);
-  EXPECT_FLOAT_EQ(set.x(1, 2), 6.0F);
+  // The message of the UserError @p f throws, or "" if it throws none.
+  template<typename F> std::string user_error_message(F&& f) {
+    try {
+      f();
+    } catch (UserError const& e) {
+      return e.what();
+    }
+    return "";
+  }
 }
 
-TEST(ReadFeaturesFromString, EmptyBodyThrows) {
-  EXPECT_THROW(io::csv::read_features_from_string(""), ppforest2::UserError);
+/* Only the model's features: no response, and x follows the model's column
+ * order whatever the order in the file. */
+TEST(ReadPredictionData, MatchesFeaturesByName) {
+  auto const data = io::csv::read_prediction_data_from_string("c,a,b\n3,1,2\n6,4,5\n", FEATURES, 3);
+
+  ASSERT_EQ(data.x.rows(), 2);
+  ASSERT_EQ(data.x.cols(), 3);
+  EXPECT_FLOAT_EQ(data.x(0, 0), 1.0F);
+  EXPECT_FLOAT_EQ(data.x(0, 1), 2.0F);
+  EXPECT_FLOAT_EQ(data.x(0, 2), 3.0F);
+  EXPECT_FLOAT_EQ(data.x(1, 2), 6.0F);
+  EXPECT_FALSE(data.response.has_value());
 }
 
-TEST(ReadFeaturesFromString, HeaderOnlyThrows) {
-  EXPECT_THROW(io::csv::read_features_from_string("a,b,c\n"), ppforest2::UserError);
+/* One column more than the features: it is the response, kept as text. */
+TEST(ReadPredictionData, ExtraColumnIsTheResponse) {
+  auto const data = io::csv::read_prediction_data_from_string("a,b,c,y\n1,2,3,x\n4,5,6,z\n", FEATURES, 3);
+
+  ASSERT_EQ(data.x.cols(), 3);
+  ASSERT_TRUE(data.response.has_value());
+  EXPECT_EQ(data.response->name, "y");
+  EXPECT_EQ(data.response->values, (std::vector<std::string>{"x", "z"}));
 }
 
-TEST(ReadFeaturesFromString, RaggedRowsThrow) {
-  EXPECT_THROW(io::csv::read_features_from_string("a,b,c\n1,2,3\n4,5\n"), ppforest2::UserError);
+/* With several columns that are not features, the last one is the response
+ * and the others are ignored. */
+TEST(ReadPredictionData, LastNonFeatureColumnIsTheResponse) {
+  auto const data =
+      io::csv::read_prediction_data_from_string("id,b,a,notes,c,y\n7,2,1,low,3,x\n8,5,4,high,6,z\n", FEATURES, 3);
+
+  EXPECT_FLOAT_EQ(data.x(1, 0), 4.0F);
+  EXPECT_FLOAT_EQ(data.x(1, 1), 5.0F);
+  EXPECT_FLOAT_EQ(data.x(1, 2), 6.0F);
+  ASSERT_TRUE(data.response.has_value());
+  EXPECT_EQ(data.response->name, "y");
+}
+
+/* A feature column is converted with the same rules as training data: a mix
+ * of numeric and non-numeric cells is an error. */
+TEST(ReadPredictionData, MixedFeatureColumnThrows) {
+  auto const message =
+      user_error_message([] { io::csv::read_prediction_data_from_string("a,b,c\n1,2,3\nNA,5,6\n", FEATURES, 3); });
+  EXPECT_NE(message.find("Column 'a'"), std::string::npos) << message;
+}
+
+/* A feature missing from the header is an error naming it. */
+TEST(ReadPredictionData, MissingFeatureThrows) {
+  auto const message =
+      user_error_message([] { io::csv::read_prediction_data_from_string("a,c,y\n1,3,x\n", FEATURES, 3); });
+  EXPECT_NE(message.find("missing [b]"), std::string::npos) << message;
+}
+
+/* Without feature names, as many columns as features are taken by position,
+ * whatever the header says, and there is no response. */
+TEST(ReadPredictionData, UnnamedModelTakesColumnsByPosition) {
+  auto const data = io::csv::read_prediction_data_from_string("p,q\n1,2\n3,4\n", {}, 2);
+
+  ASSERT_EQ(data.x.cols(), 2);
+  EXPECT_FLOAT_EQ(data.x(0, 0), 1.0F);
+  EXPECT_FLOAT_EQ(data.x(1, 1), 4.0F);
+  EXPECT_FALSE(data.response.has_value());
+}
+
+/* Without feature names, one column more than the features is the response. */
+TEST(ReadPredictionData, UnnamedModelLastExtraColumnIsTheResponse) {
+  auto const data = io::csv::read_prediction_data_from_string("p,q,r\n1,2,x\n3,4,z\n", {}, 2);
+
+  ASSERT_EQ(data.x.cols(), 2);
+  EXPECT_FLOAT_EQ(data.x(1, 1), 4.0F);
+  ASSERT_TRUE(data.response.has_value());
+  EXPECT_EQ(data.response->name, "r");
+  EXPECT_EQ(data.response->values, (std::vector<std::string>{"x", "z"}));
+}
+
+/* Without feature names, any other column count is an error stating the
+ * expected one. */
+TEST(ReadPredictionData, UnnamedModelWrongColumnCountThrows) {
+  auto const fewer = user_error_message([] { io::csv::read_prediction_data_from_string("p\n1\n", {}, 2); });
+  EXPECT_NE(fewer.find("2 feature column(s)"), std::string::npos) << fewer;
+  EXPECT_NE(fewer.find("got 1"), std::string::npos) << fewer;
+
+  auto const more = user_error_message([] { io::csv::read_prediction_data_from_string("p,q,r,s\n1,2,3,4\n", {}, 2); });
+  EXPECT_NE(more.find("got 4"), std::string::npos) << more;
+}
+
+/* The file reader matches columns the same way: iris.csv carries its
+ * response, Type, after the features. */
+TEST(ReadPredictionData, ReadsFile) {
+  types::Names const iris_features = {"Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"};
+  auto const data                  = io::csv::read_prediction_data(IRIS_PATH, iris_features, 4);
+
+  EXPECT_EQ(data.x.rows(), 150);
+  EXPECT_EQ(data.x.cols(), 4);
+  EXPECT_FLOAT_EQ(data.x(0, 0), 5.1F);
+  ASSERT_TRUE(data.response.has_value());
+  EXPECT_EQ(data.response->name, "Type");
+  EXPECT_EQ(data.response->values.front(), "setosa");
+}
+
+TEST(ReadPredictionData, EmptyBodyThrows) {
+  EXPECT_THROW(io::csv::read_prediction_data_from_string("", FEATURES, 3), UserError);
+}
+
+TEST(ReadPredictionData, HeaderOnlyThrows) {
+  EXPECT_THROW(io::csv::read_prediction_data_from_string("a,b,c\n", FEATURES, 3), UserError);
+}
+
+TEST(ReadPredictionData, RaggedRowsThrow) {
+  EXPECT_THROW(io::csv::read_prediction_data_from_string("a,b,c\n1,2,3\n4,5\n", FEATURES, 3), UserError);
+}
+
+TEST(ReadPredictionData, EmptyFileThrows) {
+  io::TempFile tmp(".csv");
+  write_csv(tmp.path(), "");
+
+  EXPECT_THROW(io::csv::read_prediction_data(tmp.path(), FEATURES, 3), UserError);
+}
+
+// ---------------------------------------------------------------------------
+// parse_response — a response column in the model's outcome space
+// ---------------------------------------------------------------------------
+
+/* Labels become indices into the model's labels, whatever order the data
+ * lists them in. */
+TEST(ParseResponse, ClassificationUsesModelLabelOrder) {
+  io::csv::ResponseColumn const response{"y", {"b", "a", "b"}};
+
+  auto const y = io::csv::parse_response(response, types::Mode::Classification, {"a", "b"});
+
+  ASSERT_EQ(y.size(), 3);
+  EXPECT_EQ(y(0), 1);
+  EXPECT_EQ(y(1), 0);
+  EXPECT_EQ(y(2), 1);
+}
+
+/* A label the model wasn't trained on is an error naming it and its column. */
+TEST(ParseResponse, UnknownLabelThrows) {
+  io::csv::ResponseColumn const response{"y", {"a", "c"}};
+
+  auto const message =
+      user_error_message([&] { io::csv::parse_response(response, types::Mode::Classification, {"a", "b"}); });
+  EXPECT_NE(message.find("'c'"), std::string::npos) << message;
+  EXPECT_NE(message.find("column 'y'"), std::string::npos) << message;
+  EXPECT_NE(message.find("row 2"), std::string::npos) << message;
+}
+
+TEST(ParseResponse, RegressionParsesNumbers) {
+  io::csv::ResponseColumn const response{"y", {"1.5", "2", "-3e2"}};
+
+  auto const y = io::csv::parse_response(response, types::Mode::Regression, {});
+
+  ASSERT_EQ(y.size(), 3);
+  EXPECT_FLOAT_EQ(y(0), 1.5F);
+  EXPECT_FLOAT_EQ(y(1), 2.0F);
+  EXPECT_FLOAT_EQ(y(2), -300.0F);
+}
+
+TEST(ParseResponse, RegressionNonNumericThrows) {
+  io::csv::ResponseColumn const response{"y", {"1.5", "NA"}};
+
+  auto const message = user_error_message([&] { io::csv::parse_response(response, types::Mode::Regression, {}); });
+  EXPECT_NE(message.find("'NA'"), std::string::npos) << message;
+  EXPECT_NE(message.find("not numeric"), std::string::npos) << message;
+}
+
+/* A number beyond float's range is a UserError, not a stray std::out_of_range
+ * (`serve` only catches UserError to omit metrics). */
+TEST(ParseResponse, RegressionOutOfRangeThrowsUserError) {
+  io::csv::ResponseColumn const response{"y", {"1e300"}};
+
+  EXPECT_THROW(io::csv::parse_response(response, types::Mode::Regression, {}), UserError);
 }

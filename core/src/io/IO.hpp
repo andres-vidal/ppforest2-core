@@ -9,7 +9,9 @@
 #include "utils/Invariant.hpp"
 
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace ppforest2::io {
   using ErrorHandler = void (*)(bool, std::string const&);
@@ -170,30 +172,75 @@ namespace ppforest2::io::csv {
   void write(stats::DataPacket const& data, std::string const& filename);
 
   /**
-   * @brief Result of parsing a feature-only CSV (no response column).
-   *
-   * `raw_rows[i][j]` is the original text of the j-th column on row i. It is
-   * kept around so callers can inspect columns that aren't part of the model
-   * (e.g. a response column carried over from training data, used to compute
-   * metrics on /predict).
+   * @brief The response column of a data file, with its values as written.
    */
-  struct FeatureSet {
-    types::FeatureMatrix x;
-    types::Names feature_names;
-    std::vector<std::vector<std::string>> raw_rows;
+  struct ResponseColumn {
+    /** @brief Header name of the column. */
+    std::string name;
+    /** @brief The value on each row, unparsed. */
+    std::vector<std::string> values;
   };
 
   /**
-   * @brief Parse a feature-only CSV from an in-memory string.
+   * @brief Data to predict on, with its columns matched to a model's features.
    *
-   * The first row is the header (feature names); every subsequent row is one
-   * observation. There is no response column. Used by the `serve` subcommand
-   * to parse `POST /predict` request bodies — categorical encoding runs
-   * per-call, so callers must encode categoricals consistently with the
-   * training data.
-   *
-   * @throws UserError on empty body, missing header, no data rows, or
-   *         malformed shape.
+   * `x` holds the model's features in the model's column order, whatever
+   * their order in the file. `response` is the column read as the response,
+   * absent when the data has none; `parse_response` turns it into outcomes.
    */
-  FeatureSet read_features_from_string(std::string const& content);
+  struct PredictionData {
+    types::FeatureMatrix x;
+    std::optional<ResponseColumn> response;
+  };
+
+  /**
+   * @brief Read a CSV file to predict on, matching its columns to a model's
+   *        features.
+   *
+   * The first row is the header. How the columns are matched depends on
+   * whether the model has feature names:
+   *
+   * - With @p feature_names (`meta.feature_names`), columns are matched by
+   *   name, in any order, and every feature must be present. The last column
+   *   that is not a feature is read as the response; any other is ignored.
+   * - Without them (a model trained on data without column names), columns
+   *   are matched by position: the file has the @p n_features feature
+   *   columns, and no response, or one more column, the response.
+   *
+   * Rows keep their file order. Every column is converted with the same
+   * rules as `read`, so one mixing numbers and text is an error even when it
+   * is not a feature. Categorical features are integer-encoded per file, so
+   * their values must encode the same way as in the training data.
+   *
+   * `predict` reads files with this function and `serve` reads request
+   * bodies with `read_prediction_data_from_string`, so both match columns
+   * the same way.
+   *
+   * @throws UserError on a malformed CSV, a feature the header lacks, or a
+   *         column count that does not fit a model without feature names.
+   */
+  PredictionData read_prediction_data(std::string const& filename, types::Names const& feature_names, int n_features);
+
+  /**
+   * @brief Same as `read_prediction_data`, from a CSV held in memory (the
+   *        body of a `serve` request).
+   *
+   * @throws UserError on an empty body, and in the same cases as
+   *         `read_prediction_data`.
+   */
+  PredictionData
+  read_prediction_data_from_string(std::string const& content, types::Names const& feature_names, int n_features);
+
+  /**
+   * @brief Parse a response column into a model's outcome space.
+   *
+   * Classification: each label becomes its index in @p groups (the model's
+   * `meta.groups`), so the data may list classes in any order. Regression:
+   * each value must be a finite number.
+   *
+   * @throws UserError naming the column, row and value of the first entry
+   *         that is not one of @p groups (classification) or not numeric
+   *         (regression).
+   */
+  types::OutcomeVector parse_response(ResponseColumn const& response, types::Mode mode, types::Names const& groups);
 }
