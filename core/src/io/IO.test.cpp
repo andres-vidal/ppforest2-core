@@ -381,10 +381,10 @@ TEST(ReadPredictionData, ExtraColumnIsTheResponse) {
 }
 
 /* With several columns that are not features, the last one is the response
- * and the others are ignored. */
+ * and the others are ignored — never converted, so they may hold anything. */
 TEST(ReadPredictionData, LastNonFeatureColumnIsTheResponse) {
   auto const data =
-      io::csv::read_prediction_data_from_string("id,b,a,notes,c,y\n7,2,1,low,3,x\n8,5,4,high,6,z\n", FEATURES, 3);
+      io::csv::read_prediction_data_from_string("id,b,a,notes,c,y\n7,2,1,NA,3,x\n8,5,4,9,6,z\n", FEATURES, 3);
 
   EXPECT_FLOAT_EQ(data.x(1, 0), 4.0F);
   EXPECT_FLOAT_EQ(data.x(1, 1), 5.0F);
