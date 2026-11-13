@@ -13,5 +13,5 @@ jobs:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: requirements-dev.txt
-      - run: make install-tools
+      - run: pip install -r requirements-dev.txt
       - run: make format-dry

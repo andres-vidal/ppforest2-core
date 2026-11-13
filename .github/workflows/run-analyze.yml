@@ -19,7 +19,7 @@ jobs:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: requirements-dev.txt
-      - run: make install-tools
+      - run: pip install -r requirements-dev.txt
       - run: make analyze
 
   Clang-Tidy:
@@ -37,5 +37,5 @@ jobs:
         with:
           path: .build/_deps
           key: ${{ runner.os }}-cmake-deps-${{ hashFiles('core/Dependencies.cmake') }}
-      - run: make install-tools
+      - run: pip install -r requirements-dev.txt
       - run: make tidy
