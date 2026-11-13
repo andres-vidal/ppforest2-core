@@ -380,6 +380,15 @@ TEST(ReadPredictionData, ExtraColumnIsTheResponse) {
   EXPECT_EQ(data.response->values, (std::vector<std::string>{"x", "z"}));
 }
 
+/* The response is never converted, so one that mixes numbers and text (a
+ * regression response with a missing value) is read as it is written. */
+TEST(ReadPredictionData, MixedResponseIsKeptAsText) {
+  auto const data = io::csv::read_prediction_data_from_string("a,b,c,y\n1,2,3,1.5\n4,5,6,NA\n", FEATURES, 3);
+
+  ASSERT_TRUE(data.response.has_value());
+  EXPECT_EQ(data.response->values, (std::vector<std::string>{"1.5", "NA"}));
+}
+
 /* With several columns that are not features, the last one is the response
  * and the others are ignored — never converted, so they may hold anything. */
 TEST(ReadPredictionData, LastNonFeatureColumnIsTheResponse) {

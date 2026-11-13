@@ -539,6 +539,7 @@ TEST(CLIPredictColumns, NoMetricsSkipsResponseColumn) {
   auto failed = run_ppforest2("-q predict -M " + model.path() + " -d " + predict_csv.path());
   EXPECT_NE(failed.exit_code, 0);
   EXPECT_NE(failed.stderr_output.find("response column 'id'"), std::string::npos) << failed.stderr_output;
+  EXPECT_NE(failed.stderr_output.find("Use --no-metrics"), std::string::npos) << failed.stderr_output;
 
   TempFile output;
   output.clear();
@@ -575,6 +576,39 @@ TEST(CLIPredictColumns, RegressionFeaturesOnlyPredictsWithoutMetrics) {
   EXPECT_TRUE(j["predictions"][0].is_number());
   EXPECT_FALSE(j.contains("metrics"));
   EXPECT_FALSE(j.contains("proportions"));
+}
+
+/* A regression response with a missing value is kept as text until metrics
+ * need it: it fails the metrics, naming the row, and --no-metrics predicts
+ * without reading it. */
+TEST(CLIPredictColumns, RegressionResponseWithMissingValue) {
+  TempFile train_csv(".csv");
+  write_file(train_csv.path(), "f1,f2,y\n1,1,10\n2,2,20\n3,3,30\n4,4,40\n5,5,50\n6,6,60\n");
+
+  TempFile model;
+  model.clear();
+  auto train = run_ppforest2("-q train --mode regression -d " + train_csv.path() + " -n 0 -r 0 -s " + model.path());
+  ASSERT_EQ(train.exit_code, 0);
+
+  TempFile predict_csv(".csv");
+  write_file(predict_csv.path(), "f1,f2,y\n1,1,10\n6,6,NA\n");
+
+  auto failed = run_ppforest2("-q predict -M " + model.path() + " -d " + predict_csv.path());
+  EXPECT_NE(failed.exit_code, 0);
+  EXPECT_NE(failed.stderr_output.find("Value 'NA' in response column 'y' (row 2)"), std::string::npos)
+      << failed.stderr_output;
+  EXPECT_NE(failed.stderr_output.find("Use --no-metrics"), std::string::npos) << failed.stderr_output;
+
+  TempFile output;
+  output.clear();
+  auto result = run_ppforest2(
+      "-q predict -M " + model.path() + " -d " + predict_csv.path() + " --no-metrics -o " + output.path()
+  );
+  ASSERT_EQ(result.exit_code, 0) << result.stderr_output;
+
+  auto j = json::parse(output.read());
+  EXPECT_EQ(j["predictions"].size(), 2U);
+  EXPECT_FALSE(j.contains("metrics"));
 }
 
 // ---------------------------------------------------------------------------
