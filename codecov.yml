@@ -1,0 +1,13 @@
+# Codecov's defaults fail the project check on any drop in total coverage and
+# hold a pull request's new lines to the project's own coverage. Some lines
+# change coverage between runs of the same code (gcov's attribution of brace
+# initializers, benchmark output that depends on timing), so the project check
+# tolerates a small drop, and new code must be mostly, not fully, covered.
+coverage:
+  status:
+    project:
+      default:
+        threshold: 0.5%
+    patch:
+      default:
+        target: 80%
