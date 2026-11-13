@@ -45,6 +45,16 @@ namespace ppforest2::cli {
       return model_data.value("model_type", "tree") == "forest" ? "Random Forest" : "Decision Tree";
     }
 
+    // Parses the response column into the model's outcome space. Its error
+    // names `--no-metrics`, since the column read as the response may not be
+    // one at all (an ID column after the features, say).
+    OutcomeVector read_response(io::csv::ResponseColumn const& response, Mode mode, Names const& groups) {
+      try {
+        return io::csv::parse_response(response, mode, groups);
+      } catch (UserError const& e) {
+        throw UserError(fmt::format("{} Use --no-metrics to predict without reading the response column.", e.what()));
+      }
+    }
   }
 
   int run_predict(Params const& params) {
@@ -86,7 +96,7 @@ namespace ppforest2::cli {
     if (has_metrics) {
       // Labels are looked up in the model's label space, so the file may
       // list classes in any order; one the model wasn't trained on fails.
-      OutcomeVector const y = io::csv::parse_response(*data.response, mode, group_names);
+      OutcomeVector const y = read_response(*data.response, mode, group_names);
       Metrics const metrics = metrics_from_outcomes(predictions, y, mode);
 
       out.println("{}", emphasis("Prediction results for " + model_display_name(model_data)));

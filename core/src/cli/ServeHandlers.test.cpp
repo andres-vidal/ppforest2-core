@@ -135,6 +135,28 @@ TEST_F(ServeHandlersClassificationTest, PredictUnparseableResponseOmitsMetrics) 
   EXPECT_FALSE(body.contains("metrics"));
 }
 
+/* A regression response with a missing value leaves the metrics out of the
+ * response instead of failing the request: only the features are converted. */
+TEST(ServeHandlersRegression, PredictResponseWithMissingValueOmitsMetrics) {
+  TempFile train_csv(".csv");
+  ppforest2::io::text::write_file("f1,f2,y\n1,1,10\n2,2,20\n3,3,30\n4,4,40\n5,5,50\n6,6,60\n", train_csv.path());
+
+  TempFile model;
+  model.clear();
+  auto const train =
+      run_ppforest2("-q train --mode regression -d " + train_csv.path() + " -n 0 -r 0 -s " + model.path());
+  ASSERT_EQ(train.exit_code, 0);
+
+  auto const loaded = load_from_file(model.path());
+  PredictionStore store;
+
+  Response const r = handle_predict(loaded, store, "f1,f2,y\n1,1,10\n6,6,NA\n");
+  ASSERT_EQ(r.status, 200) << r.body;
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  EXPECT_FALSE(body.contains("metrics"));
+}
+
 TEST_F(ServeHandlersClassificationTest, SummarizeOmitsModelField) {
   auto const loaded = load_from_file(model_->path());
 
