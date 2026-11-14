@@ -332,6 +332,17 @@ namespace ppforest2::io::csv {
       std::optional<int> response;
     };
 
+    // At most `max` names joined by ", ", then how many were left out, so an
+    // error stays readable when a wide data set lacks most of its features.
+    std::string list_names(types::Names const& names, std::size_t max = 10) {
+      if (names.size() <= max) {
+        return fmt::format("{}", fmt::join(names, ", "));
+      }
+
+      auto const shown = names.begin() + static_cast<std::ptrdiff_t>(max);
+      return fmt::format("{} and {} more", fmt::join(names.begin(), shown, ", "), names.size() - max);
+    }
+
     // A model without feature names can only take the columns by position:
     // its features in training order, optionally followed by the response.
     ColumnMatch match_by_position(int n_cols, int n_features) {
@@ -382,7 +393,7 @@ namespace ppforest2::io::csv {
           missing.empty(),
           fmt::format(
               "Feature mismatch: missing [{}]. Columns are matched to the model's features by name.",
-              fmt::join(missing, ", ")
+              list_names(missing)
           )
       );
 
