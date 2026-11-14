@@ -14,7 +14,6 @@
 #include "summary_js.hpp"
 
 #include <fmt/format.h>
-#include <fmt/ranges.h>
 #include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 
@@ -22,11 +21,9 @@
 #include <cctype>
 #include <cmath>
 #include <cstdint>
-#include <numeric>
 #include <optional>
 #include <random>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -50,45 +47,6 @@ namespace ppforest2::cli::serve {
 
     Response error_response(int status, std::string message) {
       return Response{status, bad_request(std::move(message)).dump()};
-    }
-
-    // Build a permutation `perm` of length n_features such that the model's
-    // expected column j corresponds to the parsed CSV's column `perm[j]`.
-    // Extra columns in @p provided (e.g. a response column carried over from
-    // the training CSV) are silently ignored. Missing columns are an error.
-    std::vector<int> build_permutation(types::Names const& expected, types::Names const& provided, std::string& err) {
-      std::unordered_map<std::string, int> index;
-      for (int i = 0; i < static_cast<int>(provided.size()); ++i) {
-        index.emplace(provided[i], i);
-      }
-
-      std::vector<std::string> missing;
-      std::vector<int> perm;
-      perm.reserve(expected.size());
-
-      for (auto const& name : expected) {
-        auto it = index.find(name);
-        if (it == index.end()) {
-          missing.push_back(name);
-        } else {
-          perm.push_back(it->second);
-        }
-      }
-
-      if (!missing.empty()) {
-        err = fmt::format("Feature mismatch: missing [{}]", fmt::join(missing, ", "));
-        return {};
-      }
-
-      return perm;
-    }
-
-    types::FeatureMatrix reorder_columns(types::FeatureMatrix const& src, std::vector<int> const& perm) {
-      types::FeatureMatrix dst(src.rows(), static_cast<Eigen::Index>(perm.size()));
-      for (int j = 0; j < static_cast<int>(perm.size()); ++j) {
-        dst.col(j) = src.col(perm[j]);
-      }
-      return dst;
     }
   }
 
@@ -434,97 +392,42 @@ namespace ppforest2::cli::serve {
   }
 
   namespace {
-    // The "response" column is whichever extra column in the request CSV
-    // doesn't appear in the model's feature names. When multiple extras
-    // exist, the last one wins — matching the CLI's convention where the
-    // response is the rightmost column.
-    std::optional<int> find_response_column(types::Names const& csv_columns, types::Names const& model_features) {
-      std::optional<int> last_extra;
-      for (int j = 0; j < static_cast<int>(csv_columns.size()); ++j) {
-        if (std::find(model_features.begin(), model_features.end(), csv_columns[j]) == model_features.end()) {
-          last_extra = j;
-        }
-      }
-      return last_extra;
-    }
-
-    std::optional<types::OutcomeVector> parse_response_column(
-        std::vector<std::vector<std::string>> const& raw_rows,
-        int col,
-        types::Mode mode,
-        types::Names const& group_names
+    // Metrics of @p predictions against @p response, if it parses as the
+    // model's response. Unlike `predict`, which fails, a request whose
+    // response column doesn't (an ID column taken as the response, say)
+    // still gets its predictions, just no metrics.
+    std::optional<stats::Metrics> metrics_against(
+        LoadedModel const& loaded, io::csv::ResponseColumn const& response, types::OutcomeVector const& predictions
     ) {
-      types::OutcomeVector y(static_cast<Eigen::Index>(raw_rows.size()));
-      for (size_t i = 0; i < raw_rows.size(); ++i) {
-        auto const& s = raw_rows[i][static_cast<size_t>(col)];
-        if (types::is_classification(mode)) {
-          auto const it = std::find(group_names.begin(), group_names.end(), s);
-          if (it == group_names.end()) {
-            return std::nullopt;
-          }
-          y(static_cast<Eigen::Index>(i)) = static_cast<types::Outcome>(std::distance(group_names.begin(), it));
-        } else {
-          try {
-            y(static_cast<Eigen::Index>(i)) = std::stof(s);
-          } catch (...) {
-            return std::nullopt;
-          }
-        }
+      try {
+        auto const y = io::csv::parse_response(response, loaded.mode, loaded.group_names);
+        return stats::metrics_from_outcomes(predictions, y, loaded.mode);
+      } catch (UserError const&) {
+        return std::nullopt;
       }
-      return y;
     }
 
     // Parse + validate + predict, shared by JSON and HTML predict handlers.
     // Returns either a populated result or a 4xx Response describing why the
-    // request was rejected.
+    // request was rejected. Columns are matched to the model's features by
+    // `io::csv::read_prediction_data_from_string`, the same rules `predict`
+    // applies to a data file.
     std::variant<PredictionResult, Response> run_predict(LoadedModel const& loaded, std::string const& csv_body) {
-      io::csv::FeatureSet parsed;
+      io::csv::PredictionData data;
       try {
-        parsed = io::csv::read_features_from_string(csv_body);
+        data = io::csv::read_prediction_data_from_string(csv_body, loaded.feature_names, loaded.n_features);
       } catch (UserError const& e) {
         return error_response(400, e.what());
       }
 
-      std::vector<int> perm;
-      if (loaded.feature_names.empty()) {
-        // Model saved without column names (e.g. trained via the R
-        // bindings): name-based permutation is impossible, so require the
-        // exact column count and take the columns positionally. Without
-        // this check, predicting through a narrower matrix reads out of
-        // bounds.
-        if (static_cast<int>(parsed.feature_names.size()) != loaded.n_features) {
-          return error_response(
-              400,
-              fmt::format(
-                  "Feature mismatch: the model has no feature names, so the request must have exactly {} column(s) "
-                  "in training order (got {})",
-                  loaded.n_features,
-                  parsed.feature_names.size()
-              )
-          );
-        }
-        perm.resize(static_cast<std::size_t>(loaded.n_features));
-        std::iota(perm.begin(), perm.end(), 0);
-      } else {
-        std::string err;
-        perm = build_permutation(loaded.feature_names, parsed.feature_names, err);
-        if (perm.empty()) {
-          return error_response(400, err);
-        }
-      }
-
-      types::FeatureMatrix const x = reorder_columns(parsed.x, perm);
-
       PredictionResult out;
-      out.predictions = loaded.model->predict(x);
+      out.predictions = loaded.model->predict(data.x);
       if (types::is_classification(loaded.mode)) {
-        out.proportions = predict_proportions(*loaded.model, x);
+        out.proportions = predict_proportions(*loaded.model, data.x);
       }
 
-      if (auto const response_col = find_response_column(parsed.feature_names, loaded.feature_names)) {
-        if (auto y = parse_response_column(parsed.raw_rows, *response_col, loaded.mode, loaded.group_names)) {
-          out.metrics = stats::metrics_from_outcomes(out.predictions, *y, loaded.mode);
-        }
+      if (data.response) {
+        out.metrics = metrics_against(loaded, *data.response, out.predictions);
       }
       return out;
     }

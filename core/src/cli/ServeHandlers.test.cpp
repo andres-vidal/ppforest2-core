@@ -95,6 +95,66 @@ TEST_F(ServeHandlersClassificationTest, PredictUnnamedModelPositionalColumnsWork
   EXPECT_EQ(r.status, 200);
   auto body = json::parse(r.body);
   EXPECT_EQ(body.at("predictions").size(), 1U);
+  EXPECT_FALSE(body.contains("metrics"));
+}
+
+/* For an unnamed model, one column more than the training feature count is
+ * the response, as `predict` reads it: the response gains metrics. */
+TEST_F(ServeHandlersClassificationTest, PredictUnnamedModelLastExtraColumnIsResponse) {
+  auto mj                     = json::parse(model_->read());
+  mj["meta"]["feature_names"] = json::array();
+  TempFile const stripped;
+  {
+    std::ofstream out(stripped.path());
+    out << mj.dump();
+  }
+  auto const loaded = load_from_file(stripped.path());
+
+  Response const r = handle_predict(loaded, store, "a,b,c,d,e\n5.1,3.5,1.4,0.2,setosa\n6.7,3.0,5.2,2.3,virginica\n");
+  ASSERT_EQ(r.status, 200);
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  ASSERT_TRUE(body.contains("metrics"));
+  EXPECT_TRUE(body.at("metrics").contains("error_rate"));
+}
+
+/* Unlike `predict`, which fails, a request whose response column doesn't
+ * parse as the model's response (an ID column, say) still gets predictions,
+ * just no metrics. */
+TEST_F(ServeHandlersClassificationTest, PredictUnparseableResponseOmitsMetrics) {
+  auto const loaded = load_from_file(model_->path());
+
+  std::string const csv = "id,Sepal.Length,Sepal.Width,Petal.Length,Petal.Width\n"
+                          "1,5.1,3.5,1.4,0.2\n"
+                          "2,6.7,3.0,5.2,2.3\n";
+
+  Response const r = handle_predict(loaded, store, csv);
+  ASSERT_EQ(r.status, 200);
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  EXPECT_FALSE(body.contains("metrics"));
+}
+
+/* A regression response with a missing value leaves the metrics out of the
+ * response instead of failing the request: only the features are converted. */
+TEST(ServeHandlersRegression, PredictResponseWithMissingValueOmitsMetrics) {
+  TempFile train_csv(".csv");
+  ppforest2::io::text::write_file("f1,f2,y\n1,1,10\n2,2,20\n3,3,30\n4,4,40\n5,5,50\n6,6,60\n", train_csv.path());
+
+  TempFile model;
+  model.clear();
+  auto const train =
+      run_ppforest2("-q train --mode regression -d " + train_csv.path() + " -n 0 -r 0 -s " + model.path());
+  ASSERT_EQ(train.exit_code, 0);
+
+  auto const loaded = load_from_file(model.path());
+  PredictionStore store;
+
+  Response const r = handle_predict(loaded, store, "f1,f2,y\n1,1,10\n6,6,NA\n");
+  ASSERT_EQ(r.status, 200) << r.body;
+  auto body = json::parse(r.body);
+  EXPECT_EQ(body.at("predictions").size(), 2U);
+  EXPECT_FALSE(body.contains("metrics"));
 }
 
 TEST_F(ServeHandlersClassificationTest, SummarizeOmitsModelField) {
