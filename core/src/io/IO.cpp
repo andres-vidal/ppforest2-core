@@ -19,6 +19,7 @@
 #include <numeric>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -108,6 +109,18 @@ namespace ppforest2::io::csv {
       char* end      = nullptr;
       double const v = std::strtod(s.c_str(), &end);
       return end != s.c_str() && *end == '\0' && std::isfinite(v);
+    }
+
+    // Whether `std::stof` can read @p s, a string `is_numeric` accepts. It
+    // rejects magnitudes beyond float's range, and values too small to be
+    // represented.
+    bool fits_float(std::string const& s) {
+      try {
+        static_cast<void>(std::stof(s));
+        return true;
+      } catch (std::out_of_range const&) {
+        return false;
+      }
     }
 
     bool is_floating(std::string const& s) {
@@ -544,47 +557,39 @@ namespace ppforest2::io::csv {
   }
 
   OutcomeVector parse_response(ResponseColumn const& response, types::Mode mode, types::Names const& groups) {
-    try {
-      int const n = static_cast<int>(response.values.size());
-      OutcomeVector y(n);
+    int const n = static_cast<int>(response.values.size());
+    OutcomeVector y(n);
 
-      if (types::is_classification(mode)) {
-        std::unordered_map<std::string, int> code_of;
-        for (int k = 0; k < static_cast<int>(groups.size()); ++k) {
-          code_of.emplace(at(groups, k), k);
-        }
-
-        for (int i = 0; i < n; ++i) {
-          auto const& label = at(response.values, i);
-          auto const it     = code_of.find(label);
-          user_error(
-              it != code_of.end(),
-              fmt::format(
-                  "Label '{}' in response column '{}' (row {}) is not one of the model's training labels.",
-                  label,
-                  response.name,
-                  i + 1
-              )
-          );
-          y(i) = static_cast<Outcome>(it->second);
-        }
-      } else {
-        for (int i = 0; i < n; ++i) {
-          auto const& value = at(response.values, i);
-          user_error(
-              is_numeric(value),
-              fmt::format("Value '{}' in response column '{}' (row {}) is not numeric.", value, response.name, i + 1)
-          );
-          y(i) = std::stof(value);
-        }
+    if (types::is_classification(mode)) {
+      std::unordered_map<std::string, int> code_of;
+      for (int k = 0; k < static_cast<int>(groups.size()); ++k) {
+        code_of.emplace(at(groups, k), k);
       }
 
-      return y;
-    } catch (UserError const&) {
-      throw;
-    } catch (std::exception const& e) {
-      // std::stof rejects magnitudes beyond float's range that `is_numeric` accepts.
-      throw UserError(fmt::format("Error parsing response column '{}': {}", response.name, e.what()));
+      for (int i = 0; i < n; ++i) {
+        auto const& label = at(response.values, i);
+        auto const it     = code_of.find(label);
+        user_error(
+            it != code_of.end(),
+            fmt::format(
+                "Label '{}' in response column '{}' (row {}) is not one of the model's training labels.",
+                label,
+                response.name,
+                i + 1
+            )
+        );
+        y(i) = static_cast<Outcome>(it->second);
+      }
+    } else {
+      for (int i = 0; i < n; ++i) {
+        auto const& value = at(response.values, i);
+        auto const where  = fmt::format("Value '{}' in response column '{}' (row {})", value, response.name, i + 1);
+        user_error(is_numeric(value), where + " is not numeric.");
+        user_error(fits_float(value), where + " is out of range for a single-precision float.");
+        y(i) = std::stof(value);
+      }
     }
+
+    return y;
   }
 }
