@@ -531,9 +531,14 @@ TEST(ParseResponse, RegressionNonNumericThrows) {
 }
 
 /* A number beyond float's range is a UserError, not a stray std::out_of_range
- * (`serve` only catches UserError to omit metrics). */
+ * (`serve` only catches UserError to omit metrics), and names the row and
+ * value like any other bad response. */
 TEST(ParseResponse, RegressionOutOfRangeThrowsUserError) {
-  io::csv::ResponseColumn const response{"y", {"1e300"}};
+  io::csv::ResponseColumn const response{"y", {"1.5", "1e300"}};
 
   EXPECT_THROW(io::csv::parse_response(response, types::Mode::Regression, {}), UserError);
+
+  auto const message = user_error_message([&] { io::csv::parse_response(response, types::Mode::Regression, {}); });
+  EXPECT_NE(message.find("Value '1e300' in response column 'y' (row 2)"), std::string::npos) << message;
+  EXPECT_NE(message.find("out of range"), std::string::npos) << message;
 }
