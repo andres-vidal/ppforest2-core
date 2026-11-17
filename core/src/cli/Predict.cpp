@@ -7,14 +7,12 @@
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <optional>
-#include <vector>
 
 #include "io/Color.hpp"
 #include "io/IO.hpp"
 #include "io/Output.hpp"
 #include "io/Presentation.hpp"
 #include "serialization/Json.hpp"
-#include "stats/DataPacket.hpp"
 #include "stats/Metrics.hpp"
 #include "utils/UserError.hpp"
 
@@ -30,9 +28,9 @@ namespace ppforest2::cli {
   void setup_predict(CLI::App& app, Params& params) {
     auto* sub = app.add_subcommand("predict", "Load a model and predict on new data");
     sub->add_option("-M,--model", params.model_path, "Saved model JSON file");
-    sub->add_option("-d,--data", params.data_path, "CSV data to predict on");
+    sub->add_option("-d,--data", params.data_path, "CSV data to predict on, with or without a response column");
     sub->add_option("-o,--output", params.output_path, "Save prediction results to JSON file");
-    sub->add_flag("--no-metrics", params.no_metrics, "Omit error rate and confusion matrix from output");
+    sub->add_flag("--no-metrics", params.no_metrics, "Don't read the response column; omit metrics from output");
     sub->add_flag("--no-proportions", params.no_proportions, "Omit vote proportions from output");
 
     // CLI-exclusive constraints (predict doesn't use config files)
@@ -47,6 +45,16 @@ namespace ppforest2::cli {
       return model_data.value("model_type", "tree") == "forest" ? "Random Forest" : "Decision Tree";
     }
 
+    // Parses the response column into the model's outcome space. Its error
+    // names `--no-metrics`, since the column read as the response may not be
+    // one at all (an ID column after the features, say).
+    OutcomeVector read_response(io::csv::ResponseColumn const& response, Mode mode, Names const& groups) {
+      try {
+        return io::csv::parse_response(response, mode, groups);
+      } catch (UserError const& e) {
+        throw UserError(fmt::format("{} Use --no-metrics to predict without reading the response column.", e.what()));
+      }
+    }
   }
 
   int run_predict(Params const& params) {
@@ -60,12 +68,11 @@ namespace ppforest2::cli {
     auto const exported   = model_data.get<serialization::Export<Model::Ptr>>();
     Mode const mode       = exported.spec->mode;
 
-    // Rows keep their file order so `predictions[i]` corresponds to input
-    // row i; the model's mode (not the y column's written form) decides how
-    // the response is parsed.
-    DataPacket const data = io::csv::read(params.data_path, mode);
-
-    io::csv::check_feature_count(data, exported.n_features);
+    // Columns are matched to the model's features as `serve` matches a
+    // request: by name, or by position for a model without feature names.
+    // The data may or may not carry a response column. Rows keep their file
+    // order so `predictions[i]` corresponds to input row i.
+    auto const data = io::csv::read_prediction_data(params.data_path, exported.feature_names, exported.n_features);
 
     auto const& model      = *exported.model;
     auto const predictions = model.predict(data.x);
@@ -74,8 +81,7 @@ namespace ppforest2::cli {
     // classification (validate_*_export enforces this), empty for regression.
     auto const& group_names = exported.groups;
 
-    bool const has_labels      = data.y.size() > 0;
-    bool const has_metrics     = has_labels && !params.no_metrics;
+    bool const has_metrics     = data.response && !params.no_metrics;
     bool const has_output_file = !params.output_path.empty();
 
     json result;
@@ -88,10 +94,9 @@ namespace ppforest2::cli {
     }
 
     if (has_metrics) {
-      // The file encodes labels in first-appearance order, which need not
-      // match the model's label order — remap into the model's space before
-      // comparing with predictions.
-      OutcomeVector const y = is_classification(mode) ? io::csv::remap_labels(data, group_names) : data.y;
+      // Labels are looked up in the model's label space, so the file may
+      // list classes in any order; one the model wasn't trained on fails.
+      OutcomeVector const y = read_response(*data.response, mode, group_names);
       Metrics const metrics = metrics_from_outcomes(predictions, y, mode);
 
       out.println("{}", emphasis("Prediction results for " + model_display_name(model_data)));
@@ -101,9 +106,22 @@ namespace ppforest2::cli {
       if (has_output_file) {
         result["metrics"] = serialization::to_json(metrics, group_names);
       }
+    } else if (!has_output_file) {
+      // No metrics and no file: report what was predicted rather than
+      // printing nothing at all.
+      auto const n = predictions.size();
+      out.println("{}", emphasis("Prediction results for " + model_display_name(model_data)));
+      out.newline();
+      out.println(
+          "Predicted {} observation{}.{}",
+          n,
+          n == 1 ? "" : "s",
+          data.response ? "" : " The data has no response column, so there are no metrics."
+      );
+      out.newline();
     }
 
-    if (has_metrics && !has_output_file) {
+    if (!has_output_file) {
       out.println("{}", muted("Tip: use --output <file> to save individual predictions"));
     }
 

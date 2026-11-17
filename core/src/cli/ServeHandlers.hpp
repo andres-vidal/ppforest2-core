@@ -30,7 +30,8 @@ namespace ppforest2::cli::serve {
     types::Mode mode = types::Mode::Classification;
     nlohmann::json model_json;
     /** @brief Feature count from `meta.features` — the only shape check
-     * available when `feature_names` is empty (e.g. R-trained models). */
+     * available when `feature_names` is empty (a model trained on data
+     * without column names). */
     int n_features = 0;
   };
 
@@ -48,7 +49,7 @@ namespace ppforest2::cli::serve {
   struct PredictionResult {
     types::OutcomeVector predictions;
     types::FeatureMatrix proportions;      // populated for classification only
-    std::optional<stats::Metrics> metrics; // present when the request carried a response column
+    std::optional<stats::Metrics> metrics; // present when the request carried a response column that parses
   };
 
   /** @brief In-memory bounded store of recent prediction results, keyed by

@@ -203,23 +203,25 @@ The saved model JSON includes the full serialization, training configuration, va
 
 ### `predict` — Predict with a Saved Model
 
-Load a trained model and classify new observations.
+Load a trained model and predict new observations.
 
 ```bash
-ppforest2 predict -M model.json -d test.csv
-ppforest2 predict -M model.json -d test.csv -o predictions.json
+ppforest2 predict -M model.json -d test.csv                      # with a response column: reports metrics
+ppforest2 predict -M model.json -d new.csv -o predictions.json   # features only: predictions, no metrics
 ppforest2 predict -M model.json -d test.csv --no-proportions -o predictions.json
 ```
 
 | Flag                     | Default       | Description                                       |
 |--------------------------|---------------|---------------------------------------------------|
 | `-M, --model <file>`     | *(required)*  | Saved model JSON                                  |
-| `-d, --data <file>`      | *(required)*  | CSV data to classify                              |
-| `-o, --output <file>`    | —             | Save predictions, error rate, and confusion matrix to JSON |
-| `--no-metrics`           | —             | Omit error rate and confusion matrix from output  |
+| `-d, --data <file>`      | *(required)*  | CSV data to predict on, with or without a response column |
+| `-o, --output <file>`    | —             | Save predictions, vote proportions, and metrics (when the data has a response) to JSON |
+| `--no-metrics`           | —             | Don't read the response column; omit metrics from output |
 | `--no-proportions`       | —             | Omit vote proportions from output (forest only)   |
 
-If the CSV includes response labels, the tool reports the error rate and confusion matrix; labels are matched by name against the model's training labels, so the data file may list classes in any order (an unknown label is an error). Predictions are written in the same order as the input rows. For forest models, the JSON output includes per-group vote proportions by default; use `--no-proportions` to omit them.
+**Data format**: the CSV has a header row, and its columns are matched to the model's features by name, so they may come in any order. These are the rules `serve` applies to a request. The response column is optional: the last column that is not a feature is read as the response, and the tool reports the error rate and confusion matrix (MSE, MAE and R² for regression); data with only the features is predicted without metrics. Any other extra column is ignored, and a missing feature is an error that names it. A model saved without feature names (trained on data without column names) takes the columns by position instead: its features in training order, optionally followed by the response, so the file has exactly as many columns as the model has features, or one more.
+
+Labels are matched by name against the model's training labels, so the data file may list classes in any order. A label absent from training is an error, and so is a non-numeric response for regression; this includes an extra column that is not a response at all (an ID column, say), since it is read as one. `--no-metrics` skips the response column entirely. Predictions are written in the same order as the input rows. For classification models, the JSON output includes per-group vote proportions by default; use `--no-proportions` to omit them.
 
 ### `summarize` — Display a Saved Model
 
@@ -333,7 +335,7 @@ Content type is chosen by the request's `Accept` header — browsers (`text/html
 
 - `GET /` — model summary. JSON returns `meta`, `config`, `training_metrics`, `oob_metrics`, `variable_importance` (the heavy `model` tree is stripped). HTML returns the dashboard.
 - `GET /predict` — predict landing page (HTML only). Without a query string: upload form. With `?id=<hex>`: a previously-computed result from the in-memory cache, with a download button.
-- `POST /predict` — body is feature-only CSV (header + rows). JSON returns `{predictions, [proportions], [metrics], id, url}`. HTML returns the predictions table (plus metrics and a colour-coded confusion matrix when the request CSV included a response column). `Content-Location` and the body's `url` field point to the canonical `/predict?id=<hex>` URL so a single result is refreshable and shareable.
+- `POST /predict` — body is a CSV (header + rows) with the model's features and, optionally, a response column. JSON returns `{predictions, [proportions], [metrics], id, url}`. HTML returns the predictions table (plus metrics and a colour-coded confusion matrix when the request CSV included a response column). `Content-Location` and the body's `url` field point to the canonical `/predict?id=<hex>` URL so a single result is refreshable and shareable.
 - `GET /health` — liveness probe. Returns `{"status":"ok","version":"X.Y.Z"}`.
 
 ```bash
@@ -345,7 +347,7 @@ curl -s -X POST -H 'Content-Type: text/csv' \
      http://127.0.0.1:8080/predict | jq
 ```
 
-**Request format**: header columns map to the model's training-time feature names; column order may differ from the training CSV. Missing columns produce a `400` with a list of offending names. Extra columns (e.g. a response column carried over from the training CSV) are silently ignored for prediction — but if the rightmost extra parses as the model's response type (classification labels in `meta.groups` or numeric values for regression), it's used as ground truth and the response gains a `metrics` field with accuracy/error-rate or MAE/MSE/R². Categorical features must be encoded by the caller in the same form they had during training.
+**Request format**: the same as the [`predict` data format](#predict--predict-with-a-saved-model) — both read data with the same code. Header columns map to the model's training-time feature names; column order may differ from the training CSV. Missing columns produce a `400` with a list of offending names. Extra columns (e.g. a response column carried over from the training CSV) are ignored for prediction — but if the rightmost extra parses as the model's response type (classification labels in `meta.groups` or numeric values for regression), it's used as ground truth and the response gains a `metrics` field with accuracy/error-rate or MAE/MSE/R². Unlike `predict`, which fails, a rightmost extra that doesn't parse just leaves `metrics` out. A model saved without feature names takes the columns by position: exactly its feature count, or one more with the response last; any other count is a `400`. Categorical features must be encoded by the caller in the same form they had during training.
 
 **Deployment notes**: the default bind is `127.0.0.1` because the server is intentionally minimal — no TLS, no auth, no rate limiting. Those belong in front, not in here. The prediction cache is a bounded in-memory LRU (~32 entries) cleared on restart, so `?id=<hex>` URLs survive a page refresh but not a deploy. For per-user persistence or richer access control, hit the JSON endpoints from your own application.
 
