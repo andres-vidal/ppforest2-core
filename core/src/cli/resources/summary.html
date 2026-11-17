@@ -62,7 +62,7 @@
       </section>
       {% endif %} {% if length(importance) > 0 %}
       <section class="card">
-        <h2>Variable importance (permuted)</h2>
+        <h2>Variable importance ({{ importance_measure }})</h2>
         <table class="bars">
           {% for row in importance %}
           <tr>

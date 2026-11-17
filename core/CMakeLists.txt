@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.24)  # $<LINK_LIBRARY:WHOLE_ARCHIVE,...> for se
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../VERSION" PPFOREST2_VERSION)
 string(STRIP "${PPFOREST2_VERSION}" PPFOREST2_VERSION)
-project(ppforest2 VERSION ${PPFOREST2_VERSION})
+# Between releases VERSION carries a pre-release suffix (0.1.5-dev). project()
+# takes only the numeric part; --version reports the full string.
+string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" PPFOREST2_VERSION_NUMBER "${PPFOREST2_VERSION}")
+project(ppforest2 VERSION ${PPFOREST2_VERSION_NUMBER})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -194,7 +197,7 @@ if(NOT PPFOREST2_CORE_ONLY)
   # the Windows MinGW build can't find the Winsock symbols cpp-httplib
   # brings in transitively (`ws2_32`).
   target_link_libraries(ppforest2 $<LINK_LIBRARY:WHOLE_ARCHIVE,ppforest2-strategies> ppforest2-core nlohmann_json::nlohmann_json csv CLI11::CLI11 fmt::fmt httplib::httplib)
-  target_compile_definitions(ppforest2 PRIVATE PPFOREST2_VERSION="${PROJECT_VERSION}")
+  target_compile_definitions(ppforest2 PRIVATE PPFOREST2_VERSION="${PPFOREST2_VERSION}")
 
   # ---------------------------------------------------------------------------
   # Tests
@@ -296,7 +299,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     PPFOREST2_BENCH_SCENARIOS_CLS="${CMAKE_SOURCE_DIR}/../bench/default-scenarios-classification.json"
     PPFOREST2_BENCH_SCENARIOS_REG="${CMAKE_SOURCE_DIR}/../bench/default-scenarios-regression.json"
     PPFOREST2_PLATFORM="${PPFOREST2_PLATFORM}"
-    PPFOREST2_VERSION="${PROJECT_VERSION}")
+    PPFOREST2_VERSION="${PPFOREST2_VERSION}")
 
   add_dependencies(ppforest2-test ppforest2)
 

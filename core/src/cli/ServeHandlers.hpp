@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <deque>
+#include <exception>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -80,6 +81,16 @@ namespace ppforest2::cli::serve {
 
   /** @brief `GET /health` → 200 with status + version. */
   Response handle_health(std::string const& version);
+
+  /**
+   * @brief Turn an exception caught by the server into a 500 response.
+   *
+   * Extracts the exception's `what()` message (or a generic fallback for a
+   * null or non-`std::exception` pointer) into the same `{"error": ...}` JSON
+   * body the 4xx responses use, so a handler that throws surfaces a reason to
+   * the client instead of an empty 500.
+   */
+  Response exception_response(std::exception_ptr ep);
 
   /**
    * @brief `GET /` (Accept: application/json) → 200 with the loaded

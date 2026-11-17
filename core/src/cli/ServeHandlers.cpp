@@ -137,6 +137,20 @@ namespace ppforest2::cli::serve {
     return Response{200, body.dump()};
   }
 
+  Response exception_response(std::exception_ptr ep) {
+    std::string message = "internal error";
+    if (ep) {
+      try {
+        std::rethrow_exception(ep);
+      } catch (std::exception const& e) {
+        message = e.what();
+      } catch (...) {
+        // Non-std exception: keep the generic message.
+      }
+    }
+    return error_response(500, std::move(message));
+  }
+
   Response handle_summarize(LoadedModel const& loaded) {
     json copy = loaded.model_json;
     copy.erase("model");
@@ -339,12 +353,29 @@ namespace ppforest2::cli::serve {
       return rows;
     }
 
+    // Which importance measure the summary page shows. Permuted importance is
+    // forest-only (it needs out-of-bag predictions); a single tree carries
+    // projection-based importance instead. Preferring permuted keeps the
+    // forest page unchanged while giving trees a measure they actually have.
+    std::string importance_measure(json const& j) {
+      auto const& vi = j.at("variable_importance");
+      if (vi.is_object() && vi.contains("permuted")) {
+        return "permuted";
+      }
+      return "projections";
+    }
+
     json build_importance_rows(json const& j, types::Names const& feature_names) {
       json rows = json::array();
       if (!j.at("variable_importance").is_object()) {
         return rows;
       }
-      auto const& values = j.at("variable_importance").at("permuted");
+      auto const& vi      = j.at("variable_importance");
+      std::string const m = importance_measure(j);
+      if (!vi.contains(m)) {
+        return rows;
+      }
+      auto const& values = vi.at(m);
 
       std::vector<std::pair<int, double>> ranked;
       ranked.reserve(values.size());
@@ -418,16 +449,17 @@ namespace ppforest2::cli::serve {
     // emitted from here (rather than living in the template) because some
     // HTML formatters re-format the contents of those tags as CSS/JS and
     // mangle the inja `{{ }}` placeholder.
-    data["style_tag"]         = "<style>" + std::string(resources::APP_CSS) + "</style>";
-    data["script_tag"]        = "<script>" + std::string(resources::SUMMARY_JS) + "</script>";
-    data["version"]           = PPFOREST2_VERSION;
-    data["obs"]               = j.at("meta").at("observations").get<int>();
-    data["feat"]              = j.at("meta").at("features").get<int>();
-    data["is_classification"] = is_classification;
-    data["groups_count"]      = loaded.group_names.size();
-    data["config"]            = build_config_rows(j.at("config"));
-    data["metrics"]           = build_summary_metrics(j, is_classification);
-    data["importance"]        = build_importance_rows(j, loaded.feature_names);
+    data["style_tag"]          = "<style>" + std::string(resources::APP_CSS) + "</style>";
+    data["script_tag"]         = "<script>" + std::string(resources::SUMMARY_JS) + "</script>";
+    data["version"]            = PPFOREST2_VERSION;
+    data["obs"]                = j.at("meta").at("observations").get<int>();
+    data["feat"]               = j.at("meta").at("features").get<int>();
+    data["is_classification"]  = is_classification;
+    data["groups_count"]       = loaded.group_names.size();
+    data["config"]             = build_config_rows(j.at("config"));
+    data["metrics"]            = build_summary_metrics(j, is_classification);
+    data["importance"]         = build_importance_rows(j, loaded.feature_names);
+    data["importance_measure"] = importance_measure(j);
 
     std::string body = templating_env().render(resources::SUMMARY_HTML, data);
     return Response{200, std::move(body), "text/html; charset=utf-8"};
