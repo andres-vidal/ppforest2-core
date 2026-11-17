@@ -217,7 +217,7 @@ ppforest2 predict -M model.json -d test.csv --no-proportions -o predictions.json
 | `-d, --data <file>`      | *(required)*  | CSV data to predict on, with or without a response column |
 | `-o, --output <file>`    | —             | Save predictions, vote proportions, and metrics (when the data has a response) to JSON |
 | `--no-metrics`           | —             | Don't read the response column; omit metrics from output |
-| `--no-proportions`       | —             | Omit vote proportions from output (forest only)   |
+| `--no-proportions`       | —             | Omit vote proportions from output (classification only) |
 
 **Data format**: the CSV has a header row, and its columns are matched to the model's features by name, so they may come in any order. These are the rules `serve` applies to a request. The response column is optional: the last column that is not a feature is read as the response, and the tool reports the error rate and confusion matrix (MSE, MAE and R² for regression); data with only the features is predicted without metrics. Any other extra column is ignored, and a missing feature is an error that names it. A model saved without feature names (trained on data without column names) takes the columns by position instead: its features in training order, optionally followed by the response, so the file has exactly as many columns as the model has features, or one more.
 
