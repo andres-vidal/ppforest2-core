@@ -28,6 +28,7 @@ add_library(ppforest2-strategies STATIC
   cutpoint/MinEntropy.cpp
   grouping/ByCutpoint.cpp
   grouping/ByLabel.cpp
+  grouping/ByObservation.cpp
   grouping/Grouping.cpp
   leaf/MajorityVote.cpp
   leaf/MeanResponse.cpp

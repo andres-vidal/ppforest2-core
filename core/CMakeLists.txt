@@ -234,6 +234,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/binarize/Disabled.test.cpp
     src/models/strategies/grouping/Grouping.test.cpp
     src/models/strategies/grouping/ByLabel.test.cpp
+    src/models/strategies/grouping/ByObservation.test.cpp
     src/models/strategies/grouping/ByCutpoint.test.cpp
     src/models/strategies/leaf/MajorityVote.test.cpp
     src/models/strategies/leaf/MeanResponse.test.cpp
