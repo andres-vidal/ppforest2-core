@@ -5,6 +5,7 @@
 - Core: the `between_centers` cutpoint strategy places the split between the two groups' projected means or medians (`center`), optionally weighted by group size, spread or standard error (`weight`). Its eight combinations are the split rules of PPforest's `rule` argument, of which only rule 1 (`mean_of_means`) was available. On the command line: `--cutpoint between_centers:center=median,weight=size`.
 - Core: the `min_entropy` cutpoint strategy (classification) tries the midpoint between every two consecutive projected observations and keeps the one whose two sides have the lowest weighted entropy. It works on a node with any number of groups.
 - Core: the `by_observation` grouping strategy (classification) sends each observation to the child on its side of the cutpoint, whatever its group, so a group can be divided between the two children.
+- Core: classification trees can split a group more than once, the second extension of PPtree in PPtreeExt (da Silva, Cook and Lee, 2026). The `none` binarization strategy keeps all the groups of a node, so the projection is optimized once over all of them; with `--binarize none --cutpoint min_entropy --grouping by_observation` a group can end up in several leaves, and the tree is no longer limited to one leaf per group. `none` is rejected with a cutpoint or a grouping that needs two groups.
 
 # ppforest2 0.1.4
 

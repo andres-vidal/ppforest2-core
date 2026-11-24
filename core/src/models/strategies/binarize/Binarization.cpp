@@ -15,6 +15,10 @@ namespace ppforest2::binarize {
       return;
     }
 
+    if (!binarizes()) {
+      return;
+    }
+
     invariant(ctx.y_bin.has_value(), "Binarization must set ctx.y_bin");
 
     if (ctx.y_bin.value().groups.size() < 2) {

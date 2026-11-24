@@ -232,6 +232,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/binarize/Binarization.test.cpp
     src/models/strategies/binarize/LargestGap.test.cpp
     src/models/strategies/binarize/Disabled.test.cpp
+    src/models/strategies/binarize/None.test.cpp
     src/models/strategies/grouping/Grouping.test.cpp
     src/models/strategies/grouping/ByLabel.test.cpp
     src/models/strategies/grouping/ByObservation.test.cpp

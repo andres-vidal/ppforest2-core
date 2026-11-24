@@ -31,6 +31,15 @@ namespace ppforest2::binarize {
      */
     void regroup(NodeContext& ctx, stats::RNG& rng) const;
 
+    /**
+     * @brief Whether this strategy reduces the node's groups to two.
+     *
+     * A strategy that does not leaves `ctx.y_bin` unset, so the node keeps
+     * all its groups. It needs a cutpoint and a grouping that accept more
+     * than two groups; `TrainingSpec` checks that they do.
+     */
+    virtual bool binarizes() const { return true; }
+
   protected:
     /** @brief Subclass implementation of binarization. */
     virtual void compute(NodeContext& ctx, stats::RNG& rng) const = 0;
@@ -41,4 +50,7 @@ namespace ppforest2::binarize {
 
   /** @brief Factory function for the Disabled (placeholder) binarizer. */
   Binarization::Ptr disabled();
+
+  /** @brief Factory function for no binarization: the node keeps all its groups. */
+  Binarization::Ptr none();
 }

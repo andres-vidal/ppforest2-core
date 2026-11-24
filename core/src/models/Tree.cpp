@@ -100,7 +100,10 @@ namespace ppforest2 {
       spec.find_projection(ctx, rng);
       if (step.y.groups.size() > 2) {
         spec.regroup(ctx, rng);
-        spec.find_projection(ctx, rng);
+
+        if (ctx.y_bin.has_value()) {
+          spec.find_projection(ctx, rng);
+        }
       }
       spec.find_cutpoint(ctx, rng);
       spec.group(ctx, rng);
