@@ -222,6 +222,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/cutpoint/Cutpoint.test.cpp
     src/models/strategies/cutpoint/MeanOfMeans.test.cpp
     src/models/strategies/cutpoint/BetweenCenters.test.cpp
+    src/models/strategies/cutpoint/MinEntropy.test.cpp
     src/models/strategies/stop/StopRule.test.cpp
     src/models/strategies/stop/PureNode.test.cpp
     src/models/strategies/stop/MinSize.test.cpp
@@ -239,6 +240,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/TrainingSpec.test.cpp
     src/models/Visualization.test.cpp
     src/stats/Stats.test.cpp
+    src/stats/Entropy.test.cpp
     src/stats/GroupPartition.test.cpp
     src/stats/ConfusionMatrix.test.cpp
     src/stats/Metrics.test.cpp

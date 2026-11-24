@@ -46,9 +46,13 @@ namespace ppforest2::cutpoint {
     }
 
     invariant(ctx.cutpoint.has_value(), "Cutpoint must set ctx.cutpoint.");
-    invariant(ctx.active_partition().groups.size() == 2, "Cutpoint expects a 2-group active partition.");
     invariant(ctx.projector.has_value(), "Cutpoint expects a projector to be set.");
 
-    orient_groups(ctx);
+    bool const two_groups = ctx.active_partition().groups.size() == 2;
+    invariant(two_groups || !requires_two_groups(), "Cutpoint expects a 2-group active partition.");
+
+    if (two_groups) {
+      orient_groups(ctx);
+    }
   }
 }

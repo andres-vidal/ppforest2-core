@@ -3,6 +3,7 @@
 ## New features
 
 - Core: the `between_centers` cutpoint strategy places the split between the two groups' projected means or medians (`center`), optionally weighted by group size, spread or standard error (`weight`). Its eight combinations are the split rules of PPforest's `rule` argument, of which only rule 1 (`mean_of_means`) was available. On the command line: `--cutpoint between_centers:center=median,weight=size`.
+- Core: the `min_entropy` cutpoint strategy (classification) tries the midpoint between every two consecutive projected observations and keeps the one whose two sides have the lowest weighted entropy. It works on a node with any number of groups.
 
 # ppforest2 0.1.4
 

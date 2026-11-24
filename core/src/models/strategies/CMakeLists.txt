@@ -25,6 +25,7 @@ add_library(ppforest2-strategies STATIC
   cutpoint/BetweenCenters.cpp
   cutpoint/Cutpoint.cpp
   cutpoint/MeanOfMeans.cpp
+  cutpoint/MinEntropy.cpp
   grouping/ByCutpoint.cpp
   grouping/ByLabel.cpp
   grouping/Grouping.cpp

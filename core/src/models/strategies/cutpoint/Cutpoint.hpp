@@ -30,6 +30,14 @@ namespace ppforest2::cutpoint {
      */
     void locate(NodeContext& ctx, stats::RNG& rng) const;
 
+    /**
+     * @brief Whether the strategy needs the node reduced to two groups.
+     *
+     * A strategy that does not can follow `binarize::None`. With two
+     * groups, `locate` also writes `ctx.lower_group` and `ctx.upper_group`.
+     */
+    virtual bool requires_two_groups() const { return true; }
+
   protected:
     /** @brief Subclass implementation of cutpoint computation. */
     virtual void compute(NodeContext& ctx, stats::RNG& rng) const = 0;
@@ -37,4 +45,7 @@ namespace ppforest2::cutpoint {
 
   /** @brief Factory function for mean-of-means split cutpoint. */
   Cutpoint::Ptr mean_of_means();
+
+  /** @brief Factory function for the minimum-entropy split cutpoint. */
+  Cutpoint::Ptr min_entropy();
 }

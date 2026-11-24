@@ -2,6 +2,7 @@ add_library(ppforest2-stats OBJECT
   Stats.cpp
   Uniform.cpp
   Normal.cpp
+  Entropy.cpp
   GroupPartition.cpp
   ConfusionMatrix.cpp
   Metrics.cpp
