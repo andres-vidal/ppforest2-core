@@ -1122,3 +1122,21 @@ TEST(ClassificationTreeMultipleSplits, SeparatesThreeGroupsWithoutBinarization) 
 
   EXPECT_EQ(tree->predict(x), y);
 }
+
+/* An entropy threshold above log(2) stops at the root, which votes for the majority. */
+TEST(ClassificationTreeMultipleSplits, EntropyStopLeavesTheRootAsALeaf) {
+  FeatureMatrix x = surrounded_x();
+  OutcomeVector y = surrounded_y();
+
+  auto const spec = TrainingSpec::builder(types::Mode::Classification)
+                        .binarization(binarize::none())
+                        .cutpoint(cutpoint::min_entropy())
+                        .grouping(grouping::by_observation())
+                        .stop(stop::any({stop::pure_node(), stop::min_entropy(0.7F)}))
+                        .build();
+
+  stats::RNG rng(0, 0);
+  auto const tree = Tree::train(spec, x, y, rng);
+
+  EXPECT_EQ(count_leaves(*tree->root), 1);
+}

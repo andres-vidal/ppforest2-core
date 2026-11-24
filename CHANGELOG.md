@@ -6,6 +6,7 @@
 - Core: the `min_entropy` cutpoint strategy (classification) tries the midpoint between every two consecutive projected observations and keeps the one whose two sides have the lowest weighted entropy. It works on a node with any number of groups.
 - Core: the `by_observation` grouping strategy (classification) sends each observation to the child on its side of the cutpoint, whatever its group, so a group can be divided between the two children.
 - Core: classification trees can split a group more than once, the second extension of PPtree in PPtreeExt (da Silva, Cook and Lee, 2026). The `none` binarization strategy keeps all the groups of a node, so the projection is optimized once over all of them; with `--binarize none --cutpoint min_entropy --grouping by_observation` a group can end up in several leaves, and the tree is no longer limited to one leaf per group. `none` is rejected with a cutpoint or a grouping that needs two groups.
+- Core: the stop rules `min_entropy` (stop when the entropy of the node's groups is below a threshold) and `min_proportion` (stop when the node holds at most a share of the training observations) keep such trees small. On the command line: `--stop min_entropy:0.5 --stop min_proportion:0.05`.
 
 # ppforest2 0.1.4
 

@@ -229,6 +229,8 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/stop/MinVariance.test.cpp
     src/models/strategies/stop/CompositeStop.test.cpp
     src/models/strategies/stop/MaxDepth.test.cpp
+    src/models/strategies/stop/MinEntropy.test.cpp
+    src/models/strategies/stop/MinProportion.test.cpp
     src/models/strategies/binarize/Binarization.test.cpp
     src/models/strategies/binarize/LargestGap.test.cpp
     src/models/strategies/binarize/Disabled.test.cpp

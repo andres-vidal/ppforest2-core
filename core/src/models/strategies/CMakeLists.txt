@@ -37,6 +37,8 @@ add_library(ppforest2-strategies STATIC
   pp/ProjectionPursuit.cpp
   stop/CompositeStop.cpp
   stop/MaxDepth.cpp
+  stop/MinEntropy.cpp
+  stop/MinProportion.cpp
   stop/MinSize.cpp
   stop/MinVariance.cpp
   stop/PureNode.cpp
