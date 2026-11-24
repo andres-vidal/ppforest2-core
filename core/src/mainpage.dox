@@ -132,16 +132,21 @@
  * - **cutpoint::Cutpoint** — split cutpoint computation. \n
  *   Built-in: cutpoint::MeanOfMeans (midpoint of projected group means),
  *   cutpoint::BetweenCenters (between the group means or medians, optionally
- *   weighted by group size, spread or standard error).
+ *   weighted by group size, spread or standard error),
+ *   cutpoint::MinEntropy (the cut with the lowest entropy on its two sides).
  *
  * - **stop::StopRule** — node stopping condition. \n
- *   Built-in: stop::PureNode (stop when the node contains a single group).
+ *   Built-in: stop::PureNode (stop when the node contains a single group),
+ *   stop::MinEntropy (stop when the entropy of the node's groups is low),
+ *   stop::MinProportion (stop when the node holds a small share of the data).
  *
  * - **binarize::Binarization** — multiclass → binary regrouping. \n
- *   Built-in: binarize::LargestGap (largest gap between projected group means).
+ *   Built-in: binarize::LargestGap (largest gap between projected group means),
+ *   binarize::None (keep all the groups of the node).
  *
  * - **grouping::Grouping** — group partition management. \n
- *   Built-in: grouping::ByLabel (route all observations of a group to the same child).
+ *   Built-in: grouping::ByLabel (route all observations of a group to the same child),
+ *   grouping::ByObservation (route each observation by its own projection).
  *
  * - **leaf::LeafStrategy** — leaf node creation. \n
  *   Built-in: leaf::MajorityVote (assign the majority class).
