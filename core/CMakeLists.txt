@@ -222,23 +222,29 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/cutpoint/Cutpoint.test.cpp
     src/models/strategies/cutpoint/MeanOfMeans.test.cpp
     src/models/strategies/cutpoint/BetweenCenters.test.cpp
+    src/models/strategies/cutpoint/MinEntropy.test.cpp
     src/models/strategies/stop/StopRule.test.cpp
     src/models/strategies/stop/PureNode.test.cpp
     src/models/strategies/stop/MinSize.test.cpp
     src/models/strategies/stop/MinVariance.test.cpp
     src/models/strategies/stop/CompositeStop.test.cpp
     src/models/strategies/stop/MaxDepth.test.cpp
+    src/models/strategies/stop/MinEntropy.test.cpp
+    src/models/strategies/stop/MinProportion.test.cpp
     src/models/strategies/binarize/Binarization.test.cpp
     src/models/strategies/binarize/LargestGap.test.cpp
     src/models/strategies/binarize/Disabled.test.cpp
+    src/models/strategies/binarize/None.test.cpp
     src/models/strategies/grouping/Grouping.test.cpp
     src/models/strategies/grouping/ByLabel.test.cpp
+    src/models/strategies/grouping/ByObservation.test.cpp
     src/models/strategies/grouping/ByCutpoint.test.cpp
     src/models/strategies/leaf/MajorityVote.test.cpp
     src/models/strategies/leaf/MeanResponse.test.cpp
     src/models/TrainingSpec.test.cpp
     src/models/Visualization.test.cpp
     src/stats/Stats.test.cpp
+    src/stats/Entropy.test.cpp
     src/stats/GroupPartition.test.cpp
     src/stats/ConfusionMatrix.test.cpp
     src/stats/Metrics.test.cpp

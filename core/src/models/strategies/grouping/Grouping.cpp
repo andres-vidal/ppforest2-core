@@ -38,8 +38,10 @@ namespace ppforest2::grouping {
       return;
     }
 
-    invariant(ctx.lower_group.has_value(), "Grouping requires ctx.lower_group (set by Cutpoint)");
-    invariant(ctx.upper_group.has_value(), "Grouping requires ctx.upper_group (set by Cutpoint)");
+    if (requires_two_groups()) {
+      invariant(ctx.lower_group.has_value(), "Grouping requires ctx.lower_group (set by Cutpoint)");
+      invariant(ctx.upper_group.has_value(), "Grouping requires ctx.upper_group (set by Cutpoint)");
+    }
 
     compute(ctx, rng);
 

@@ -1014,3 +1014,129 @@ TEST(ClassificationTree, PredictRejectsWrongFeatureCount) {
   EXPECT_THROW(tree.predict(x), UserError);
   EXPECT_THROW(tree.predict(x, Proportions{}), UserError);
 }
+
+namespace {
+  // Group 0 lies on both sides of group 1 along the first feature; the
+  // second feature carries no information.
+  FeatureMatrix surrounded_x() {
+    return MAT(
+        Feature,
+        rows(12),
+        0,
+        0.5F,
+        1,
+        0.1F,
+        2,
+        0.9F,
+        20,
+        0.4F,
+        21,
+        0.2F,
+        22,
+        0.7F,
+        5,
+        0.3F,
+        6,
+        0.8F,
+        7,
+        0.6F,
+        5.5F,
+        0.2F,
+        6.5F,
+        0.5F,
+        7.5F,
+        0.1F
+    );
+  }
+
+  OutcomeVector surrounded_y() {
+    return VEC(Outcome, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1);
+  }
+
+  TrainingSpec multiple_splits_spec() {
+    return TrainingSpec::builder(types::Mode::Classification)
+        .binarization(binarize::none())
+        .cutpoint(cutpoint::min_entropy())
+        .grouping(grouping::by_observation())
+        .stop(stop::pure_node())
+        .build();
+  }
+
+  int count_leaves(TreeNode const& node) {
+    auto const* branch = dynamic_cast<TreeBranch const*>(&node);
+    return branch == nullptr ? 1 : count_leaves(*branch->lower) + count_leaves(*branch->upper);
+  }
+}
+
+/* One leaf per group cannot separate a group that surrounds another. */
+TEST(ClassificationTreeMultipleSplits, OneSplitPerGroupMisclassifiesASurroundedGroup) {
+  FeatureMatrix x = surrounded_x();
+  OutcomeVector y = surrounded_y();
+
+  stats::RNG rng(0, 0);
+  auto const tree = Tree::train(TrainingSpec::builder(types::Mode::Classification).build(), x, y, rng);
+
+  EXPECT_EQ(count_leaves(*tree->root), 2);
+  EXPECT_NE(tree->predict(x), y);
+}
+
+/* Splitting group 0 twice gives it a leaf on each side of group 1. */
+TEST(ClassificationTreeMultipleSplits, SplittingAGroupTwiceSeparatesIt) {
+  FeatureMatrix x = surrounded_x();
+  OutcomeVector y = surrounded_y();
+
+  stats::RNG rng(0, 0);
+  auto const tree = Tree::train(multiple_splits_spec(), x, y, rng);
+
+  EXPECT_EQ(count_leaves(*tree->root), 3);
+  EXPECT_EQ(tree->predict(x), y);
+}
+
+/* With three groups and no binarization the tree still separates them. */
+TEST(ClassificationTreeMultipleSplits, SeparatesThreeGroupsWithoutBinarization) {
+  FeatureMatrix x =
+      MAT(Feature,
+          rows(9),
+          0.0F,
+          0.5F,
+          0.1F,
+          0.3F,
+          0.2F,
+          0.7F,
+          5.0F,
+          0.4F,
+          5.1F,
+          0.6F,
+          5.2F,
+          0.2F,
+          9.8F,
+          0.4F,
+          9.9F,
+          0.6F,
+          9.7F,
+          0.2F);
+  OutcomeVector y = VEC(Outcome, 0, 0, 0, 1, 1, 1, 2, 2, 2);
+
+  stats::RNG rng(0, 0);
+  auto const tree = Tree::train(multiple_splits_spec(), x, y, rng);
+
+  EXPECT_EQ(tree->predict(x), y);
+}
+
+/* An entropy threshold above log(2) stops at the root, which votes for the majority. */
+TEST(ClassificationTreeMultipleSplits, EntropyStopLeavesTheRootAsALeaf) {
+  FeatureMatrix x = surrounded_x();
+  OutcomeVector y = surrounded_y();
+
+  auto const spec = TrainingSpec::builder(types::Mode::Classification)
+                        .binarization(binarize::none())
+                        .cutpoint(cutpoint::min_entropy())
+                        .grouping(grouping::by_observation())
+                        .stop(stop::any({stop::pure_node(), stop::min_entropy(0.7F)}))
+                        .build();
+
+  stats::RNG rng(0, 0);
+  auto const tree = Tree::train(spec, x, y, rng);
+
+  EXPECT_EQ(count_leaves(*tree->root), 1);
+}

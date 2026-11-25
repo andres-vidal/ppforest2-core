@@ -538,3 +538,41 @@ TEST(TrainingSpec, ApplyDefaultsLeavesUserChoicesIntact) {
   EXPECT_EQ(b.config.stop->to_json().at("min_size").get<int>(), 20);
   EXPECT_EQ(b.config.binarization->to_json().at("name"), "disabled");
 }
+
+/* Without a binarization, the cutpoint must work on more than two groups. */
+TEST(TrainingSpec, NoBinarizationRejectsATwoGroupCutpoint) {
+  EXPECT_THROW(
+      TrainingSpec::builder(types::Mode::Classification)
+          .binarization(binarize::none())
+          .grouping(grouping::by_observation())
+          .build(),
+      UserError
+  );
+}
+
+/* Without a binarization, the grouping must work on more than two groups. */
+TEST(TrainingSpec, NoBinarizationRejectsATwoGroupGrouping) {
+  EXPECT_THROW(
+      TrainingSpec::builder(types::Mode::Classification)
+          .binarization(binarize::none())
+          .cutpoint(cutpoint::min_entropy())
+          .build(),
+      UserError
+  );
+}
+
+TEST(TrainingSpec, NoBinarizationAcceptsMinEntropyByObservation) {
+  EXPECT_NO_THROW(TrainingSpec::builder(types::Mode::Classification)
+                      .binarization(binarize::none())
+                      .cutpoint(cutpoint::min_entropy())
+                      .grouping(grouping::by_observation())
+                      .build());
+}
+
+/* The entropy cutpoint and the grouping by observation also work after a binarization. */
+TEST(TrainingSpec, BinarizationAcceptsMinEntropyByObservation) {
+  EXPECT_NO_THROW(TrainingSpec::builder(types::Mode::Classification)
+                      .cutpoint(cutpoint::min_entropy())
+                      .grouping(grouping::by_observation())
+                      .build());
+}

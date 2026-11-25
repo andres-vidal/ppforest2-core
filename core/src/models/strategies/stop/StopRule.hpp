@@ -50,6 +50,12 @@ namespace ppforest2::stop {
   /** @brief Factory function for minimum-variance stop rule. */
   StopRule::Ptr min_variance(types::Feature threshold);
 
+  /** @brief Factory function for the min-entropy stop rule. */
+  StopRule::Ptr min_entropy(types::Feature threshold);
+
+  /** @brief Factory function for the min-proportion stop rule. */
+  StopRule::Ptr min_proportion(types::Feature proportion);
+
   /** @brief Factory function for max-depth stop rule. */
   StopRule::Ptr max_depth(int n);
 

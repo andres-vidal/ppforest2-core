@@ -660,6 +660,35 @@ TEST(CLITrain, TrainWithThresholdStrategy) {
   EXPECT_EQ(j["config"]["cutpoint"]["name"], "mean_of_means");
 }
 
+/* The strategies that let a tree split a group more than once are all selectable. */
+TEST(CLITrain, TrainSplittingGroupsMoreThanOnce) {
+  TempFile const model;
+  model.clear();
+  auto result = run_ppforest2(
+      "-q train -d " + IRIS_CSV +
+      " -n 0 -r 0 --binarize none --cutpoint min_entropy --grouping by_observation "
+      "--stop pure_node --stop min_entropy:0.5 --stop min_proportion:0.05 -s " +
+      model.path()
+  );
+  EXPECT_EQ(result.exit_code, 0);
+
+  auto j = json::parse(model.read());
+  EXPECT_EQ(j["config"]["binarize"]["name"], "none");
+  EXPECT_EQ(j["config"]["cutpoint"]["name"], "min_entropy");
+  EXPECT_EQ(j["config"]["grouping"]["name"], "by_observation");
+  EXPECT_EQ(j["config"]["stop"]["name"], "any");
+}
+
+/* --binarize none with the default cutpoint is a user error, not a crash. */
+TEST(CLITrain, NoBinarizationWithATwoGroupCutpointFails) {
+  auto result =
+      run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --binarize none --grouping by_observation --no-save");
+
+  EXPECT_NE(result.exit_code, 0);
+  EXPECT_NE(result.stderr_output.find("needs the groups of a node reduced to two"), std::string::npos)
+      << result.stderr_output;
+}
+
 /* Train with all three explicit strategy flags produces correct config. */
 TEST(CLITrain, TrainWithAllStrategies) {
   TempFile const model;

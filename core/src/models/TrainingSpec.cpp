@@ -122,6 +122,28 @@ namespace ppforest2 {
     }
   }
 
+  namespace {
+    /**
+     * @brief Error if the node may keep more than two groups and the
+     *        cutpoint or the grouping cannot split such a node.
+     */
+    void check_multiclass_split(
+        binarize::Binarization::Ptr const& binarization,
+        cutpoint::Cutpoint::Ptr const& cutpoint,
+        grouping::Grouping::Ptr const& grouping
+    ) {
+      if (!binarization || !cutpoint || !grouping || binarization->binarizes()) {
+        return;
+      }
+
+      std::string const reason = "' needs the groups of a node reduced to two, which binarize strategy '" +
+                                 binarization->display_name() + "' does not do.";
+
+      user_error(!cutpoint->requires_two_groups(), "cutpoint strategy '" + cutpoint->display_name() + reason);
+      user_error(!grouping->requires_two_groups(), "grouping strategy '" + grouping->display_name() + reason);
+    }
+  }
+
   TrainingSpec::TrainingSpec(
       pp::ProjectionPursuit::Ptr pp,
       vars::VariableSelection::Ptr vars,
@@ -156,6 +178,8 @@ namespace ppforest2 {
     check_supports(this->binarization, "binarize", mode);
     check_supports(this->grouping, "grouping", mode);
     check_supports(this->leaf, "leaf", mode);
+
+    check_multiclass_split(this->binarization, this->cutpoint, this->grouping);
   }
 
 

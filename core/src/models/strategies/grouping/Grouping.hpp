@@ -59,6 +59,14 @@ namespace ppforest2::grouping {
      */
     void split(NodeContext& ctx, stats::RNG& rng) const;
 
+    /**
+     * @brief Whether the strategy needs the node reduced to two groups.
+     *
+     * A strategy that does reads `ctx.lower_group` and `ctx.upper_group`;
+     * one that does not can follow `binarize::None`.
+     */
+    virtual bool requires_two_groups() const { return true; }
+
   protected:
     /** @brief Subclass implementation of initial partition construction. */
     virtual stats::GroupPartition compute_init(types::OutcomeVector const& y) const = 0;
@@ -72,4 +80,7 @@ namespace ppforest2::grouping {
 
   /** @brief Factory function for cutpoint-based grouping (regression). */
   Grouping::Ptr by_cutpoint();
+
+  /** @brief Factory function for grouping that routes each observation by its projection. */
+  Grouping::Ptr by_observation();
 }

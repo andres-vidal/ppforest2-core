@@ -191,9 +191,9 @@ ppforest2 train -d data.csv --no-metrics         # skip variable importance
 | `--pp <spec>`            | `pda`            | PP strategy (e.g. `pda:lambda=0.5`); excludes `--lambda`           |
 | `--vars <spec>`          | `uniform`        | Variable selection strategy (e.g. `all`, `uniform:count=3`); excludes `--n-vars`/`--p-vars` |
 | `--cutpoint <spec>`      | `mean_of_means`  | Cutpoint strategy (e.g. `between_centers:center=median,weight=size`, see [Cutpoint](#cutpoint)) |
-| `--stop <spec>`          | *(mode-aware)*   | Stop rule (e.g. `pure_node`, `min_size:min_size=5`); repeatable — multiple rules compose via `any(...)` |
-| `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`)                         |
-| `--grouping <spec>`      | *(mode-aware)*   | Grouping strategy (e.g. `by_label`, `by_cutpoint`)                 |
+| `--stop <spec>`          | *(mode-aware)*   | Stop rule (e.g. `pure_node`, `min_size:min_size=5`, `min_entropy:0.5`, `min_proportion:0.05`); repeatable — multiple rules compose via `any(...)` |
+| `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`, `none`)                 |
+| `--grouping <spec>`      | *(mode-aware)*   | Grouping strategy (e.g. `by_label`, `by_observation`, `by_cutpoint`) |
 | `--leaf <spec>`          | *(mode-aware)*   | Leaf strategy (e.g. `majority_vote`, `mean_response`)              |
 | `-s, --save <file>`      | `model.json`     | Output model path (`.json` added if missing)                       |
 | `--no-save`              | —                | Skip saving the model                                              |
@@ -377,6 +377,24 @@ The `--cutpoint` flag controls where each node splits the projected data. `mean_
 | `median` | `standard_error` | Medians weighted by interquartile range / sqrt(n)     | 8               |
 
 `center` defaults to `mean` and `weight` to `none`. When either group has no spread, `spread` falls back to `none` and `standard_error` to `size`.
+
+`min_entropy` (classification only) does not use the group centers: it tries the midpoint between every two consecutive projected observations and keeps the one whose two sides have the lowest entropy, each side weighted by its share of the observations. It follows the boundary between the groups even when their centers are far from it, and it works on a node with any number of groups.
+
+### Splitting a Group More Than Once
+
+By default a classification tree sends every observation of a group to the same child (`--grouping by_label`), so it has one leaf per group and at most G - 1 splits. It cannot follow a boundary where a group lies on both sides of another. The `by_observation` grouping sends each observation to the child on its own side of the cutpoint, so a group can be divided and end up in several leaves. This is the second extension of the PPtree algorithm in [PPtreeExt](https://github.com/natydasilva/PPtreeExt) (da Silva, Cook and Lee, 2026), which combines:
+
+- `--binarize none`: the projection is optimized once over all the groups in the node, without reducing them to two;
+- `--cutpoint min_entropy`: the cutpoint is the one that leaves the purest two sides;
+- `--grouping by_observation`: each observation follows its own projection.
+
+```bash
+ppforest2 train -d data.csv -n 0 --binarize none --cutpoint min_entropy --grouping by_observation --stop pure_node --stop min_entropy:0.5 --stop min_proportion:0.05
+```
+
+`--binarize none` requires a cutpoint and a grouping that accept more than two groups, which are these two. Both also work after a binarization.
+
+Such a tree is not bounded by the number of groups, so it needs stop rules besides `pure_node`. `min_entropy:<threshold>` stops at a node whose groups have entropy below the threshold (`-sum(p * log(p))` over the group shares: 0 for a pure node, `log(G)` for G groups of equal size), and `min_proportion:<proportion>` at a node that holds at most that share of the training observations. PPtreeExt uses `0.5` and `0.05`.
 
 ## Architecture
 

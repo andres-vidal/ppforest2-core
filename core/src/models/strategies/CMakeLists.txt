@@ -22,11 +22,14 @@ add_library(ppforest2-strategies STATIC
   binarize/Binarization.cpp
   binarize/Disabled.cpp
   binarize/LargestGap.cpp
+  binarize/None.cpp
   cutpoint/BetweenCenters.cpp
   cutpoint/Cutpoint.cpp
   cutpoint/MeanOfMeans.cpp
+  cutpoint/MinEntropy.cpp
   grouping/ByCutpoint.cpp
   grouping/ByLabel.cpp
+  grouping/ByObservation.cpp
   grouping/Grouping.cpp
   leaf/MajorityVote.cpp
   leaf/MeanResponse.cpp
@@ -34,6 +37,8 @@ add_library(ppforest2-strategies STATIC
   pp/ProjectionPursuit.cpp
   stop/CompositeStop.cpp
   stop/MaxDepth.cpp
+  stop/MinEntropy.cpp
+  stop/MinProportion.cpp
   stop/MinSize.cpp
   stop/MinVariance.cpp
   stop/PureNode.cpp
