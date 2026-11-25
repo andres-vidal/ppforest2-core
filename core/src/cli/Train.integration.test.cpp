@@ -689,6 +689,166 @@ TEST(CLITrain, NoBinarizationWithATwoGroupCutpointFails) {
       << result.stderr_output;
 }
 
+/* --multiple-splits sets the strategies of trees that split a class more than once. */
+TEST(CLITrain, MultipleSplitsSetsItsStrategies) {
+  TempFile const model;
+  model.clear();
+  auto result = run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits -s " + model.path());
+  ASSERT_EQ(result.exit_code, 0) << result.stderr_output;
+
+  auto const config = json::parse(model.read())["config"];
+  EXPECT_EQ(config["binarize"], json({{"name", "none"}}));
+  EXPECT_EQ(config["cutpoint"], json({{"name", "min_entropy"}}));
+  EXPECT_EQ(config["grouping"], json({{"name", "by_observation"}}));
+
+  auto const& rules = config["stop"]["rules"];
+  ASSERT_EQ(rules.size(), 3U);
+  EXPECT_EQ(rules[0]["name"], "pure_node");
+  EXPECT_FLOAT_EQ(rules[1]["threshold"].get<float>(), 0.5F);
+  EXPECT_FLOAT_EQ(rules[2]["proportion"].get<float>(), 0.05F);
+}
+
+/* --min-entropy and --min-proportion tune the shortcut's stop rules. */
+TEST(CLITrain, MultipleSplitsTakesItsStopThresholds) {
+  TempFile const model;
+  model.clear();
+  auto result = run_ppforest2(
+      "-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits --min-entropy 0.3 --min-proportion 0.1 -s " +
+      model.path()
+  );
+  ASSERT_EQ(result.exit_code, 0) << result.stderr_output;
+
+  auto const saved  = json::parse(model.read());
+  auto const& rules = saved["config"]["stop"]["rules"];
+  EXPECT_FLOAT_EQ(rules[1]["threshold"].get<float>(), 0.3F);
+  EXPECT_FLOAT_EQ(rules[2]["proportion"].get<float>(), 0.1F);
+}
+
+/* An explicit --stop replaces the shortcut's stop rules. */
+TEST(CLITrain, MultipleSplitsKeepsAnExplicitStopRule) {
+  TempFile const model;
+  model.clear();
+  auto result =
+      run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits --stop pure_node -s " + model.path());
+  ASSERT_EQ(result.exit_code, 0) << result.stderr_output;
+
+  EXPECT_EQ(json::parse(model.read())["config"]["stop"], json({{"name", "pure_node"}}));
+}
+
+/* The shortcut and the strategies it sets are one API or the other. */
+TEST(CLITrain, MultipleSplitsRejectsTheStrategiesItSets) {
+  for (std::string const flag : {"--binarize largest_gap", "--cutpoint mean_of_means", "--grouping by_label"}) {
+    auto result = run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits " + flag + " --no-save");
+
+    EXPECT_NE(result.exit_code, 0) << flag;
+    EXPECT_NE(result.stderr_output.find("cannot be combined with them"), std::string::npos) << result.stderr_output;
+  }
+}
+
+TEST(CLITrain, StopThresholdsNeedMultipleSplits) {
+  auto result = run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --min-entropy 0.3 --no-save");
+
+  EXPECT_NE(result.exit_code, 0);
+  EXPECT_NE(result.stderr_output.find("which is not set"), std::string::npos) << result.stderr_output;
+}
+
+TEST(CLITrain, StopThresholdsRejectAnExplicitStopRule) {
+  auto result = run_ppforest2(
+      "-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits --min-proportion 0.1 --stop pure_node --no-save"
+  );
+
+  EXPECT_NE(result.exit_code, 0);
+  EXPECT_NE(result.stderr_output.find("explicit stop rule"), std::string::npos) << result.stderr_output;
+}
+
+TEST(CLITrain, MultipleSplitsIsForClassificationOnly) {
+  auto result = run_ppforest2("-q train -d " + MTCARS_CSV + " -n 0 -r 0 --multiple-splits --no-save");
+
+  EXPECT_NE(result.exit_code, 0);
+  EXPECT_NE(result.stderr_output.find("classification only"), std::string::npos) << result.stderr_output;
+}
+
+/* The shortcut also comes from a config file, with the same keys. */
+TEST(CLITrain, MultipleSplitsFromConfigFile) {
+  TempFile const config;
+  {
+    std::ofstream out(config.path());
+    out << R"({"data": ")" << IRIS_CSV << R"(", "size": 0, "seed": 0, "multiple_splits": true, "min_entropy": 0.3})";
+  }
+
+  TempFile const model;
+  model.clear();
+  auto result = run_ppforest2("-q train --config " + config.path() + " -s " + model.path());
+  ASSERT_EQ(result.exit_code, 0) << result.stderr_output;
+
+  auto const config_out = json::parse(model.read())["config"];
+  EXPECT_EQ(config_out["grouping"]["name"], "by_observation");
+  EXPECT_FLOAT_EQ(config_out["stop"]["rules"][1]["threshold"].get<float>(), 0.3F);
+}
+
+namespace {
+  // A config file that trains a single iris tree with seed 0, plus `keys`,
+  // a JSON fragment that starts with a comma.
+  void write_iris_tree_config(TempFile const& config, std::string const& keys) {
+    std::ofstream out(config.path());
+    out << R"({"data": ")" << IRIS_CSV << R"(", "size": 0, "seed": 0)" << keys << "}";
+  }
+
+  // Trains with `config` plus `flags` and returns the saved model's config.
+  json train_config_with_flags(TempFile const& config, std::string const& flags) {
+    TempFile const model;
+    model.clear();
+    auto result = run_ppforest2("-q train --config " + config.path() + " " + flags + " -s " + model.path());
+    EXPECT_EQ(result.exit_code, 0) << result.stderr_output;
+
+    return result.exit_code == 0 ? json::parse(model.read())["config"] : json();
+  }
+}
+
+/* --stop on the command line replaces the thresholds of a config file. */
+TEST(CLITrain, StopFlagOverridesConfigThresholds) {
+  TempFile const config;
+  write_iris_tree_config(config, R"(, "multiple_splits": true, "min_entropy": 0.3)");
+
+  EXPECT_EQ(train_config_with_flags(config, "--stop pure_node")["stop"], json({{"name", "pure_node"}}));
+}
+
+/* --min-entropy on the command line replaces the stop rule of a config file. */
+TEST(CLITrain, ThresholdFlagOverridesConfigStopRule) {
+  TempFile const config;
+  write_iris_tree_config(config, R"(, "multiple_splits": true, "stop": {"name": "pure_node"})");
+
+  auto const stop = train_config_with_flags(config, "--min-entropy 0.3")["stop"];
+  EXPECT_EQ(stop["name"], "any");
+  EXPECT_FLOAT_EQ(stop["rules"][1]["threshold"].get<float>(), 0.3F);
+}
+
+/* --multiple-splits on the command line replaces the strategies of a config file it sets. */
+TEST(CLITrain, MultipleSplitsFlagOverridesConfigStrategies) {
+  TempFile const config;
+  write_iris_tree_config(config, R"(, "cutpoint": {"name": "mean_of_means"}, "binarize": "largest_gap")");
+
+  auto const config_out = train_config_with_flags(config, "--multiple-splits");
+  EXPECT_EQ(config_out["cutpoint"], json({{"name", "min_entropy"}}));
+  EXPECT_EQ(config_out["binarize"], json({{"name", "none"}}));
+}
+
+/* The thresholds are checked with the other parameters, from either source. */
+TEST(CLITrain, StopThresholdsOutOfRangeAreRejected) {
+  auto const from_flag =
+      run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 --multiple-splits --min-entropy -1 --no-save");
+  EXPECT_NE(from_flag.exit_code, 0);
+  EXPECT_NE(from_flag.stderr_output.find("min_entropy must be >= 0"), std::string::npos) << from_flag.stderr_output;
+
+  TempFile const config;
+  write_iris_tree_config(config, R"(, "multiple_splits": true, "min_proportion": 1.5)");
+
+  auto const from_config = run_ppforest2("-q train --config " + config.path() + " --no-save");
+  EXPECT_NE(from_config.exit_code, 0);
+  EXPECT_NE(from_config.stderr_output.find("min_proportion must be in (0, 1)"), std::string::npos)
+      << from_config.stderr_output;
+}
+
 /* Train with all three explicit strategy flags produces correct config. */
 TEST(CLITrain, TrainWithAllStrategies) {
   TempFile const model;

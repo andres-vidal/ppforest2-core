@@ -113,6 +113,48 @@ namespace ppforest2::cli {
       return any_rule;
     }
 
+    constexpr float DEFAULT_MIN_ENTROPY    = 0.5F;
+    constexpr float DEFAULT_MIN_PROPORTION = 0.05F;
+  }
+
+  void ModelParams::resolve_multiple_splits() {
+    bool const tuned = min_entropy.has_value() || min_proportion.has_value();
+
+    user_error(multiple_splits || !tuned, "min_entropy and min_proportion tune multiple_splits, which is not set.");
+
+    if (!multiple_splits) {
+      return;
+    }
+
+    user_error(mode_input != "regression", "multiple_splits is for classification only.");
+    user_error(
+        binarize_config.is_null() && cutpoint_config.is_null() && grouping_config.is_null(),
+        "multiple_splits sets the binarize, cutpoint and grouping strategies; it cannot be combined with them."
+    );
+    user_error(
+        !tuned || stop_config.is_null(),
+        "min_entropy and min_proportion set the stop rule; they cannot be combined with an explicit stop rule."
+    );
+
+    binarize_config = {{"name", "none"}};
+    cutpoint_config = {{"name", "min_entropy"}};
+    grouping_config = {{"name", "by_observation"}};
+
+    if (stop_config.is_null()) {
+      stop_config = {
+          {"name", "any"},
+          {"rules",
+           {{{"name", "pure_node"}},
+            {{"name", "min_entropy"}, {"threshold", min_entropy.value_or(DEFAULT_MIN_ENTROPY)}},
+            {{"name", "min_proportion"}, {"proportion", min_proportion.value_or(DEFAULT_MIN_PROPORTION)}}}}
+      };
+    }
+
+    // The strategies now carry the shortcut, so the configuration this
+    // writes out lists them instead of the shortcut.
+    multiple_splits = false;
+    min_entropy.reset();
+    min_proportion.reset();
   }
 
   float parse_proportion(std::string const& input) {
@@ -245,6 +287,20 @@ namespace ppforest2::cli {
     if (config.contains("max_retries") && config["max_retries"].is_number_integer()) {
       check(config["max_retries"].get<int>() >= 0, "max_retries must be non-negative", errors);
     }
+
+    // Multiple splits shortcut
+    if (config.contains("multiple_splits")) {
+      check(config["multiple_splits"].is_boolean(), "multiple_splits must be true or false", errors);
+    }
+
+    if (config.contains("min_entropy") && config["min_entropy"].is_number()) {
+      check(config["min_entropy"].get<float>() >= 0, "min_entropy must be >= 0", errors);
+    }
+
+    if (config.contains("min_proportion") && config["min_proportion"].is_number()) {
+      auto const proportion = config["min_proportion"].get<float>();
+      check(proportion > 0 && proportion < 1, "min_proportion must be in (0, 1)", errors);
+    }
   }
 
   ModelParams::ModelParams(nlohmann::json const& config) {
@@ -255,6 +311,14 @@ namespace ppforest2::cli {
     threads     = config.value("threads", threads);
     max_retries = config.value("max_retries", max_retries);
     n_vars      = config.value("n_vars", n_vars);
+
+    multiple_splits = config.value("multiple_splits", multiple_splits);
+    if (config.contains("min_entropy")) {
+      min_entropy = config["min_entropy"].get<float>();
+    }
+    if (config.contains("min_proportion")) {
+      min_proportion = config["min_proportion"].get<float>();
+    }
 
     if (config.contains("p_vars")) {
       auto const& v = config["p_vars"];
@@ -338,6 +402,8 @@ namespace ppforest2::cli {
       vars_config["count"] = count;
     }
 
+    resolve_multiple_splits();
+
     invariant(
         !mode_input.empty(),
         "ModelParams::resolve_defaults: mode_input must be set before resolving strategy defaults "
@@ -383,6 +449,16 @@ namespace ppforest2::cli {
     }
     if (p_vars) {
       j["p_vars"] = *p_vars;
+    }
+
+    if (multiple_splits) {
+      j["multiple_splits"] = true;
+    }
+    if (min_entropy) {
+      j["min_entropy"] = *min_entropy;
+    }
+    if (min_proportion) {
+      j["min_proportion"] = *min_proportion;
     }
 
     if (!pp_config.is_null()) {

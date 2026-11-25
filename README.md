@@ -195,6 +195,9 @@ ppforest2 train -d data.csv --no-metrics         # skip variable importance
 | `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`, `none`)                 |
 | `--grouping <spec>`      | *(mode-aware)*   | Grouping strategy (e.g. `by_label`, `by_observation`, `by_cutpoint`) |
 | `--leaf <spec>`          | *(mode-aware)*   | Leaf strategy (e.g. `majority_vote`, `mean_response`)              |
+| `--multiple-splits`      | —                | Let a class be split more than once (see [Splitting a Group More Than Once](#splitting-a-group-more-than-once)); excludes `--binarize`/`--cutpoint`/`--grouping` |
+| `--min-entropy <X>`      | `0.5`            | With `--multiple-splits`: entropy below which a node stops; excludes `--stop` |
+| `--min-proportion <X>`   | `0.05`           | With `--multiple-splits`: share of the data at or below which a node stops; excludes `--stop` |
 | `-s, --save <file>`      | `model.json`     | Output model path (`.json` added if missing)                       |
 | `--no-save`              | —                | Skip saving the model                                              |
 | `--no-metrics`           | —                | Skip variable importance computation                               |
@@ -284,7 +287,7 @@ ppforest2 evaluate -d data.csv -n 50 -i 20
 | `--convergence-min <N>`     | `10`     | Minimum iterations before checking convergence    |
 | `--convergence-window <N>`  | `3`      | Consecutive stable checks required to stop        |
 
-All model parameters (`--size`, `--lambda`, `--seed`, `--n-vars`/`--p-vars`, `--threads`, `--max-retries`) and strategy flags (`--pp`, `--vars`, `--cutpoint`, `--stop`, `--binarize`, `--grouping`, `--leaf`) are also available.
+All model parameters (`--size`, `--lambda`, `--seed`, `--n-vars`/`--p-vars`, `--threads`, `--max-retries`, `--multiple-splits`, `--min-entropy`, `--min-proportion`) and strategy flags (`--pp`, `--vars`, `--cutpoint`, `--stop`, `--binarize`, `--grouping`, `--leaf`) are also available.
 
 ### `benchmark` — Multi-Scenario Benchmarks
 
@@ -389,8 +392,16 @@ By default a classification tree sends every observation of a group to the same 
 - `--grouping by_observation`: each observation follows its own projection.
 
 ```bash
+ppforest2 train -d data.csv -n 0 --multiple-splits
+```
+
+`--multiple-splits` is a shortcut for those three strategies plus PPtreeExt's stop rules, and the same as:
+
+```bash
 ppforest2 train -d data.csv -n 0 --binarize none --cutpoint min_entropy --grouping by_observation --stop pure_node --stop min_entropy:0.5 --stop min_proportion:0.05
 ```
+
+`--min-entropy` and `--min-proportion` change the two thresholds (`--multiple-splits --min-entropy 0.3`), and an explicit `--stop` replaces the stop rules altogether. In a config file the shortcut is `"multiple_splits": true`, with `"min_entropy"` and `"min_proportion"`. The command line overrides the config file: `--stop` replaces its thresholds, `--min-entropy` and `--min-proportion` its stop rule, and `--multiple-splits` its binarize, cutpoint and grouping strategies.
 
 `--binarize none` requires a cutpoint and a grouping that accept more than two groups, which are these two. Both also work after a binarization.
 
