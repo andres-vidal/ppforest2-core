@@ -21,6 +21,7 @@
 add_library(ppforest2-strategies STATIC
   binarize/Binarization.cpp
   binarize/Disabled.cpp
+  binarize/GroupMeans.cpp
   binarize/LargestGap.cpp
   binarize/None.cpp
   cutpoint/BetweenCenters.cpp
