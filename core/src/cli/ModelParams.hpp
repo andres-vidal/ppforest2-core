@@ -24,6 +24,22 @@ namespace ppforest2::cli {
     std::string p_vars_input;
 
     /**
+     * @brief Shortcut for classification trees that split a class more
+     *        than once (the second PPtree extension of PPtreeExt).
+     *
+     * Resolves to the `none` binarization, the `min_entropy` cutpoint and
+     * the `by_observation` grouping, and, unless a stop rule is given, to
+     * `any(pure_node, min_entropy, min_proportion)` with `min_entropy` and
+     * `min_proportion` below. It cannot be combined with an explicit
+     * binarization, cutpoint or grouping.
+     */
+    bool multiple_splits = false;
+    /** @brief Entropy threshold of the shortcut's stop rule (default 0.5). */
+    std::optional<float> min_entropy;
+    /** @brief Node proportion of the shortcut's stop rule (default 0.05). */
+    std::optional<float> min_proportion;
+
+    /**
      * @brief Training mode ("classification" or "regression").
      *
      * Empty default = "infer from data": for `--data`, the CSV reader
@@ -66,6 +82,15 @@ namespace ppforest2::cli {
 
     /** @brief Fill in runtime defaults (threads, vars, strategy configs). */
     void resolve_defaults(unsigned int total_vars);
+
+    /**
+     * @brief Expand `multiple_splits` into its strategies.
+     *
+     * Called by `resolve_defaults`, after the data has set the mode, so
+     * the checks apply whether the shortcut came from a flag or from a
+     * config file.
+     */
+    void resolve_multiple_splits();
 
     /** @brief Validate model-related fields in a JSON config. */
     static void validate(nlohmann::json const& config, std::vector<std::string>& errors);

@@ -49,6 +49,23 @@ namespace ppforest2::cli {
     sub->add_option("--grouping", model.grouping_input, "Grouping strategy (e.g. by_label)");
     sub->add_option("--leaf", model.leaf_input, "Leaf strategy (e.g. majority_vote)");
 
+    sub->add_flag(
+        "--multiple-splits",
+        model.multiple_splits,
+        "Let a class be split more than once (PPtreeExt): sets --binarize none, --cutpoint min_entropy, "
+        "--grouping by_observation and, unless --stop is given, PPtreeExt's stop rules"
+    );
+    sub->add_option(
+        "--min-entropy",
+        model.min_entropy,
+        "With --multiple-splits: stop at a node whose entropy is below this (default: 0.5)"
+    );
+    sub->add_option(
+        "--min-proportion",
+        model.min_proportion,
+        "With --multiple-splits: stop at a node with at most this share of the data (default: 0.05)"
+    );
+
     // Mutual exclusions (all configurable via config, so no CLI11 validators)
     sub->get_option("--n-vars")->excludes("--p-vars");
     sub->get_option("--p-vars")->excludes("--n-vars");

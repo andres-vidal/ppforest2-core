@@ -113,6 +113,42 @@ namespace ppforest2::cli {
       return any_rule;
     }
 
+    constexpr float DEFAULT_MIN_ENTROPY    = 0.5F;
+    constexpr float DEFAULT_MIN_PROPORTION = 0.05F;
+  }
+
+  void ModelParams::resolve_multiple_splits() {
+    bool const tuned = min_entropy.has_value() || min_proportion.has_value();
+
+    user_error(multiple_splits || !tuned, "min_entropy and min_proportion tune multiple_splits, which is not set.");
+
+    if (!multiple_splits) {
+      return;
+    }
+
+    user_error(mode_input != "regression", "multiple_splits is for classification only.");
+    user_error(
+        binarize_config.is_null() && cutpoint_config.is_null() && grouping_config.is_null(),
+        "multiple_splits sets the binarize, cutpoint and grouping strategies; it cannot be combined with them."
+    );
+    user_error(
+        !tuned || stop_config.is_null(),
+        "min_entropy and min_proportion set the stop rule; they cannot be combined with an explicit stop rule."
+    );
+
+    binarize_config = {{"name", "none"}};
+    cutpoint_config = {{"name", "min_entropy"}};
+    grouping_config = {{"name", "by_observation"}};
+
+    if (stop_config.is_null()) {
+      stop_config = {
+          {"name", "any"},
+          {"rules",
+           {{{"name", "pure_node"}},
+            {{"name", "min_entropy"}, {"threshold", min_entropy.value_or(DEFAULT_MIN_ENTROPY)}},
+            {{"name", "min_proportion"}, {"proportion", min_proportion.value_or(DEFAULT_MIN_PROPORTION)}}}}
+      };
+    }
   }
 
   float parse_proportion(std::string const& input) {
@@ -256,6 +292,14 @@ namespace ppforest2::cli {
     max_retries = config.value("max_retries", max_retries);
     n_vars      = config.value("n_vars", n_vars);
 
+    multiple_splits = config.value("multiple_splits", multiple_splits);
+    if (config.contains("min_entropy")) {
+      min_entropy = config["min_entropy"].get<float>();
+    }
+    if (config.contains("min_proportion")) {
+      min_proportion = config["min_proportion"].get<float>();
+    }
+
     if (config.contains("p_vars")) {
       auto const& v = config["p_vars"];
       p_vars_input  = v.is_string() ? v.get<std::string>() : v.dump();
@@ -337,6 +381,8 @@ namespace ppforest2::cli {
       vars_config.erase("proportion");
       vars_config["count"] = count;
     }
+
+    resolve_multiple_splits();
 
     invariant(
         !mode_input.empty(),
