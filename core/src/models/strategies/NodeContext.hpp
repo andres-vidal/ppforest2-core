@@ -70,6 +70,16 @@ namespace ppforest2 {
      */
     std::optional<stats::GroupPartition> y_bin;
 
+    /**
+     * @brief Set by regroup: the groups the node's splitting projection is
+     *        optimized on, when they are not all the observations of `y_bin`.
+     *
+     * `std::nullopt` unless the binarization restricts the projection (as
+     * `binarize::NearestGroups` does, to the two groups next to the gap).
+     * The cutpoint and the grouping still work on `active_partition()`.
+     */
+    std::optional<stats::GroupPartition> y_projection;
+
     /** @brief Set by find_cutpoint: split cutpoint in projected space. `std::nullopt` before find_cutpoint runs. */
     std::optional<types::Feature> cutpoint;
 
@@ -99,5 +109,15 @@ namespace ppforest2 {
      * Before binarization (or for 2-group nodes), returns the original partition.
      */
     stats::GroupPartition const& active_partition() const { return y_bin.has_value() ? *y_bin : y; }
+
+    /**
+     * @brief Return the partition the projection is optimized on.
+     *
+     * `y_projection` when the binarization set it, the active partition
+     * otherwise.
+     */
+    stats::GroupPartition const& projection_partition() const {
+      return y_projection.has_value() ? *y_projection : active_partition();
+    }
   };
 }

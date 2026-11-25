@@ -59,7 +59,7 @@ namespace ppforest2::pp {
 
   void PDA::compute(NodeContext& ctx, stats::RNG& /*rng*/) const {
     invariant(ctx.var_selection.has_value(), "PDA requires var_selection on NodeContext");
-    auto const& partition         = ctx.active_partition();
+    auto const& partition         = ctx.projection_partition();
     FeatureMatrix const reduced_x = ctx.x(Eigen::indexing::all, ctx.var_selection->selected_cols);
     auto result                   = optimize_pda(lambda, reduced_x, partition);
     ctx.projector                 = ctx.var_selection->expand(result.projector);
