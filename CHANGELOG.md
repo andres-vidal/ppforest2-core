@@ -1,3 +1,9 @@
+# ppforest2 (development version)
+
+## New features
+
+- Core: the `between_centers` cutpoint strategy places the split between the two groups' projected means or medians (`center`), optionally weighted by group size, spread or standard error (`weight`). Its eight combinations are the split rules of PPforest's `rule` argument, of which only rule 1 (`mean_of_means`) was available. On the command line: `--cutpoint between_centers:center=median,weight=size`.
+
 # ppforest2 0.1.4
 
 ## Bug fixes

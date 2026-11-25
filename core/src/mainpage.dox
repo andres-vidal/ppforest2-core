@@ -130,7 +130,9 @@
  *   vars::Uniform (sample @c count variables uniformly at random, for forests).
  *
  * - **cutpoint::Cutpoint** — split cutpoint computation. \n
- *   Built-in: cutpoint::MeanOfMeans (midpoint of projected group means).
+ *   Built-in: cutpoint::MeanOfMeans (midpoint of projected group means),
+ *   cutpoint::BetweenCenters (between the group means or medians, optionally
+ *   weighted by group size, spread or standard error).
  *
  * - **stop::StopRule** — node stopping condition. \n
  *   Built-in: stop::PureNode (stop when the node contains a single group).

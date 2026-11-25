@@ -221,6 +221,7 @@ if(NOT PPFOREST2_CORE_ONLY)
     src/models/strategies/vars/All.test.cpp
     src/models/strategies/cutpoint/Cutpoint.test.cpp
     src/models/strategies/cutpoint/MeanOfMeans.test.cpp
+    src/models/strategies/cutpoint/BetweenCenters.test.cpp
     src/models/strategies/stop/StopRule.test.cpp
     src/models/strategies/stop/PureNode.test.cpp
     src/models/strategies/stop/MinSize.test.cpp

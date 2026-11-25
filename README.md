@@ -190,7 +190,7 @@ ppforest2 train -d data.csv --no-metrics         # skip variable importance
 | `--max-retries <N>`      | `3`              | Max retries for degenerate trees                                   |
 | `--pp <spec>`            | `pda`            | PP strategy (e.g. `pda:lambda=0.5`); excludes `--lambda`           |
 | `--vars <spec>`          | `uniform`        | Variable selection strategy (e.g. `all`, `uniform:count=3`); excludes `--n-vars`/`--p-vars` |
-| `--cutpoint <spec>`      | `mean_of_means`  | Cutpoint strategy (e.g. `mean_of_means`)                           |
+| `--cutpoint <spec>`      | `mean_of_means`  | Cutpoint strategy (e.g. `between_centers:center=median,weight=size`, see [Cutpoint](#cutpoint)) |
 | `--stop <spec>`          | *(mode-aware)*   | Stop rule (e.g. `pure_node`, `min_size:min_size=5`); repeatable — multiple rules compose via `any(...)` |
 | `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`)                         |
 | `--grouping <spec>`      | *(mode-aware)*   | Grouping strategy (e.g. `by_label`, `by_cutpoint`)                 |
@@ -360,6 +360,23 @@ The `--vars` flag controls how many features are considered at each split in a f
 | Fraction | `1/3`    | Use one-third of features       |
 
 This parameter is ignored for single trees (`--size 0`), which always use all features.
+
+### Cutpoint
+
+The `--cutpoint` flag controls where each node splits the projected data. `mean_of_means`, the default, is the midpoint of the two groups' projected means. `between_centers` places the cutpoint between the two group centers, with each center weighted by the other group's weight, so the cutpoint moves toward the group with the smaller weight. Its two parameters cover the eight split rules of PPforest (the `rule` argument):
+
+| `center` | `weight`         | Cutpoint                                              | PPforest `rule` |
+|----------|------------------|-------------------------------------------------------|-----------------|
+| `mean`   | `none`           | Midpoint of the means (same as `mean_of_means`)       | 1               |
+| `mean`   | `size`           | Means weighted by group size                          | 2               |
+| `mean`   | `spread`         | Means weighted by standard deviation                  | 3               |
+| `mean`   | `standard_error` | Means weighted by standard deviation / sqrt(n)        | 4               |
+| `median` | `none`           | Midpoint of the medians                               | 5               |
+| `median` | `size`           | Medians weighted by group size                        | 6               |
+| `median` | `spread`         | Medians weighted by interquartile range               | 7               |
+| `median` | `standard_error` | Medians weighted by interquartile range / sqrt(n)     | 8               |
+
+`center` defaults to `mean` and `weight` to `none`. When either group has no spread, `spread` falls back to `none` and `standard_error` to `size`.
 
 ## Architecture
 
