@@ -158,6 +158,26 @@ TEST(ServeHandlersErrors, ExceptionResponseCarriesMessage) {
   EXPECT_EQ(body.at("error"), "boom");
 }
 
+/* A thrown string is the message itself. */
+TEST(ServeHandlersErrors, ExceptionResponseUsesThrownString) {
+  Response const from_string  = exception_response(std::make_exception_ptr(std::string("bad input")));
+  Response const from_literal = exception_response(std::make_exception_ptr("bad input"));
+
+  EXPECT_EQ(nlohmann::json::parse(from_string.body).at("error"), "bad input");
+  EXPECT_EQ(nlohmann::json::parse(from_literal.body).at("error"), "bad input");
+}
+
+/* Any other type has no message, so the response says what kind it was. */
+TEST(ServeHandlersErrors, ExceptionResponseNamesNonStandardException) {
+  Response const r = exception_response(std::make_exception_ptr(7));
+
+  EXPECT_EQ(r.status, 500);
+  EXPECT_EQ(
+      nlohmann::json::parse(r.body).at("error"),
+      "internal error: an exception not derived from std::exception, with no message"
+  );
+}
+
 /* A null exception pointer still yields a well-formed 500, not a crash. */
 TEST(ServeHandlersErrors, ExceptionResponseHandlesNullPointer) {
   Response const r = exception_response(std::exception_ptr{});

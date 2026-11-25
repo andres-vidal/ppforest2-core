@@ -137,18 +137,30 @@ namespace ppforest2::cli::serve {
     return Response{200, body.dump()};
   }
 
-  Response exception_response(std::exception_ptr ep) {
-    std::string message = "internal error";
-    if (ep) {
+  namespace {
+    // The message an exception carries. A thrown string is its own message;
+    // any other type has none, so the message says what kind it was.
+    std::string exception_message(std::exception_ptr ep) {
+      if (!ep) {
+        return "internal error";
+      }
+
       try {
         std::rethrow_exception(ep);
       } catch (std::exception const& e) {
-        message = e.what();
+        return e.what();
+      } catch (std::string const& s) {
+        return s;
+      } catch (char const* s) {
+        return s;
       } catch (...) {
-        // Non-std exception: keep the generic message.
+        return "internal error: an exception not derived from std::exception, with no message";
       }
     }
-    return error_response(500, std::move(message));
+  }
+
+  Response exception_response(std::exception_ptr ep) {
+    return error_response(500, exception_message(ep));
   }
 
   Response handle_summarize(LoadedModel const& loaded) {
