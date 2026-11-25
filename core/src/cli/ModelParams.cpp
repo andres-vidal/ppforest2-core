@@ -149,6 +149,12 @@ namespace ppforest2::cli {
             {{"name", "min_proportion"}, {"proportion", min_proportion.value_or(DEFAULT_MIN_PROPORTION)}}}}
       };
     }
+
+    // The strategies now carry the shortcut, so the configuration this
+    // writes out lists them instead of the shortcut.
+    multiple_splits = false;
+    min_entropy.reset();
+    min_proportion.reset();
   }
 
   float parse_proportion(std::string const& input) {
@@ -280,6 +286,20 @@ namespace ppforest2::cli {
     // Max retries
     if (config.contains("max_retries") && config["max_retries"].is_number_integer()) {
       check(config["max_retries"].get<int>() >= 0, "max_retries must be non-negative", errors);
+    }
+
+    // Multiple splits shortcut
+    if (config.contains("multiple_splits")) {
+      check(config["multiple_splits"].is_boolean(), "multiple_splits must be true or false", errors);
+    }
+
+    if (config.contains("min_entropy") && config["min_entropy"].is_number()) {
+      check(config["min_entropy"].get<float>() >= 0, "min_entropy must be >= 0", errors);
+    }
+
+    if (config.contains("min_proportion") && config["min_proportion"].is_number()) {
+      auto const proportion = config["min_proportion"].get<float>();
+      check(proportion > 0 && proportion < 1, "min_proportion must be in (0, 1)", errors);
     }
   }
 
@@ -429,6 +449,16 @@ namespace ppforest2::cli {
     }
     if (p_vars) {
       j["p_vars"] = *p_vars;
+    }
+
+    if (multiple_splits) {
+      j["multiple_splits"] = true;
+    }
+    if (min_entropy) {
+      j["min_entropy"] = *min_entropy;
+    }
+    if (min_proportion) {
+      j["min_proportion"] = *min_proportion;
     }
 
     if (!pp_config.is_null()) {

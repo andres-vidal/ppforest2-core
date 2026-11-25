@@ -25,6 +25,43 @@ using namespace ppforest2::stats;
 using json = nlohmann::json;
 
 namespace ppforest2::cli {
+  namespace {
+    // Drops a strategy that came from the config file when its flag is not
+    // on the command line.
+    void drop_config_strategy(CLI::App const& sub, std::string const& flag, json& config, std::string& input) {
+      if (sub.count(flag) == 0) {
+        config = nullptr;
+        input.clear();
+      }
+    }
+
+    // The command line overrides the config file. A config file can set keys
+    // that conflict with the multiple splits flags, and those keys yield to
+    // the flags: --stop replaces the config's thresholds, --min-entropy and
+    // --min-proportion replace its stop rule, and --multiple-splits replaces
+    // its binarize, cutpoint and grouping strategies. Conflicts within the
+    // command line, or within the config file, are still errors.
+    void prefer_command_line_over_config(CLI::App const& sub, ModelParams& model) {
+      bool const stop_given       = sub.count("--stop") > 0;
+      bool const thresholds_given = sub.count("--min-entropy") > 0 || sub.count("--min-proportion") > 0;
+
+      if (stop_given && !thresholds_given) {
+        model.min_entropy.reset();
+        model.min_proportion.reset();
+      }
+
+      if (thresholds_given && !stop_given) {
+        model.stop_config = nullptr;
+      }
+
+      if (sub.count("--multiple-splits") > 0) {
+        drop_config_strategy(sub, "--binarize", model.binarize_config, model.binarize_input);
+        drop_config_strategy(sub, "--cutpoint", model.cutpoint_config, model.cutpoint_input);
+        drop_config_strategy(sub, "--grouping", model.grouping_config, model.grouping_input);
+      }
+    }
+  }
+
   void add_model_options(CLI::App* sub, ModelParams& model) {
     sub->add_option("-m,--mode", model.mode_input, "Training mode (classification or regression)");
     sub->add_option("-n,--size", model.size, "Number of trees (default: 100, 0 for single tree)");
@@ -75,6 +112,8 @@ namespace ppforest2::cli {
     sub->get_option("--vars")->excludes("--p-vars");
     sub->get_option("--n-vars")->excludes("--vars");
     sub->get_option("--p-vars")->excludes("--vars");
+
+    sub->parse_complete_callback([sub, &model]() { prefer_command_line_over_config(*sub, model); });
   }
 
   void setup_train(CLI::App& app, Params& params) {

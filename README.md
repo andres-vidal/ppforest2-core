@@ -401,7 +401,7 @@ ppforest2 train -d data.csv -n 0 --multiple-splits
 ppforest2 train -d data.csv -n 0 --binarize none --cutpoint min_entropy --grouping by_observation --stop pure_node --stop min_entropy:0.5 --stop min_proportion:0.05
 ```
 
-`--min-entropy` and `--min-proportion` change the two thresholds (`--multiple-splits --min-entropy 0.3`), and an explicit `--stop` replaces the stop rules altogether. In a config file the shortcut is `"multiple_splits": true`, with `"min_entropy"` and `"min_proportion"`.
+`--min-entropy` and `--min-proportion` change the two thresholds (`--multiple-splits --min-entropy 0.3`), and an explicit `--stop` replaces the stop rules altogether. In a config file the shortcut is `"multiple_splits": true`, with `"min_entropy"` and `"min_proportion"`. The command line overrides the config file: `--stop` replaces its thresholds, `--min-entropy` and `--min-proportion` its stop rule, and `--multiple-splits` its binarize, cutpoint and grouping strategies.
 
 `--binarize none` requires a cutpoint and a grouping that accept more than two groups, which are these two. Both also work after a binarization.
 
