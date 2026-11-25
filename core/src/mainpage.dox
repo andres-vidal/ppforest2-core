@@ -142,6 +142,8 @@
  *
  * - **binarize::Binarization** — multiclass → binary regrouping. \n
  *   Built-in: binarize::LargestGap (largest gap between projected group means),
+ *   binarize::NearestGroups (the same sides, with the projection optimized
+ *   on the two groups next to the gap),
  *   binarize::None (keep all the groups of the node).
  *
  * - **grouping::Grouping** — group partition management. \n
