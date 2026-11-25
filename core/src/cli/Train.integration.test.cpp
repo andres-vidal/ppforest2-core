@@ -679,6 +679,20 @@ TEST(CLITrain, TrainSplittingGroupsMoreThanOnce) {
   EXPECT_EQ(j["config"]["stop"]["name"], "any");
 }
 
+/* --binarize nearest_groups is selectable, with and without its gap. */
+TEST(CLITrain, TrainWithNearestGroupsBinarization) {
+  TempFile const model;
+  model.clear();
+  auto result = run_ppforest2(
+      "-q train -d " + IRIS_CSV + " -n 0 -r 0 --binarize nearest_groups:gap=min_entropy -s " + model.path()
+  );
+  EXPECT_EQ(result.exit_code, 0);
+
+  auto j = json::parse(model.read());
+  EXPECT_EQ(j["config"]["binarize"]["name"], "nearest_groups");
+  EXPECT_EQ(j["config"]["binarize"]["gap"], "min_entropy");
+}
+
 /* --binarize none with the default cutpoint is a user error, not a crash. */
 TEST(CLITrain, NoBinarizationWithATwoGroupCutpointFails) {
   auto result =

@@ -192,7 +192,7 @@ ppforest2 train -d data.csv --no-metrics         # skip variable importance
 | `--vars <spec>`          | `uniform`        | Variable selection strategy (e.g. `all`, `uniform:count=3`); excludes `--n-vars`/`--p-vars` |
 | `--cutpoint <spec>`      | `mean_of_means`  | Cutpoint strategy (e.g. `between_centers:center=median,weight=size`, see [Cutpoint](#cutpoint)) |
 | `--stop <spec>`          | *(mode-aware)*   | Stop rule (e.g. `pure_node`, `min_size:min_size=5`, `min_entropy:0.5`, `min_proportion:0.05`); repeatable — multiple rules compose via `any(...)` |
-| `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`, `none`)                 |
+| `--binarize <spec>`      | *(mode-aware)*   | Binarization strategy (e.g. `largest_gap`, `nearest_groups`, `none`) |
 | `--grouping <spec>`      | *(mode-aware)*   | Grouping strategy (e.g. `by_label`, `by_observation`, `by_cutpoint`) |
 | `--leaf <spec>`          | *(mode-aware)*   | Leaf strategy (e.g. `majority_vote`, `mean_response`)              |
 | `-s, --save <file>`      | `model.json`     | Output model path (`.json` added if missing)                       |
@@ -379,6 +379,18 @@ The `--cutpoint` flag controls where each node splits the projected data. `mean_
 `center` defaults to `mean` and `weight` to `none`. When either group has no spread, `spread` falls back to `none` and `standard_error` to `size`.
 
 `min_entropy` (classification only) does not use the group centers: it tries the midpoint between every two consecutive projected observations and keeps the one whose two sides have the lowest entropy, each side weighted by its share of the observations. It follows the boundary between the groups even when their centers are far from it, and it works on a node with any number of groups.
+
+### Projecting on the Nearest Groups
+
+A node with more than two groups is first divided into two sides: the groups are ordered by projected mean and cut at the largest gap between two consecutive means (`--binarize largest_gap`, the default). The projection that splits the node is then optimized to separate the two sides as a whole. When a side gathers groups that are far apart, that projection is pulled toward the distant ones and away from the boundary.
+
+`--binarize nearest_groups` optimizes it on the two groups next to the gap instead, one from each side. The cutpoint is still located from all the observations of the two sides, and every group follows its side. This is the first extension of the PPtree algorithm in [PPtreeExt](https://github.com/natydasilva/PPtreeExt) (da Silva, Cook and Lee, 2026). The groups left out of the projection may fall on either side of the cutpoint, so with many groups the tree can do worse than with `largest_gap`; compare both on your data (`ppforest2 evaluate`).
+
+`nearest_groups:gap=min_entropy` also changes how the gap is chosen: it takes the gap whose midpoint leaves the lowest sum of entropies on its two sides, counting observations rather than groups.
+
+```bash
+ppforest2 train -d data.csv -n 0 --binarize nearest_groups
+```
 
 ### Splitting a Group More Than Once
 
