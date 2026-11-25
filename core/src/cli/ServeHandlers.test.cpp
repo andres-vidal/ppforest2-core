@@ -126,14 +126,22 @@ TEST_F(ServeHandlersClassificationTest, SummaryHtmlIncludesKeyFields) {
   EXPECT_NE(r.body.find("Classification"), std::string::npos);
   EXPECT_NE(r.body.find("Petal.Length"), std::string::npos);
   EXPECT_NE(r.body.find("Accuracy"), std::string::npos);
-  EXPECT_NE(r.body.find("Variable importance"), std::string::npos);
   EXPECT_EQ(r.body.find("Regression"), std::string::npos);
 }
 
-/* A single tree has no permuted importance (that measure is forest-only, it
- * needs out-of-bag predictions), so the HTML summary falls back to
- * projection-based importance instead of aborting with a 500. Regression test
- * for `GET /` returning 500 in a browser when serving a tree model. */
+/* A forest has all three importance measures, and the page shows each. */
+TEST_F(ServeHandlersClassificationTest, SummaryHtmlShowsEveryImportanceMeasure) {
+  auto const loaded = load_from_file(model_->path());
+  Response const r  = handle_summary_html(loaded);
+
+  EXPECT_NE(r.body.find("Variable importance (projections)"), std::string::npos);
+  EXPECT_NE(r.body.find("Variable importance (weighted projections)"), std::string::npos);
+  EXPECT_NE(r.body.find("Variable importance (permuted)"), std::string::npos);
+}
+
+/* A single tree has only projection importance (the other two measures need
+ * out-of-bag predictions), and the page shows that one. Regression test for
+ * `GET /` returning 500 in a browser when serving a tree model. */
 TEST(ServeHandlersTree, SummaryHtmlRendersForSingleTree) {
   TempFile model;
   model.clear();
@@ -146,6 +154,8 @@ TEST(ServeHandlersTree, SummaryHtmlRendersForSingleTree) {
   EXPECT_EQ(r.status, 200);
   EXPECT_NE(r.body.find("<!DOCTYPE html>"), std::string::npos);
   EXPECT_NE(r.body.find("Variable importance (projections)"), std::string::npos);
+  EXPECT_EQ(r.body.find("Variable importance (weighted projections)"), std::string::npos);
+  EXPECT_EQ(r.body.find("Variable importance (permuted)"), std::string::npos);
 }
 
 /* A handler exception becomes a 500 whose JSON body carries the reason,
