@@ -46,6 +46,19 @@ namespace {
 
     return f.ctx.cutpoint.value();
   }
+
+  // Group 0 is seven values of 0.1, whose float mean is not exactly 0.1.
+  // Group 1 is 10, 12.
+  Feature cutpoint_with_rounded_mean(Weight weight) {
+    NodeContextFixture f(
+        MAT(Feature, rows(9), 0.1F, 0.1F, 0.1F, 0.1F, 0.1F, 0.1F, 0.1F, 10, 12), VEC(GroupId, 0, 0, 0, 0, 0, 0, 0, 1, 1)
+    );
+    f.ctx.projector = VEC(Feature, 1);
+
+    BetweenCenters(Center::Mean, weight).locate(f.ctx, f.rng);
+
+    return f.ctx.cutpoint.value();
+  }
 }
 
 TEST(CutpointBetweenCenters, FromJsonRoundTrip) {
@@ -154,6 +167,16 @@ TEST(CutpointBetweenCenters, SpreadFallsBackToNoWeight) {
 TEST(CutpointBetweenCenters, StandardErrorFallsBackToSize) {
   EXPECT_FLOAT_EQ(cutpoint_without_spread(Center::Mean, Weight::StandardError), 6.8F);
   EXPECT_FLOAT_EQ(cutpoint_without_spread(Center::Median, Weight::StandardError), 6.8F);
+}
+
+/*
+ * Seven values of 0.1 average to 0.10000001 in single precision, so the group's
+ * spread is 0 only when it comes from the values themselves. The other group is
+ * 10, 12: `spread` gives (0.1 + 11) / 2 and `standard_error` (0.1 * 2 + 11 * 7) / 9.
+ */
+TEST(CutpointBetweenCenters, ConstantGroupHasNoSpreadDespiteRounding) {
+  EXPECT_FLOAT_EQ(cutpoint_with_rounded_mean(Weight::Spread), 5.55F);
+  EXPECT_FLOAT_EQ(cutpoint_with_rounded_mean(Weight::StandardError), 77.2F / 9.0F);
 }
 
 /* Swapping the group labels leaves every rule's cutpoint where it was. */

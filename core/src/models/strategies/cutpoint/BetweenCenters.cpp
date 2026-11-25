@@ -90,6 +90,14 @@ namespace ppforest2::cutpoint {
       GroupSummary summary;
       summary.size = static_cast<Feature>(values.size());
 
+      // A constant group is centered on its value with no spread. Its float
+      // mean can differ from that value by rounding, which would give it a
+      // small spread and keep the rule without spread from applying.
+      if (values.front() == values.back()) {
+        summary.center = values.front();
+        return summary;
+      }
+
       if (center == Center::Mean) {
         summary.center = projected.mean();
         summary.spread = standard_deviation(values, summary.center);
