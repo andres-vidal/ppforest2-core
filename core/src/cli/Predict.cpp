@@ -33,6 +33,14 @@ namespace ppforest2::cli {
     sub->add_flag("--no-metrics", params.no_metrics, "Don't read the response column; omit metrics from output");
     sub->add_flag("--no-proportions", params.no_proportions, "Omit vote proportions from output");
 
+    // Same matching rules as `serve` (io::csv::read_prediction_data).
+    sub->footer("The CSV has a header row. Columns are matched to the model's features by\n"
+                "name, in any order. The last column that is not a feature is read as the\n"
+                "response and used to report metrics; without one, there are only\n"
+                "predictions. Any other extra column is ignored. A model saved without\n"
+                "feature names takes the columns by position: its features in training\n"
+                "order, optionally followed by the response.");
+
     // CLI-exclusive constraints (predict doesn't use config files)
     sub->get_option("--model")->required()->check(CLI::ExistingFile);
     sub->get_option("--data")->required()->check(CLI::ExistingFile);
