@@ -7,9 +7,10 @@ var searchData=
   ['error_5frate_4',['error_rate',['../structppforest2_1_1stats_1_1ClassificationMetrics.html#a93015263f493a7a71b8a4e001ad3017f',1,'ppforest2::stats::ClassificationMetrics::error_rate()'],['../namespaceppforest2_1_1stats.html#a7a65f2b6ddf141a1888923cc3b5e52c0',1,'ppforest2::stats::error_rate(types::OutcomeVector const &amp;predictions, types::GroupIdVector const &amp;actual)'],['../namespaceppforest2_1_1stats.html#a595e644d7dee128f05fd09b07ed874d9',1,'ppforest2::stats::error_rate(types::OutcomeVector const &amp;predictions, types::OutcomeVector const &amp;actual)']]],
   ['evaluateparams_5',['EvaluateParams',['../structppforest2_1_1cli_1_1EvaluateParams.html#a46433865e4da0a28b53c795fae378c48',1,'ppforest2::cli::EvaluateParams::EvaluateParams()=default'],['../structppforest2_1_1cli_1_1EvaluateParams.html#a2617e0a7add6be9ad6f4160504510e68',1,'ppforest2::cli::EvaluateParams::EvaluateParams(nlohmann::json const &amp;config)']]],
   ['evaluateresult_6',['EvaluateResult',['../structppforest2_1_1io_1_1EvaluateResult.html#ab49e32ff4fa6a895ffcd8565abf1e071',1,'ppforest2::io::EvaluateResult::EvaluateResult()=default'],['../structppforest2_1_1io_1_1EvaluateResult.html#a74b0591abaac802df5dee3c5583f6ca9',1,'ppforest2::io::EvaluateResult::EvaluateResult(nlohmann::json const &amp;j)']]],
-  ['expand_7',['expand',['../structppforest2_1_1vars_1_1VariableSelection_1_1Result.html#a57b533ed1ccf1661e915e89f85ec32ef',1,'ppforest2::vars::VariableSelection::Result']]],
-  ['expect_5farray_8',['expect_array',['../classppforest2_1_1JsonReader.html#a631120731b295eeb2ea769e8ed31b39e',1,'ppforest2::JsonReader']]],
-  ['expect_5fenum_9',['expect_enum',['../classppforest2_1_1JsonReader.html#aa295611a27e9d493712bb5f526ee2806',1,'ppforest2::JsonReader']]],
-  ['expect_5fint_10',['expect_int',['../classppforest2_1_1JsonReader.html#a7164248ad7ff188bb6c7b36cb4425059',1,'ppforest2::JsonReader']]],
-  ['expect_5fnumber_11',['expect_number',['../classppforest2_1_1JsonReader.html#aae4ac4120ab128464cc5efb8aeb0c44d',1,'ppforest2::JsonReader']]]
+  ['exception_5fresponse_7',['exception_response',['../namespaceppforest2_1_1cli_1_1serve.html#a60d3f7e2b7c6780e7a02c31711a5fef9',1,'ppforest2::cli::serve']]],
+  ['expand_8',['expand',['../structppforest2_1_1vars_1_1VariableSelection_1_1Result.html#a57b533ed1ccf1661e915e89f85ec32ef',1,'ppforest2::vars::VariableSelection::Result']]],
+  ['expect_5farray_9',['expect_array',['../classppforest2_1_1JsonReader.html#a631120731b295eeb2ea769e8ed31b39e',1,'ppforest2::JsonReader']]],
+  ['expect_5fenum_10',['expect_enum',['../classppforest2_1_1JsonReader.html#aa295611a27e9d493712bb5f526ee2806',1,'ppforest2::JsonReader']]],
+  ['expect_5fint_11',['expect_int',['../classppforest2_1_1JsonReader.html#a7164248ad7ff188bb6c7b36cb4425059',1,'ppforest2::JsonReader']]],
+  ['expect_5fnumber_12',['expect_number',['../classppforest2_1_1JsonReader.html#aae4ac4120ab128464cc5efb8aeb0c44d',1,'ppforest2::JsonReader']]]
 ];

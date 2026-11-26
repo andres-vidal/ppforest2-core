@@ -29,7 +29,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ppforest2<span id="projectnumber">&#160;v0.1.4</span>
+   <div id="projectname">ppforest2<span id="projectnumber">&#160;v0.1.5-dev</span>
    </div>
    <div id="projectbrief">Projection Pursuit Decision Trees and Random Forests</div>
   </td>
@@ -115,6 +115,7 @@ $(function(){initNavTree('ServeHandlers_8hpp.html',''); initResizable(true); });
 <code>#include &lt;nlohmann/json.hpp&gt;</code><br />
 <code>#include &lt;cstddef&gt;</code><br />
 <code>#include &lt;deque&gt;</code><br />
+<code>#include &lt;exception&gt;</code><br />
 <code>#include &lt;map&gt;</code><br />
 <code>#include &lt;mutex&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
@@ -151,6 +152,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a60d3f7e2b7c6780e7a02c31711a5fef9" id="r_a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structppforest2_1_1cli_1_1serve_1_1Response.html">Response</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceppforest2_1_1cli_1_1serve.html#a60d3f7e2b7c6780e7a02c31711a5fef9">ppforest2::cli::serve::exception_response</a> (std::exception_ptr ep)</td></tr>
+<tr class="memdesc:a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn an exception caught by the server into a 500 response.  <br /></td></tr>
+<tr class="separator:a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad78952304cbd26b29fafc4a0e5367307" id="r_ad78952304cbd26b29fafc4a0e5367307"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structppforest2_1_1cli_1_1serve_1_1Response.html">Response</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceppforest2_1_1cli_1_1serve.html#ad78952304cbd26b29fafc4a0e5367307">ppforest2::cli::serve::handle_health</a> (std::string const &amp;version)</td></tr>
 <tr class="memdesc:ad78952304cbd26b29fafc4a0e5367307"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>GET /health</code> → 200 with status + version.  <br /></td></tr>
 <tr class="separator:ad78952304cbd26b29fafc4a0e5367307"><td class="memSeparator" colspan="2">&#160;</td></tr>

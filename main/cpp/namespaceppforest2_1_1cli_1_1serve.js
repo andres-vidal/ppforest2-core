@@ -4,6 +4,7 @@ var namespaceppforest2_1_1cli_1_1serve =
     [ "PredictionResult", "structppforest2_1_1cli_1_1serve_1_1PredictionResult.html", "structppforest2_1_1cli_1_1serve_1_1PredictionResult" ],
     [ "PredictionStore", "classppforest2_1_1cli_1_1serve_1_1PredictionStore.html", "classppforest2_1_1cli_1_1serve_1_1PredictionStore" ],
     [ "Response", "structppforest2_1_1cli_1_1serve_1_1Response.html", "structppforest2_1_1cli_1_1serve_1_1Response" ],
+    [ "exception_response", "namespaceppforest2_1_1cli_1_1serve.html#a60d3f7e2b7c6780e7a02c31711a5fef9", null ],
     [ "handle_health", "namespaceppforest2_1_1cli_1_1serve.html#ad78952304cbd26b29fafc4a0e5367307", null ],
     [ "handle_predict", "namespaceppforest2_1_1cli_1_1serve.html#af933b2749884e1163ec45eec48cf15ff", null ],
     [ "handle_predict_html", "namespaceppforest2_1_1cli_1_1serve.html#a50033595debdd155bc4d7f335a5a39a7", null ],

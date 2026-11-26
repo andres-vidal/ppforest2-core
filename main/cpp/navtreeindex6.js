@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"namespaceppforest2_1_1serialization.html#a09eca2e12bf9f725e0e2cada774853fb":[3,0,2,8,5],
 "namespaceppforest2_1_1serialization.html#a0d3a4b3777332f1c526369d3375a4830":[3,0,2,8,31],
 "namespaceppforest2_1_1serialization.html#a107afa7dd5edd4dffbb2d201dbda07b3":[3,0,2,8,35],
 "namespaceppforest2_1_1serialization.html#a13a7b08b11331d1417c8c2d307bf25bb":[3,0,2,8,7],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "structppforest2_1_1VariableImportance.html":[3,0,2,34],
 "structppforest2_1_1VariableImportance.html":[4,0,1,29],
 "structppforest2_1_1VariableImportance.html#a56fdf2538c7867b8c5d7183a7268a4d3":[3,0,2,34,0],
-"structppforest2_1_1VariableImportance.html#a56fdf2538c7867b8c5d7183a7268a4d3":[4,0,1,29,0],
-"structppforest2_1_1VariableImportance.html#a9d993434c9ada143fd61ad34d87eadc7":[3,0,2,34,1]
+"structppforest2_1_1VariableImportance.html#a56fdf2538c7867b8c5d7183a7268a4d3":[4,0,1,29,0]
 };

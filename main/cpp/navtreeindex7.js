@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"structppforest2_1_1VariableImportance.html#a9d993434c9ada143fd61ad34d87eadc7":[3,0,2,34,1],
 "structppforest2_1_1VariableImportance.html#a9d993434c9ada143fd61ad34d87eadc7":[4,0,1,29,1],
 "structppforest2_1_1VariableImportance.html#aedc45885ac99406da00595eba4fc5a44":[3,0,2,34,3],
 "structppforest2_1_1VariableImportance.html#aedc45885ac99406da00595eba4fc5a44":[4,0,1,29,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "structppforest2_1_1cli_1_1ScenarioResult.html":[3,0,2,1,8],
 "structppforest2_1_1cli_1_1ScenarioResult.html":[4,0,1,1,8],
 "structppforest2_1_1cli_1_1ScenarioResult.html#a0c55bd0a3cc116bac43e9edfeea0320f":[3,0,2,1,8,3],
-"structppforest2_1_1cli_1_1ScenarioResult.html#a0c55bd0a3cc116bac43e9edfeea0320f":[4,0,1,1,8,3],
-"structppforest2_1_1cli_1_1ScenarioResult.html#a325f94104f19e71609c5965fb2569445":[3,0,2,1,8,1]
+"structppforest2_1_1cli_1_1ScenarioResult.html#a0c55bd0a3cc116bac43e9edfeea0320f":[4,0,1,1,8,3]
 };

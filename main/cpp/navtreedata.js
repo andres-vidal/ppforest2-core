@@ -101,7 +101,7 @@ var NAVTREEINDEX =
 "classppforest2_1_1grouping_1_1ByCutpoint.html#ad02968d4f26d9bda259ba0091a9e40e3",
 "classppforest2_1_1stop_1_1MinSize.html#a708b7c17fe808e8b9f5c61e607cd6e60",
 "functions_vars_o.html",
-"namespaceppforest2_1_1serialization.html#a0d3a4b3777332f1c526369d3375a4830",
+"namespaceppforest2_1_1serialization.html#a09eca2e12bf9f725e0e2cada774853fb",
 "structppforest2_1_1VariableImportance.html#a9d993434c9ada143fd61ad34d87eadc7",
 "structppforest2_1_1cli_1_1ScenarioResult.html#a325f94104f19e71609c5965fb2569445",
 "structppforest2_1_1serialization_1_1Export.html#a94424e4992832cb19b5870965193d107"

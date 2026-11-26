@@ -29,7 +29,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ppforest2<span id="projectnumber">&#160;v0.1.4</span>
+   <div id="projectname">ppforest2<span id="projectnumber">&#160;v0.1.5-dev</span>
    </div>
    <div id="projectbrief">Projection Pursuit Decision Trees and Random Forests</div>
   </td>
@@ -123,6 +123,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a60d3f7e2b7c6780e7a02c31711a5fef9" id="r_a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structppforest2_1_1cli_1_1serve_1_1Response.html">Response</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a60d3f7e2b7c6780e7a02c31711a5fef9">exception_response</a> (std::exception_ptr ep)</td></tr>
+<tr class="memdesc:a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn an exception caught by the server into a 500 response.  <br /></td></tr>
+<tr class="separator:a60d3f7e2b7c6780e7a02c31711a5fef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad78952304cbd26b29fafc4a0e5367307" id="r_ad78952304cbd26b29fafc4a0e5367307"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structppforest2_1_1cli_1_1serve_1_1Response.html">Response</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad78952304cbd26b29fafc4a0e5367307">handle_health</a> (std::string const &amp;version)</td></tr>
 <tr class="memdesc:ad78952304cbd26b29fafc4a0e5367307"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>GET /health</code> → 200 with status + version.  <br /></td></tr>
 <tr class="separator:ad78952304cbd26b29fafc4a0e5367307"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,6 +146,26 @@ Functions</h2></td></tr>
 <tr class="separator:abc499e0333013d6df713ea719dea22ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a60d3f7e2b7c6780e7a02c31711a5fef9" name="a60d3f7e2b7c6780e7a02c31711a5fef9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60d3f7e2b7c6780e7a02c31711a5fef9">&#9670;&#160;</a></span>exception_response()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structppforest2_1_1cli_1_1serve_1_1Response.html">Response</a> ppforest2::cli::serve::exception_response </td>
+          <td>(</td>
+          <td class="paramtype">std::exception_ptr</td>          <td class="paramname"><span class="paramname"><em>ep</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn an exception caught by the server into a 500 response. </p>
+<p>Puts the exception's message into the same <code>{"error": ...}</code> JSON body the 4xx responses use, so a handler that throws surfaces a reason to the client instead of an empty 500. The message is <code>what()</code> for a <code>std::exception</code> and the text itself for a thrown string; any other type gets a message saying it was not a <code>std::exception</code>, and a null pointer a generic one. </p>
+
+</div>
+</div>
 <a id="ad78952304cbd26b29fafc4a0e5367307" name="ad78952304cbd26b29fafc4a0e5367307"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad78952304cbd26b29fafc4a0e5367307">&#9670;&#160;</a></span>handle_health()</h2>
 

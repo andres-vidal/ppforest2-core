@@ -164,12 +164,13 @@ var NAVTREEINDEX5 =
 "namespaceppforest2_1_1cli.html#ae9d69e4b2a0b3aed5ad1ccd540176fca":[3,0,2,1,17],
 "namespaceppforest2_1_1cli.html#aec41d4b49e63a3d0e9527264b1699eb9":[3,0,2,1,27],
 "namespaceppforest2_1_1cli_1_1serve.html":[3,0,2,1,0],
-"namespaceppforest2_1_1cli_1_1serve.html#a4825c502f0b700320de91a665633b907":[3,0,2,1,0,7],
-"namespaceppforest2_1_1cli_1_1serve.html#a50033595debdd155bc4d7f335a5a39a7":[3,0,2,1,0,6],
-"namespaceppforest2_1_1cli_1_1serve.html#aafc348d952c0fbece36a6f177d2f05bb":[3,0,2,1,0,8],
-"namespaceppforest2_1_1cli_1_1serve.html#abc499e0333013d6df713ea719dea22ac":[3,0,2,1,0,9],
-"namespaceppforest2_1_1cli_1_1serve.html#ad78952304cbd26b29fafc4a0e5367307":[3,0,2,1,0,4],
-"namespaceppforest2_1_1cli_1_1serve.html#af933b2749884e1163ec45eec48cf15ff":[3,0,2,1,0,5],
+"namespaceppforest2_1_1cli_1_1serve.html#a4825c502f0b700320de91a665633b907":[3,0,2,1,0,8],
+"namespaceppforest2_1_1cli_1_1serve.html#a50033595debdd155bc4d7f335a5a39a7":[3,0,2,1,0,7],
+"namespaceppforest2_1_1cli_1_1serve.html#a60d3f7e2b7c6780e7a02c31711a5fef9":[3,0,2,1,0,4],
+"namespaceppforest2_1_1cli_1_1serve.html#aafc348d952c0fbece36a6f177d2f05bb":[3,0,2,1,0,9],
+"namespaceppforest2_1_1cli_1_1serve.html#abc499e0333013d6df713ea719dea22ac":[3,0,2,1,0,10],
+"namespaceppforest2_1_1cli_1_1serve.html#ad78952304cbd26b29fafc4a0e5367307":[3,0,2,1,0,5],
+"namespaceppforest2_1_1cli_1_1serve.html#af933b2749884e1163ec45eec48cf15ff":[3,0,2,1,0,6],
 "namespaceppforest2_1_1cutpoint.html":[3,0,2,2],
 "namespaceppforest2_1_1cutpoint.html#a87c2b7c4af0ba296ee6ad99c0fb20b6e":[3,0,2,2,2],
 "namespaceppforest2_1_1grouping.html":[3,0,2,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "namespaceppforest2_1_1pp.html#af1c9cd0f355ffcb4b45747b150ac7142":[3,0,2,7,3],
 "namespaceppforest2_1_1serialization.html":[3,0,2,8],
 "namespaceppforest2_1_1serialization.html#a01cba52c86eb7eac278667da8255e95b":[3,0,2,8,26],
-"namespaceppforest2_1_1serialization.html#a052bad7805eab558173c7ea9aca52354":[3,0,2,8,12],
-"namespaceppforest2_1_1serialization.html#a09eca2e12bf9f725e0e2cada774853fb":[3,0,2,8,5]
+"namespaceppforest2_1_1serialization.html#a052bad7805eab558173c7ea9aca52354":[3,0,2,8,12]
 };
