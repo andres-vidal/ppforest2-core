@@ -417,6 +417,18 @@ TEST(ReadPredictionData, MissingFeatureThrows) {
   EXPECT_NE(message.find("missing [b]"), std::string::npos) << message;
 }
 
+/* A wide data set missing most of its features lists only the first few. */
+TEST(ReadPredictionData, ManyMissingFeaturesAreTruncated) {
+  types::Names wide;
+  for (int i = 0; i < 25; ++i) {
+    wide.push_back("f" + std::to_string(i));
+  }
+
+  auto const message = user_error_message([&] { io::csv::read_prediction_data_from_string("x\n1\n", wide, 25); });
+  EXPECT_NE(message.find("f9 and 15 more"), std::string::npos) << message;
+  EXPECT_EQ(message.find("f10"), std::string::npos) << message;
+}
+
 /* Without feature names, as many columns as features are taken by position,
  * whatever the header says, and there is no response. */
 TEST(ReadPredictionData, UnnamedModelTakesColumnsByPosition) {
