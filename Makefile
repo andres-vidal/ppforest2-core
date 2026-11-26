@@ -172,7 +172,7 @@ docs: docs-site docs-cpp
 RELEASE_TAG ?= v${CORE_VERSION}
 
 release:
-	@case "${RELEASE_TAG}" in *-*) echo "${RELEASE_TAG} is a development version; set VERSION to the release number before tagging." >&2; exit 1;; esac
+	@case "${RELEASE_TAG}" in *-dev) echo "${RELEASE_TAG} is a development version; set VERSION to the release number before tagging." >&2; exit 1;; esac
 	@git tag -a ${RELEASE_TAG} -m "Release ${RELEASE_TAG}"
 	@git push origin ${RELEASE_TAG}
 
