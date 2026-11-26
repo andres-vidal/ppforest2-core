@@ -1,3 +1,10 @@
+# ppforest2 (development version)
+
+## Bug fixes
+
+- CLI: `serve` no longer returns HTTP 500 on `GET /` from a browser when the saved model is a single tree. The HTML summary built its variable-importance section from permuted importance, which only forests have, so a tree aborted the render. The page now shows every importance measure the model has, each in its own section: projection importance for a tree, and projection, weighted projection and permuted importance for a forest.
+- CLI: an exception escaping a `serve` request handler now produces a 500 whose JSON body carries the error message, and the message is echoed to stderr, instead of an empty 500 that hid the cause.
+
 # ppforest2 0.1.4
 
 ## Bug fixes

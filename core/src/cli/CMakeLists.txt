@@ -89,4 +89,4 @@ target_link_libraries(ppforest2-cli PUBLIC
   pantor::inja)
 
 target_compile_definitions(ppforest2-cli PRIVATE
-  PPFOREST2_VERSION="${PROJECT_VERSION}")
+  PPFOREST2_VERSION="${PPFOREST2_VERSION}")

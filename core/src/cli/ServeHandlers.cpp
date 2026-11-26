@@ -137,6 +137,32 @@ namespace ppforest2::cli::serve {
     return Response{200, body.dump()};
   }
 
+  namespace {
+    // The message an exception carries. A thrown string is its own message;
+    // any other type has none, so the message says what kind it was.
+    std::string exception_message(std::exception_ptr ep) {
+      if (!ep) {
+        return "internal error";
+      }
+
+      try {
+        std::rethrow_exception(ep);
+      } catch (std::exception const& e) {
+        return e.what();
+      } catch (std::string const& s) {
+        return s;
+      } catch (char const* s) {
+        return s;
+      } catch (...) {
+        return "internal error: an exception not derived from std::exception, with no message";
+      }
+    }
+  }
+
+  Response exception_response(std::exception_ptr ep) {
+    return error_response(500, exception_message(ep));
+  }
+
   Response handle_summarize(LoadedModel const& loaded) {
     json copy = loaded.model_json;
     copy.erase("model");
@@ -339,12 +365,24 @@ namespace ppforest2::cli::serve {
       return rows;
     }
 
-    json build_importance_rows(json const& j, types::Names const& feature_names) {
+    // An importance measure: its key in the model JSON and its name on the page.
+    struct ImportanceMeasure {
+      char const* key;
+      char const* label;
+    };
+
+    // The measures in the order the terminal summary lists them. Every model
+    // has projection importance; forests also have weighted projection and
+    // permuted importance.
+    constexpr ImportanceMeasure IMPORTANCE_MEASURES[] = {
+        {"projections", "projections"},
+        {"weighted_projections", "weighted projections"},
+        {"permuted", "permuted"},
+    };
+
+    // One measure's features, ranked from the most important.
+    json build_importance_rows(json const& values, types::Names const& feature_names) {
       json rows = json::array();
-      if (!j.at("variable_importance").is_object()) {
-        return rows;
-      }
-      auto const& values = j.at("variable_importance").at("permuted");
 
       std::vector<std::pair<int, double>> ranked;
       ranked.reserve(values.size());
@@ -368,6 +406,27 @@ namespace ppforest2::cli::serve {
         });
       }
       return rows;
+    }
+
+    // One {measure, rows} section per importance measure the model has.
+    json build_importance_sections(json const& j, types::Names const& feature_names) {
+      json sections  = json::array();
+      auto const& vi = j.at("variable_importance");
+      if (!vi.is_object()) {
+        return sections;
+      }
+
+      for (auto const& measure : IMPORTANCE_MEASURES) {
+        if (!vi.contains(measure.key)) {
+          continue;
+        }
+
+        json rows = build_importance_rows(vi.at(measure.key), feature_names);
+        if (!rows.empty()) {
+          sections.push_back({{"measure", measure.label}, {"rows", std::move(rows)}});
+        }
+      }
+      return sections;
     }
 
     // Builds {present, labels, rows} where each row carries
@@ -427,7 +486,7 @@ namespace ppforest2::cli::serve {
     data["groups_count"]      = loaded.group_names.size();
     data["config"]            = build_config_rows(j.at("config"));
     data["metrics"]           = build_summary_metrics(j, is_classification);
-    data["importance"]        = build_importance_rows(j, loaded.feature_names);
+    data["importance"]        = build_importance_sections(j, loaded.feature_names);
 
     std::string body = templating_env().render(resources::SUMMARY_HTML, data);
     return Response{200, std::move(body), "text/html; charset=utf-8"};

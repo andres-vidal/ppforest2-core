@@ -125,6 +125,16 @@ namespace ppforest2::cli {
       }
     });
 
+    // Turn an exception escaping a handler into a 500 whose JSON body carries
+    // the reason, echoed to stderr so the console shows it alongside the
+    // request log below. httplib's default for an uncaught exception is an
+    // empty 500, so this handler is what makes the failure legible.
+    server.set_exception_handler([&](httplib::Request const& req, httplib::Response& res, std::exception_ptr ep) {
+      serve::Response const r = serve::exception_response(ep);
+      fmt::print(stderr, "{} {} -> {} {}\n", req.method, req.path, r.status, r.body);
+      write_response(res, r);
+    });
+
     server.set_logger([&](httplib::Request const& req, httplib::Response const& res) {
       out.println("{} {} -> {}", req.method, req.path, res.status);
     });

@@ -14,10 +14,13 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
+#include <exception>
 #include <regex>
+#include <stdexcept>
 #include <string>
 
 using json = nlohmann::json;
+using ppforest2::cli::serve::exception_response;
 using ppforest2::cli::serve::handle_health;
 using ppforest2::cli::serve::handle_predict;
 using ppforest2::cli::serve::handle_predict_html;
@@ -123,8 +126,73 @@ TEST_F(ServeHandlersClassificationTest, SummaryHtmlIncludesKeyFields) {
   EXPECT_NE(r.body.find("Classification"), std::string::npos);
   EXPECT_NE(r.body.find("Petal.Length"), std::string::npos);
   EXPECT_NE(r.body.find("Accuracy"), std::string::npos);
-  EXPECT_NE(r.body.find("Variable importance"), std::string::npos);
   EXPECT_EQ(r.body.find("Regression"), std::string::npos);
+}
+
+/* A forest has all three importance measures, and the page shows each. */
+TEST_F(ServeHandlersClassificationTest, SummaryHtmlShowsEveryImportanceMeasure) {
+  auto const loaded = load_from_file(model_->path());
+  Response const r  = handle_summary_html(loaded);
+
+  EXPECT_NE(r.body.find("Variable importance (projections)"), std::string::npos);
+  EXPECT_NE(r.body.find("Variable importance (weighted projections)"), std::string::npos);
+  EXPECT_NE(r.body.find("Variable importance (permuted)"), std::string::npos);
+}
+
+/* A single tree has only projection importance (the other two measures need
+ * out-of-bag predictions), and the page shows that one. Regression test for
+ * `GET /` returning 500 in a browser when serving a tree model. */
+TEST(ServeHandlersTree, SummaryHtmlRendersForSingleTree) {
+  TempFile model;
+  model.clear();
+  auto const train = run_ppforest2("-q train -d " + IRIS_CSV + " -n 0 -r 0 -s " + model.path());
+  ASSERT_EQ(train.exit_code, 0);
+
+  auto const loaded = load_from_file(model.path());
+  Response const r  = handle_summary_html(loaded);
+
+  EXPECT_EQ(r.status, 200);
+  EXPECT_NE(r.body.find("<!DOCTYPE html>"), std::string::npos);
+  EXPECT_NE(r.body.find("Variable importance (projections)"), std::string::npos);
+  EXPECT_EQ(r.body.find("Variable importance (weighted projections)"), std::string::npos);
+  EXPECT_EQ(r.body.find("Variable importance (permuted)"), std::string::npos);
+}
+
+/* A handler exception becomes a 500 whose JSON body carries the reason,
+ * rather than an empty 500. */
+TEST(ServeHandlersErrors, ExceptionResponseCarriesMessage) {
+  Response const r = exception_response(std::make_exception_ptr(std::runtime_error("boom")));
+  EXPECT_EQ(r.status, 500);
+  EXPECT_NE(r.content_type.find("application/json"), std::string::npos);
+  auto const body = nlohmann::json::parse(r.body);
+  EXPECT_EQ(body.at("error"), "boom");
+}
+
+/* A thrown string is the message itself. */
+TEST(ServeHandlersErrors, ExceptionResponseUsesThrownString) {
+  Response const from_string  = exception_response(std::make_exception_ptr(std::string("bad input")));
+  Response const from_literal = exception_response(std::make_exception_ptr("bad input"));
+
+  EXPECT_EQ(nlohmann::json::parse(from_string.body).at("error"), "bad input");
+  EXPECT_EQ(nlohmann::json::parse(from_literal.body).at("error"), "bad input");
+}
+
+/* Any other type has no message, so the response says what kind it was. */
+TEST(ServeHandlersErrors, ExceptionResponseNamesNonStandardException) {
+  Response const r = exception_response(std::make_exception_ptr(7));
+
+  EXPECT_EQ(r.status, 500);
+  EXPECT_EQ(
+      nlohmann::json::parse(r.body).at("error"),
+      "internal error: an exception not derived from std::exception, with no message"
+  );
+}
+
+/* A null exception pointer still yields a well-formed 500, not a crash. */
+TEST(ServeHandlersErrors, ExceptionResponseHandlesNullPointer) {
+  Response const r = exception_response(std::exception_ptr{});
+  EXPECT_EQ(r.status, 500);
+  EXPECT_FALSE(nlohmann::json::parse(r.body).at("error").get<std::string>().empty());
 }
 
 TEST_F(ServeHandlersClassificationTest, SummaryHtmlEmbedsStyleAndScript) {

@@ -599,18 +599,19 @@ The project follows [Semantic Versioning](https://semver.org/) with a single sou
 - **MINOR** — new features, new model types, new parameters
 - **PATCH** — bug fixes, performance improvements, documentation
 
-The `VERSION` file contains `MAJOR.MINOR.PATCH` (e.g., `0.1.0`). CMake reads it for the C++ core and CLI. The R package versions independently in ppforest2-r. Git tags use the format `v0.1.0`.
+The `VERSION` file contains `MAJOR.MINOR.PATCH` (e.g., `0.1.0`) for a release. Between releases it holds the next version with a `-dev` suffix (e.g., `0.1.1-dev`), so a build from `main` is never mistaken for a release; the release itself may still get another number. CMake reads it for the C++ core and CLI. The R package versions independently in ppforest2-r. Git tags use the format `v0.1.0`.
 
 ### Changelog
 
-`CHANGELOG.md` at the repository root tracks all changes. It uses the format expected by R's `utils::news()` (`# ppforest2 X.Y.Z` headings).
+`CHANGELOG.md` at the repository root tracks all changes. It uses the format expected by R's `utils::news()` (`# ppforest2 X.Y.Z` headings). Unreleased changes go under a `# ppforest2 (development version)` heading at the top.
 
 ### How to release
 
-1. Update the `VERSION` file with the new version number
-2. Add a section to `CHANGELOG.md` for the new version
+1. Set the `VERSION` file to the new version number
+2. Rename the `# ppforest2 (development version)` heading of `CHANGELOG.md` to `# ppforest2 X.Y.Z`
 3. Merge the changes into `main`
-4. Tag and push the tag with `make release`, which tags `v` followed by the `VERSION`
+4. Tag and push the tag with `make release`, which tags `v` followed by the `VERSION` and refuses a `-dev` version
+5. On `main`, set `VERSION` to the next version with a `-dev` suffix and open a new `# ppforest2 (development version)` section in `CHANGELOG.md`
 
 The tag runs `.github/workflows/release.yml`, which runs the tests on Ubuntu, macOS and Windows, checks that the tag is on `main`, that it matches `VERSION` and that `CHANGELOG.md` has exactly one section for it, and publishes a GitHub release with that section and the benchmark results.
 
